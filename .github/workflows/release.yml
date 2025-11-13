@@ -236,7 +236,7 @@ jobs:
         run: echo "version=${{ needs.create-release.outputs.version }}" >> $GITHUB_OUTPUT
 
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
