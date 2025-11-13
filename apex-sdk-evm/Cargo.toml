@@ -1,0 +1,17 @@
+[package]
+name = "apex-sdk-evm"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "EVM adapter for Apex SDK"
+
+[dependencies]
+apex-sdk-core = { workspace = true }
+apex-sdk-types = { workspace = true }
+tokio = { workspace = true }
+async-trait = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+hex = { workspace = true }
+tracing = { workspace = true }
