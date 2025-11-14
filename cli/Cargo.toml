@@ -6,6 +6,9 @@ rust-version.workspace = true
 license.workspace = true
 description = "CLI tool for Apex SDK"
 
+[package.metadata.cargo-udeps.ignore]
+normal = ["apex-sdk", "tracing"]
+
 [[bin]]
 name = "apex"
 path = "src/main.rs"
