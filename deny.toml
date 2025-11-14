@@ -48,6 +48,7 @@ allow = [
     "0BSD",
     "Zlib",
     "CC0-1.0",
+    "MPL-2.0",  # Mozilla Public License 2.0 (webpki-roots)
 ]
 # The confidence threshold for detecting a license from license text
 confidence-threshold = 0.8
@@ -57,6 +58,19 @@ confidence-threshold = 0.8
 name = "r-efi"
 version = "*"
 allow = ["LGPL-2.1-or-later"]
+
+# ring 0.16.20 doesn't declare license in Cargo.toml (shows as unlicensed)
+# But LICENSE file shows ISC-style license (BoringSSL-derived)
+# ring 0.17+ uses "Apache-2.0 AND ISC" which are both allowed
+# We explicitly allow ring because it's a well-vetted cryptography library
+[[licenses.exceptions]]
+name = "ring"
+version = "*"
+allow = [
+    "LicenseRef-ring",  # For 0.16.20 (no license in Cargo.toml)
+    "Apache-2.0",
+    "ISC",
+]
 
 [licenses.private]
 # If true, ignores workspace crates that aren't published
