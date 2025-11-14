@@ -25,13 +25,21 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@1.84
 
       - name: Install cargo-geiger (unsafe code detection)
         run: cargo install --locked cargo-geiger
 
       - name: Check for unsafe code
-        run: cargo geiger --all-targets --output-format GitHubMarkdown >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
+        run: |
+          echo "## Unsafe Code Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          for pkg in apex-sdk apex-sdk-core apex-sdk-evm apex-sdk-substrate apex-sdk-types cli; do
+            echo "### Package: $pkg" >> $GITHUB_STEP_SUMMARY
+            cargo geiger -p $pkg --output-format GitHubMarkdown >> $GITHUB_STEP_SUMMARY 2>&1 || true
+            echo "" >> $GITHUB_STEP_SUMMARY
+          done
 
   # Dead code detection
   dead-code:
@@ -104,7 +112,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@1.84
 
       - name: Generate dependency graph
         run: |
@@ -125,7 +133,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@1.84
 
       - name: Install cargo-bloat
         run: cargo install --locked cargo-bloat

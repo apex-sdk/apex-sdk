@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@1.84
 
       - name: Cache cargo registry
         uses: actions/cache@v4
@@ -77,7 +77,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@1.84
 
       - name: Cache cargo registry
         uses: actions/cache@v4
