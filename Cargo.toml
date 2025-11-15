@@ -22,10 +22,6 @@ keywords = ["blockchain", "substrate", "evm", "sdk", "development"]
 documentation = "https://docs.rs/apex-sdk"
 categories = ["cryptography::cryptocurrencies", "api-bindings", "development-tools::libraries"]
 
-[badges]
-maintainance = { status = "actively-developed" }
-github = { repository = "kherldhussein/apex-sdk", branch = "main", status = "active", type = "auto" , workflow = "CI"}
-
 [workspace.dependencies]
 # Async runtime
 tokio = { version = "1.35", features = ["full"] }
