@@ -11,7 +11,6 @@ resolver = "2"
 
 [workspace.package]
 version = "0.1.2"
-name = "apex-sdk"
 edition = "2021"
 description = "Unified Rust SDK for Substrate & EVM Blockchain Development"
 authors = ["Khalid Hussein <kherld.hussein@gmail.com>"]
