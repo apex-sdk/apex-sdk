@@ -599,6 +599,12 @@ Happy coding! 🎉
 }
 
 async fn build_project(release: bool) -> anyhow::Result<()> {
+    println!(
+        "   🔨 Building project{}...",
+        if release { " (release mode)" } else { "" }
+    );
+    println!("   ⏳ This may take a while on first build...\n");
+
     let mut cmd = std::process::Command::new("cargo");
     cmd.arg("build");
     if release {
@@ -607,12 +613,36 @@ async fn build_project(release: bool) -> anyhow::Result<()> {
 
     let output = cmd.output()?;
     if !output.status.success() {
-        anyhow::bail!("Build failed: {}", String::from_utf8_lossy(&output.stderr));
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        anyhow::bail!(
+            "\n❌ Build failed!\n\n\
+            Error details:\n{}\n\n\
+            💡 Common fixes:\n\
+            • Run 'cargo clean' to clear build cache\n\
+            • Update dependencies with 'cargo update'\n\
+            • Check for compilation errors above\n\
+            • Ensure Rust toolchain is up to date: rustup update\n",
+            stderr
+        );
+    }
+
+    println!("   ✅ Build completed successfully!");
+    if release {
+        println!("   📦 Binary available in ./target/release/");
+    } else {
+        println!("   📦 Binary available in ./target/debug/");
     }
     Ok(())
 }
 
 async fn run_tests(filter: Option<String>) -> anyhow::Result<()> {
+    if let Some(ref pattern) = filter {
+        println!("   🧪 Running tests matching '{}'...", pattern);
+    } else {
+        println!("   🧪 Running all tests...");
+    }
+    println!("   ⏳ Please wait...\n");
+
     let mut cmd = std::process::Command::new("cargo");
     cmd.arg("test");
     if let Some(pattern) = filter {
@@ -621,60 +651,95 @@ async fn run_tests(filter: Option<String>) -> anyhow::Result<()> {
 
     let output = cmd.output()?;
     if !output.status.success() {
-        anyhow::bail!("Tests failed: {}", String::from_utf8_lossy(&output.stderr));
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        anyhow::bail!(
+            "\n❌ Tests failed!\n\n\
+            Error details:\n{}\n\n\
+            💡 Troubleshooting:\n\
+            • Review the test output above for specific failures\n\
+            • Run tests individually: cargo test <test_name>\n\
+            • Run with output: cargo test -- --nocapture\n\
+            • Check for compilation errors first: cargo check\n",
+            stderr
+        );
     }
+
+    println!("   ✅ All tests passed!");
     Ok(())
 }
 
-async fn deploy_contract(contract: &str, chain: &str, endpoint: &str) -> anyhow::Result<()> {
-    println!("   Reading contract from: {}", contract);
-    println!("   Validating contract...");
-    println!("   Estimating deployment costs...");
-    println!("   Deploying to {} via {}...", chain, endpoint);
-    // TODO: Implement actual deployment logic
-    Ok(())
+async fn deploy_contract(_contract: &str, _chain: &str, _endpoint: &str) -> anyhow::Result<()> {
+    anyhow::bail!(
+        "\n❌ Contract deployment is not yet implemented.\n\n\
+        📋 This feature is planned for a future release.\n\
+        🔗 Track progress: https://github.com/kherldhussein/apexsdk/issues\n\n\
+        💡 Alternative: Deploy manually using:\n\
+        • Polkadot.js Apps: https://polkadot.js.org/apps/\n\
+        • Remix IDE: https://remix.ethereum.org/\n"
+    );
 }
 
-fn generate_account(account_type: &str) -> anyhow::Result<()> {
-    match account_type {
-        "substrate" => {
-            println!("   Type: Substrate (SR25519)");
-            println!("   Address: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY (example)");
-            println!("   Mnemonic: [SECURE - Store this safely!]");
-        }
-        "evm" => {
-            println!("   Type: EVM");
-            println!("   Address: 0x1234567890123456789012345678901234567890 (example)");
-            println!("   Private Key: [SECURE - Store this safely!]");
-        }
-        _ => anyhow::bail!("Unsupported account type: {}", account_type),
-    }
-    println!("\n⚠️  WARNING: Keep your keys secure and never share them!");
-    Ok(())
+fn generate_account(_account_type: &str) -> anyhow::Result<()> {
+    anyhow::bail!(
+        "\n❌ Account generation is not yet fully implemented.\n\n\
+        📋 This feature is in development and currently shows example data only.\n\
+        🔗 Track progress: https://github.com/kherldhussein/apexsdk/issues\n\n\
+        💡 Alternative: Generate accounts using:\n\
+        • Substrate: subkey generate --scheme sr25519\n\
+        • EVM: Use MetaMask, MyEtherWallet, or similar tools\n\n\
+        🔒 Security: Always generate and store keys securely!\n"
+    );
 }
 
-fn import_account(mnemonic: &str, account_type: &str) -> anyhow::Result<()> {
-    println!("   Validating mnemonic...");
-    println!("   Deriving {} account...", account_type);
-    println!("   Account imported successfully!");
-    println!("   Address: [Generated from mnemonic]");
-    println!("⚠️  WARNING: Import functionality is not yet implemented. The provided mnemonic ('{}') is not actually used.", mnemonic);
-    Ok(())
+fn import_account(_mnemonic: &str, _account_type: &str) -> anyhow::Result<()> {
+    anyhow::bail!(
+        "\n❌ Account import is not yet implemented.\n\n\
+        📋 This feature is planned for a future release.\n\
+        🔗 Track progress: https://github.com/kherldhussein/apexsdk/issues\n\n\
+        💡 Alternative: Use accounts programmatically in your code:\n\n\
+        ```rust\n\
+        use apex_sdk::{{ApexSDK, Chain}};\n\
+        use bip39::Mnemonic;\n\n\
+        let mnemonic = Mnemonic::from_phrase(\"your mnemonic here\", Language::English)?;\n\
+        let sdk = ApexSDK::builder()\n\
+            .with_substrate(Chain::Polkadot, \"wss://rpc.polkadot.io\")\n\
+            .build()?;\n\
+        ```\n\n\
+        🔒 Security: Never commit mnemonics or private keys to version control!\n"
+    );
 }
 
 fn list_accounts() -> anyhow::Result<()> {
-    println!("\n   No accounts found. Use 'apex account generate' to create one.");
-    println!("   (Account management will be implemented in a future version)");
-    Ok(())
+    anyhow::bail!(
+        "\n❌ Account listing is not yet implemented.\n\n\
+        📋 This feature requires persistent account storage, planned for a future release.\n\
+        🔗 Track progress: https://github.com/kherldhussein/apexsdk/issues\n\n\
+        💡 For now, manage accounts in your application code or use external tools:\n\
+        • Substrate: polkadot-js/apps or subkey\n\
+        • EVM: MetaMask, MyEtherWallet, or similar wallets\n"
+    );
 }
 
-async fn get_balance(_address: &str, chain: &str, endpoint: &str) -> anyhow::Result<()> {
-    println!("   Chain: {}", chain);
-    println!("   Endpoint: {}", endpoint);
-    println!("   Balance: [Fetching from chain...]");
-    // TODO: Implement actual balance fetching
-    println!("   Balance: 1000.0 (example)");
-    Ok(())
+async fn get_balance(_address: &str, _chain: &str, _endpoint: &str) -> anyhow::Result<()> {
+    anyhow::bail!(
+        "\n❌ Balance checking via CLI is not yet implemented.\n\n\
+        📋 This feature is planned for a future release.\n\
+        🔗 Track progress: https://github.com/kherldhussein/apexsdk/issues\n\n\
+        💡 Check balances programmatically in your code:\n\n\
+        ```rust\n\
+        use apex_sdk::{{ApexSDK, Chain, Address}};\n\n\
+        let sdk = ApexSDK::builder()\n\
+            .with_substrate(Chain::Polkadot, \"wss://rpc.polkadot.io\")\n\
+            .build()?;\n\n\
+        let balance = sdk.substrate()\n\
+            .get_balance(\"5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY\")\n\
+            .await?;\n\
+        println!(\"Balance: {{}}\", balance);\n\
+        ```\n\n\
+        🌐 Or use blockchain explorers:\n\
+        • Substrate: https://polkadot.subscan.io/\n\
+        • Ethereum: https://etherscan.io/\n"
+    );
 }
 
 fn list_chains() {
