@@ -130,6 +130,17 @@ impl ChainConfig {
         }
     }
 
+    /// Create configuration for Paseo (default Polkadot testnet)
+    pub fn paseo() -> Self {
+        Self {
+            name: "Paseo".to_string(),
+            endpoint: "wss://paseo-rpc.polkadot.io".to_string(),
+            ss58_prefix: 0, // Same as Polkadot
+            token_symbol: "PAS".to_string(),
+            token_decimals: 10, // Same as Polkadot
+        }
+    }
+
     /// Create custom configuration
     pub fn custom(name: impl Into<String>, endpoint: impl Into<String>, ss58_prefix: u16) -> Self {
         Self {
@@ -497,6 +508,12 @@ mod tests {
         assert_eq!(kusama.name, "Kusama");
         assert_eq!(kusama.ss58_prefix, 2);
         assert_eq!(kusama.token_symbol, "KSM");
+
+        let paseo = ChainConfig::paseo();
+        assert_eq!(paseo.name, "Paseo");
+        assert_eq!(paseo.ss58_prefix, 0); // Same as Polkadot
+        assert_eq!(paseo.token_symbol, "PAS");
+        assert_eq!(paseo.token_decimals, 10); // Same as Polkadot
     }
 
     #[tokio::test]
@@ -514,6 +531,17 @@ mod tests {
     async fn test_polkadot_connection() {
         let adapter = SubstrateAdapter::connect_with_config(ChainConfig::polkadot()).await;
         assert!(adapter.is_ok());
+    }
+
+    #[tokio::test]
+    #[ignore] // Requires network connection
+    async fn test_paseo_connection() {
+        let adapter = SubstrateAdapter::connect_with_config(ChainConfig::paseo()).await;
+        assert!(adapter.is_ok(), "Failed to connect to Paseo testnet");
+
+        let adapter = adapter.unwrap();
+        assert!(adapter.is_connected());
+        assert_eq!(adapter.config().name, "Paseo");
     }
 
     #[test]

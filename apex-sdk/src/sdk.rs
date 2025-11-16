@@ -210,7 +210,8 @@ impl ApexSDK {
             | Chain::Acala
             | Chain::Phala
             | Chain::Bifrost
-            | Chain::Westend => self.substrate_adapter.is_some(),
+            | Chain::Westend
+            | Chain::Paseo => self.substrate_adapter.is_some(),
             Chain::Ethereum
             | Chain::Polygon
             | Chain::BinanceSmartChain
@@ -237,7 +238,8 @@ impl ApexSDK {
             | Chain::Acala
             | Chain::Phala
             | Chain::Bifrost
-            | Chain::Westend => self
+            | Chain::Westend
+            | Chain::Paseo => self
                 .substrate()?
                 .get_transaction_status(tx_hash)
                 .await
@@ -284,7 +286,8 @@ impl ApexSDK {
             | Chain::Acala
             | Chain::Phala
             | Chain::Bifrost
-            | Chain::Westend => {
+            | Chain::Westend
+            | Chain::Paseo => {
                 self.substrate()?;
             }
             Chain::Ethereum
@@ -419,6 +422,7 @@ mod tests {
 
         assert!(sdk.is_chain_supported(&Chain::Polkadot));
         assert!(sdk.is_chain_supported(&Chain::Kusama));
+        assert!(sdk.is_chain_supported(&Chain::Paseo));
         assert!(!sdk.is_chain_supported(&Chain::Ethereum));
         assert!(!sdk.is_chain_supported(&Chain::Polygon));
         assert!(!sdk.is_chain_supported(&Chain::Moonbeam)); // Requires both adapters
@@ -435,6 +439,7 @@ mod tests {
 
         assert!(!sdk.is_chain_supported(&Chain::Polkadot));
         assert!(!sdk.is_chain_supported(&Chain::Kusama));
+        assert!(!sdk.is_chain_supported(&Chain::Paseo));
         assert!(sdk.is_chain_supported(&Chain::Ethereum));
         assert!(sdk.is_chain_supported(&Chain::Polygon));
         assert!(!sdk.is_chain_supported(&Chain::Moonbeam)); // Requires both adapters

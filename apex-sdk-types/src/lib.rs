@@ -61,8 +61,10 @@ pub enum Chain {
     Phala,
     /// Bifrost Liquid Staking
     Bifrost,
-    /// Westend testnet
+    /// Westend testnet (legacy)
     Westend,
+    /// Paseo testnet (default Polkadot testnet)
+    Paseo,
 
     // EVM Layer 1
     /// Ethereum mainnet
@@ -95,7 +97,8 @@ impl Chain {
             | Chain::Acala
             | Chain::Phala
             | Chain::Bifrost
-            | Chain::Westend => ChainType::Substrate,
+            | Chain::Westend
+            | Chain::Paseo => ChainType::Substrate,
 
             // Pure EVM chains
             Chain::Ethereum
@@ -122,6 +125,7 @@ impl Chain {
             Chain::Phala => "Phala",
             Chain::Bifrost => "Bifrost",
             Chain::Westend => "Westend",
+            Chain::Paseo => "Paseo",
 
             // EVM L1
             Chain::Ethereum => "Ethereum",
@@ -151,6 +155,7 @@ impl Chain {
             Chain::Phala => "wss://phala.api.onfinality.io/public-ws",
             Chain::Bifrost => "wss://bifrost-polkadot.api.onfinality.io/public-ws",
             Chain::Westend => "wss://westend-rpc.polkadot.io",
+            Chain::Paseo => "wss://paseo-rpc.polkadot.io",
 
             // EVM L1
             Chain::Ethereum => "https://eth.llamarpc.com",
@@ -188,6 +193,11 @@ impl Chain {
                 "wss://westend-rpc.polkadot.io",
                 "wss://rpc.ibp.network/westend",
                 "wss://westend.dotters.network",
+            ],
+            Chain::Paseo => vec![
+                "wss://paseo-rpc.polkadot.io",
+                "wss://rpc.ibp.network/paseo",
+                "wss://paseo.dotters.network",
             ],
             // For other chains, return the single default endpoint
             _ => vec![self.default_endpoint()],
