@@ -215,7 +215,7 @@ impl ParallelExecutor {
                 let _permit = permit.acquire().await.unwrap();
                 match tokio::time::timeout(timeout, tx()).await {
                     Ok(result) => result,
-                    Err(_) => Err(Error::Transaction("Transaction timeout".to_string())),
+                    Err(_) => Err(Error::transaction("Transaction timeout")),
                 }
             });
             handles.push(handle);

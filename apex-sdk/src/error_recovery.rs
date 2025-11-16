@@ -75,8 +75,8 @@ impl RetryConfig {
 /// Determines if an error is retryable
 pub fn is_retryable(error: &Error) -> bool {
     match error {
-        Error::Connection(_) => true,
-        Error::Transaction(msg) => {
+        Error::Connection(_, _) => true,
+        Error::Transaction(msg, _) => {
             // Retry on timeout or network errors
             msg.contains("timeout")
                 || msg.contains("network")
@@ -85,7 +85,7 @@ pub fn is_retryable(error: &Error) -> bool {
         }
         Error::Substrate(_) => false, // Chain-specific errors are typically not retryable
         Error::Evm(_) => false,
-        Error::Config(_) => false,
+        Error::Config(_, _) => false,
         Error::UnsupportedChain(_) => false,
         Error::InvalidAddress(_) => false,
         Error::Serialization(_) => false,
@@ -188,7 +188,7 @@ impl CircuitBreaker {
                     self.state = CircuitState::HalfOpen;
                     self.success_count = 0;
                 } else {
-                    return Err(Error::Connection("Circuit breaker is open".to_string()));
+                    return Err(Error::connection("Circuit breaker is open"));
                 }
             }
         }
@@ -249,12 +249,10 @@ mod tests {
 
     #[test]
     fn test_is_retryable() {
-        assert!(is_retryable(&Error::Connection("test".to_string())));
-        assert!(is_retryable(&Error::Transaction(
-            "timeout error".to_string()
-        )));
+        assert!(is_retryable(&Error::connection("test")));
+        assert!(is_retryable(&Error::transaction("timeout error")));
         assert!(!is_retryable(&Error::InvalidAddress("test".to_string())));
-        assert!(!is_retryable(&Error::Config("test".to_string())));
+        assert!(!is_retryable(&Error::config("test")));
     }
 
     #[tokio::test]
@@ -284,13 +282,13 @@ mod tests {
 
         // First failure
         let _ = breaker
-            .call(|| async { Err::<(), _>(Error::Connection("test".to_string())) })
+            .call(|| async { Err::<(), _>(Error::connection("test")) })
             .await;
         assert!(!breaker.is_open());
 
         // Second failure - circuit should open
         let _ = breaker
-            .call(|| async { Err::<(), _>(Error::Connection("test".to_string())) })
+            .call(|| async { Err::<(), _>(Error::connection("test")) })
             .await;
         assert!(breaker.is_open());
 
@@ -305,7 +303,7 @@ mod tests {
 
         // Trigger failure
         let _ = breaker
-            .call(|| async { Err::<(), _>(Error::Connection("test".to_string())) })
+            .call(|| async { Err::<(), _>(Error::connection("test")) })
             .await;
         assert!(breaker.is_open());
 

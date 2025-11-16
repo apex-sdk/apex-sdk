@@ -107,9 +107,7 @@ impl ApexSDK {
     ///
     /// Always returns a configuration error directing you to use the builder.
     pub async fn new() -> Result<Self> {
-        Err(Error::Config(
-            "Use ApexSDK::builder() to configure the SDK".to_string(),
-        ))
+        Err(Error::config("Use ApexSDK::builder() to configure the SDK"))
     }
 
     /// Get a reference to the Substrate adapter.
@@ -140,7 +138,7 @@ impl ApexSDK {
     pub fn substrate(&self) -> Result<&SubstrateAdapter> {
         self.substrate_adapter
             .as_ref()
-            .ok_or_else(|| Error::Config("Substrate adapter not configured".to_string()))
+            .ok_or_else(|| Error::config("Substrate adapter not configured"))
     }
 
     /// Get a reference to the EVM adapter.
@@ -171,7 +169,7 @@ impl ApexSDK {
     pub fn evm(&self) -> Result<&EvmAdapter> {
         self.evm_adapter
             .as_ref()
-            .ok_or_else(|| Error::Config("EVM adapter not configured".to_string()))
+            .ok_or_else(|| Error::config("EVM adapter not configured"))
     }
 
     /// Check if a specific blockchain is supported by the current SDK configuration.
@@ -367,7 +365,7 @@ mod tests {
         let result = ApexSDK::new().await;
         assert!(result.is_err());
         match result {
-            Err(Error::Config(_)) => {}
+            Err(Error::Config(_, _)) => {}
             _ => panic!("Expected Config error"),
         }
     }
@@ -384,7 +382,7 @@ mod tests {
         let result = sdk.substrate();
         assert!(result.is_err());
         match result {
-            Err(Error::Config(msg)) => {
+            Err(Error::Config(msg, _)) => {
                 assert!(msg.contains("Substrate adapter not configured"));
             }
             _ => panic!("Expected Config error"),
@@ -403,7 +401,7 @@ mod tests {
         let result = sdk.evm();
         assert!(result.is_err());
         match result {
-            Err(Error::Config(msg)) => {
+            Err(Error::Config(msg, _)) => {
                 assert!(msg.contains("EVM adapter not configured"));
             }
             _ => panic!("Expected Config error"),

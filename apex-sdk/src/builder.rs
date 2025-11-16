@@ -221,8 +221,8 @@ impl ApexSDKBuilder {
         };
 
         if substrate_adapter.is_none() && evm_adapter.is_none() {
-            return Err(Error::Config(
-                "At least one adapter (Substrate or EVM) must be configured".to_string(),
+            return Err(Error::config(
+                "At least one adapter (Substrate or EVM) must be configured",
             ));
         }
 
@@ -292,7 +292,7 @@ mod tests {
         let result = ApexSDKBuilder::new().build().await;
         assert!(result.is_err());
         match result {
-            Err(Error::Config(msg)) => {
+            Err(Error::Config(msg, _)) => {
                 assert!(msg.contains("At least one adapter"));
             }
             _ => panic!("Expected Config error"),
