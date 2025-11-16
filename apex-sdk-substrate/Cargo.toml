@@ -12,6 +12,9 @@ keywords = ["blockchain", "substrate", "polkadot", "kusama", "sdk"]
 categories = ["cryptography::cryptocurrencies", "api-bindings"]
 readme = "README.md"
 
+[package.metadata.cargo-udeps.ignore]
+normal = ["sp-runtime"]
+
 [features]
 default = []
 typed = []
@@ -24,7 +27,6 @@ apex-sdk-core = { path = "../apex-sdk-core", version = "0.1.2" }
 apex-sdk-types = { path = "../apex-sdk-types", version = "0.1.2" }
 tokio = { workspace = true }
 async-trait = { workspace = true }
-anyhow = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 

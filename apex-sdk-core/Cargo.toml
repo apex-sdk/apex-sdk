@@ -15,8 +15,6 @@ readme = "README.md"
 [dependencies]
 apex-sdk-types = { path = "../apex-sdk-types", version = "0.1.2" }
 async-trait = { workspace = true }
-anyhow = { workspace = true }
-thiserror = { workspace = true }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["test-util"] }

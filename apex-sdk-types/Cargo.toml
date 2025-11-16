@@ -15,4 +15,3 @@ readme = "README.md"
 [dependencies]
 serde = { workspace = true }
 serde_json = { workspace = true }
-hex = { workspace = true }
