@@ -99,7 +99,7 @@ cargo install --path ./cli
 
 ## Documentation
 
-📚 **[Complete Documentation Hub](./docs/DOCUMENTATION_HUB.md)** - Your one-stop guide
+**[Complete Documentation Hub](./docs/DOCUMENTATION_HUB.md)** - Your one-stop guide
 
 ### Quick Links
 
