@@ -42,6 +42,25 @@ ignore = [
     # Risk: None - no security vulnerabilities
     # Mitigation: Resolved with Alloy migration
     "RUSTSEC-2024-0384",
+
+    # derivative 2.2.0 unmaintained (RUSTSEC-2024-0388)
+    # ------------------------------------------------
+    # Source: sp-core -> ark-* -> derivative
+    # Type: Derive macro for custom trait implementations
+    # Risk: None - no security vulnerabilities
+    # Note: Transitive dependency from Substrate/Polkadot SDK
+    # Mitigation: Will be resolved when Substrate updates their dependencies
+    "RUSTSEC-2024-0388",
+
+    # paste 1.0.15 unmaintained (RUSTSEC-2024-0436)
+    # ------------------------------------------------
+    # Source: sp-core, sp-runtime -> paste
+    # Type: Token pasting macro utility
+    # Risk: None - no security vulnerabilities
+    # Note: Transitive dependency from Substrate/Polkadot SDK
+    # Alternative: pastey (fork) available, but requires Substrate update
+    # Mitigation: Will be resolved when Substrate updates to pastey or alternative
+    "RUSTSEC-2024-0436",
 ]
 
 [database]
