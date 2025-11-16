@@ -11,22 +11,127 @@ github:
 
 # Navigation
 navigation:
-  - title: Home
-    url: /
-  - title: Quick Start
-    url: /QUICK_START
-  - title: API Reference
-    url: /API
-  - title: Contributing
-    url: /CONTRIBUTING
-  - title: Security
-    url: /SECURITY
+  Getting Started:
+    - title: Quick Start
+      url: /QUICK_START
+      description: Get up and running in 5 minutes
+    - title: Installation
+      url: /QUICK_START#installation
+      description: Install Apex SDK
+  Documentation:
+    - title: API Reference
+      url: /API
+      description: Complete API documentation
+    - title: CLI Guide
+      url: /CLI_GUIDE
+      description: Command-line interface guide
+    - title: Testing Framework
+      url: /TESTING_FRAMEWORK
+      description: Testing and validation tools
+  Guides:
+    - title: Substrate Features
+      url: /Substrate_Features
+      description: Substrate-specific functionality
+    - title: Ecosystem Integration
+      url: /ECOSYSTEM_INTEGRATION
+      description: Integration with other tools
+    - title: Typed Metadata
+      url: /TYPED_METADATA
+      description: Working with typed metadata
+  Community:
+    - title: Contributing
+      url: /CONTRIBUTING
+      description: How to contribute to Apex SDK
+    - title: Roadmap
+      url: /ROADMAP
+      description: Future development plans
+    - title: Research Initiatives
+      url: /RESEARCH_INITIATIVES
+      description: Ongoing research projects
+  Security:
+    - title: Security Policy
+      url: /SECURITY
+      description: Security guidelines and reporting
+    - title: Security Audit
+      url: /SECURITY_AUDIT
+      description: Security audit reports
+
+# Supported Chains
+supported_chains:
+  substrate:
+    - name: Polkadot
+      description: Polkadot relay chain
+      testnet: Paseo (default)
+      icon: 🟣
+    - name: Kusama
+      description: Kusama canary network
+      testnet: Westend
+      icon: 🟡
+    - name: Acala
+      description: DeFi hub for Polkadot
+      icon: 🔴
+    - name: Moonbeam
+      description: Ethereum-compatible parachain
+      type: Hybrid
+      icon: 🌙
+  evm:
+    - name: Ethereum
+      description: Ethereum mainnet
+      testnet: Sepolia
+      icon: ⟠
+    - name: Polygon
+      description: Ethereum L2 scaling solution
+      testnet: Mumbai
+      icon: 🟣
+    - name: BSC
+      description: Binance Smart Chain
+      testnet: BSC Testnet
+      icon: 🟡
+    - name: Avalanche
+      description: High-performance blockchain
+      testnet: Fuji
+      icon: 🔴
+
+# Feature highlights
+features:
+  - title: Unified Interface
+    description: Single API for both Substrate and EVM blockchains
+    icon: 🔗
+  - title: Type Safety
+    description: Rust's compile-time guarantees prevent runtime errors
+    icon: 🛡️
+  - title: Performance
+    description: Native Rust performance with zero-cost abstractions
+    icon: ⚡
+  - title: Cross-Chain
+    description: Built-in cross-chain communication support
+    icon: 🌉
+  - title: Modular
+    description: Extensible architecture for future blockchain protocols
+    icon: 🧩
+  - title: Developer-Friendly
+    description: Comprehensive docs, examples, and community support
+    icon: 👥
 
 # Markdown settings
 markdown: kramdown
 kramdown:
   input: GFM
   syntax_highlighter: rouge
+  auto_ids: true
+  toc_levels: 1..6
+
+highlighter: rouge
+
+# Plugins
+plugins:
+  - jekyll-github-metadata
+  - jekyll-relative-links
+
+# Enable relative links processing
+relative_links:
+  enabled: true
+  collections: true
 
 # Exclude from processing
 exclude:
@@ -34,15 +139,22 @@ exclude:
   - Gemfile.lock
   - node_modules
   - vendor
+  - "*.gemspec"
+  - README.md
 
 # Collections
 collections:
   docs:
     output: true
-    permalink: /:collection/:name
+    permalink: /:collection/:name/
 
 # Defaults
 defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"
   - scope:
       path: ""
       type: "docs"
