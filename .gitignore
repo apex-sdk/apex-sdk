@@ -30,7 +30,7 @@ tmp/
 temp/
 *.tmp
 
-# Generated metadata
+# Generated metadata (but keep mod.rs which is the module declaration)
 /apex-sdk-substrate/src/metadata/*.rs
+!/apex-sdk-substrate/src/metadata/mod.rs
 /apex-sdk-substrate/src/metadata/*.scale
-/apex-sdk-substrate/src/metadata/mod.rs
