@@ -1,12 +1,21 @@
 //! Apex SDK CLI tool
 
+use anyhow::Context;
 use clap::{Parser, Subcommand};
 use std::path::{Path, PathBuf};
+
+mod account;
+mod balance;
+mod completions;
+mod config;
+mod config_cmd;
+mod deploy;
+mod keystore;
 
 #[derive(Parser)]
 #[command(name = "apex")]
 #[command(about = "Apex SDK CLI - Unified Rust SDK for Substrate & EVM", long_about = None)]
-struct Cli {
+pub struct Cli {
     #[command(subcommand)]
     command: Commands,
 }
@@ -43,18 +52,34 @@ enum Commands {
         /// RPC endpoint URL
         #[arg(short, long)]
         endpoint: String,
+        /// Account name to use for deployment
+        #[arg(short, long)]
+        account: Option<String>,
+        /// Perform a dry-run without broadcasting the transaction
+        #[arg(long)]
+        dry_run: bool,
     },
     /// Manage accounts and wallets
     Account {
         #[command(subcommand)]
         action: AccountCommands,
     },
+    /// Manage configuration
+    Config {
+        #[command(subcommand)]
+        action: ConfigCommands,
+    },
     /// Get chain information
     Chain {
         #[command(subcommand)]
         action: ChainCommands,
     },
-    /// Initialize configuration
+    /// Generate shell completions
+    Completions {
+        /// Shell to generate completions for (bash, zsh, fish, powershell, elvish)
+        shell: String,
+    },
+    /// Initialize configuration (deprecated: use 'apex config init')
     Init {
         /// Interactive mode
         #[arg(short, long)]
@@ -75,19 +100,35 @@ enum AccountCommands {
     /// Generate a new account
     Generate {
         /// Account type (substrate, evm)
-        #[arg(short, long)]
+        #[arg(short = 't', long)]
         account_type: String,
+        /// Account name (optional, will prompt to save if provided)
+        #[arg(short, long)]
+        name: Option<String>,
     },
     /// Import account from mnemonic
     Import {
         /// Mnemonic phrase
         mnemonic: String,
         /// Account type (substrate, evm)
-        #[arg(short, long)]
+        #[arg(short = 't', long)]
         account_type: String,
+        /// Account name
+        #[arg(short, long)]
+        name: String,
     },
     /// List all accounts
     List,
+    /// Export account mnemonic
+    Export {
+        /// Account name
+        name: String,
+    },
+    /// Remove an account
+    Remove {
+        /// Account name
+        name: String,
+    },
     /// Get account balance
     Balance {
         /// Account address
@@ -99,6 +140,34 @@ enum AccountCommands {
         #[arg(short, long)]
         endpoint: String,
     },
+}
+
+#[derive(Subcommand)]
+enum ConfigCommands {
+    /// Show current configuration
+    Show,
+    /// Set a configuration value
+    Set {
+        /// Configuration key (e.g., default_chain, endpoints.polkadot)
+        key: String,
+        /// Configuration value
+        value: String,
+    },
+    /// Get a configuration value
+    Get {
+        /// Configuration key
+        key: String,
+    },
+    /// Validate configuration
+    Validate,
+    /// Reset configuration to defaults
+    Reset {
+        /// Skip confirmation prompt
+        #[arg(short, long)]
+        force: bool,
+    },
+    /// Initialize configuration interactively
+    Init,
 }
 
 #[derive(Subcommand)]
@@ -129,60 +198,87 @@ async fn main() -> anyhow::Result<()> {
     match cli.command {
         Commands::New { name, template } => {
             print_apex_banner();
-            println!("\n🚀 Initializing new Apex SDK project...\n");
+            println!("\nInitializing new Apex SDK project...\n");
             create_project(&name, &template)?;
             print_success_message(&name, &template);
         }
         Commands::Build { release } => {
             println!("🔨 Building project...");
             build_project(release).await?;
-            println!("✅ Build completed!");
+            println!("Build completed!");
         }
         Commands::Test { filter } => {
             println!("🧪 Running tests...");
             run_tests(filter).await?;
-            println!("✅ Tests passed!");
+            println!("Tests passed!");
         }
         Commands::Deploy {
             contract,
             chain,
             endpoint,
+            account,
+            dry_run,
         } => {
-            println!("🚀 Deploying contract...");
-            println!("   Contract: {}", contract);
-            println!("   Chain: {}", chain);
-            println!("   Endpoint: {}", endpoint);
-            deploy_contract(&contract, &chain, &endpoint).await?;
-            println!("✅ Contract deployed successfully!");
+            if dry_run {
+                println!("Dry-run mode: Simulating deployment without broadcasting...");
+            } else {
+                println!("Deploying contract...");
+            }
+            deploy::deploy_contract(&contract, &chain, &endpoint, account, dry_run).await?;
         }
         Commands::Account { action } => match action {
-            AccountCommands::Generate { account_type } => {
+            AccountCommands::Generate { account_type, name } => {
                 println!("🔑 Generating new {} account...", account_type);
-                generate_account(&account_type)?;
+                account::generate_account(&account_type, name)?;
             }
             AccountCommands::Import {
                 mnemonic,
                 account_type,
+                name,
             } => {
                 println!("📥 Importing {} account...", account_type);
-                import_account(&mnemonic, &account_type)?;
+                account::import_account(&mnemonic, &account_type, name)?;
             }
             AccountCommands::List => {
-                println!("📋 Listing accounts...");
-                list_accounts()?;
+                account::list_accounts()?;
+            }
+            AccountCommands::Export { name } => {
+                account::export_account(&name)?;
+            }
+            AccountCommands::Remove { name } => {
+                account::remove_account(&name)?;
             }
             AccountCommands::Balance {
                 address,
                 chain,
                 endpoint,
             } => {
-                println!("💰 Fetching balance for {}...", address);
-                get_balance(&address, &chain, &endpoint).await?;
+                balance::get_balance(&address, &chain, &endpoint).await?;
+            }
+        },
+        Commands::Config { action } => match action {
+            ConfigCommands::Show => {
+                config_cmd::show_config()?;
+            }
+            ConfigCommands::Set { key, value } => {
+                config_cmd::set_config(&key, &value)?;
+            }
+            ConfigCommands::Get { key } => {
+                config_cmd::get_config(&key)?;
+            }
+            ConfigCommands::Validate => {
+                config_cmd::validate_config()?;
+            }
+            ConfigCommands::Reset { force } => {
+                config_cmd::reset_config(force)?;
+            }
+            ConfigCommands::Init => {
+                config_cmd::init_config_interactive().await?;
             }
         },
         Commands::Chain { action } => match action {
             ChainCommands::List => {
-                println!("🔗 Supported chains:");
+                println!("Supported chains:");
                 list_chains();
             }
             ChainCommands::Info { chain, endpoint } => {
@@ -194,15 +290,27 @@ async fn main() -> anyhow::Result<()> {
                 check_chain_health(&endpoint).await?;
             }
         },
+        Commands::Completions { shell } => {
+            completions::generate_completions(&shell)?;
+            eprintln!("\n# Installation instructions:");
+            completions::print_install_instructions(&shell);
+        }
         Commands::Init { interactive } => {
-            println!("⚙️  Initializing Apex SDK configuration...");
-            init_config(interactive).await?;
-            println!("✅ Configuration initialized!");
+            eprintln!("Note: 'apex init' is deprecated. Use 'apex config init' instead.\n");
+            if interactive {
+                config_cmd::init_config_interactive().await?;
+            } else {
+                let config_path = config::get_config_path()?;
+                let config = config::Config::default();
+                config.save(&config_path)?;
+                println!("Configuration initialized at: {}", config_path.display());
+                println!("Use 'apex config init' for interactive setup");
+            }
         }
         Commands::Bench { filter } => {
             println!("📊 Running benchmarks...");
             run_benchmarks(filter).await?;
-            println!("✅ Benchmarks completed!");
+            println!("Benchmarks completed!");
         }
         Commands::Version => {
             println!("Apex SDK CLI v{}", env!("CARGO_PKG_VERSION"));
@@ -294,13 +402,13 @@ fn generate_cargo_toml(name: &str, template: &str) -> String {
     format!(
         r#"[package]
 name = "{}"
-version = "0.1.2"
+version = "0.1.0"
 edition = "2021"
 description = "{}"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-apex-sdk = "0.1.2"
+apex-sdk = "0.1.0"
 tokio = {{ version = "1.35", features = ["full"] }}
 anyhow = "1.0"
 tracing = "0.1"
@@ -323,19 +431,19 @@ fn create_readme(path: &Path, name: &str, template: &str) -> anyhow::Result<()> 
 
 > {} built with [Apex SDK](https://github.com/kherldhussein/apex-sdk)
 
-## 🚀 Overview
+## Overview
 
 This project demonstrates cross-chain blockchain development using the Apex SDK.
 
 **Template:** `{}`
 
-## 📋 Features
+## Features
 
-- ✅ Substrate & EVM support
-- ✅ Type-safe blockchain interactions
-- ✅ Built-in connection pooling
-- ✅ Automatic retry logic
-- ✅ Comprehensive error handling
+-Substrate & EVM support
+-Type-safe blockchain interactions
+-Built-in connection pooling
+-Automatic retry logic
+-Comprehensive error handling
 
 ## 🛠️ Getting Started
 
@@ -522,7 +630,7 @@ async fn main() -> Result<()> {
     println!("⚡ Apex SDK Cross-Chain Quickstart Example\n");
 
     // Connect to Polkadot
-    println!("📡 Connecting to Polkadot...");
+    println!("Connecting to Polkadot...");
     // Your cross-chain logic here
 
     Ok(())
@@ -544,7 +652,7 @@ fn print_success_message(name: &str, template: &str) {
 ║                                                                   ║
 ╚═══════════════════════════════════════════════════════════════════╝
 
-📦 Project: {}
+Project: {}
 🎨 Template: {}
 
 📁 Project Structure:
@@ -561,7 +669,7 @@ fn print_success_message(name: &str, template: &str) {
    └── 📂 .vscode/
        └── 📄 settings.json   (VS Code settings)
 
-🚀 Next Steps:
+Next Steps:
 
    1️⃣  Navigate to your project:
        cd {}
@@ -578,7 +686,7 @@ fn print_success_message(name: &str, template: &str) {
    5️⃣  Read the docs:
        cargo doc --open
 
-💡 Useful Commands:
+Useful Commands:
 
    • cargo test              Run tests
    • cargo clippy            Lint your code
@@ -591,8 +699,7 @@ fn print_success_message(name: &str, template: &str) {
    • API Reference:    https://docs.rs/apex-sdk
    • CLI Guide:        apex --help
 
-Happy coding! 🎉
-
+Happy coding!
 "#,
         name, template, name, name
     );
@@ -603,7 +710,7 @@ async fn build_project(release: bool) -> anyhow::Result<()> {
         "   🔨 Building project{}...",
         if release { " (release mode)" } else { "" }
     );
-    println!("   ⏳ This may take a while on first build...\n");
+    println!("   This may take a while on first build...\n");
 
     let mut cmd = std::process::Command::new("cargo");
     cmd.arg("build");
@@ -615,9 +722,9 @@ async fn build_project(release: bool) -> anyhow::Result<()> {
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         anyhow::bail!(
-            "\n❌ Build failed!\n\n\
+            "\nBuild failed!\n\n\
             Error details:\n{}\n\n\
-            💡 Common fixes:\n\
+            Common fixes:\n\
             • Run 'cargo clean' to clear build cache\n\
             • Update dependencies with 'cargo update'\n\
             • Check for compilation errors above\n\
@@ -626,11 +733,11 @@ async fn build_project(release: bool) -> anyhow::Result<()> {
         );
     }
 
-    println!("   ✅ Build completed successfully!");
+    println!("Build completed successfully!");
     if release {
-        println!("   📦 Binary available in ./target/release/");
+        println!("   Binary available in ./target/release/");
     } else {
-        println!("   📦 Binary available in ./target/debug/");
+        println!("   Binary available in ./target/debug/");
     }
     Ok(())
 }
@@ -641,7 +748,7 @@ async fn run_tests(filter: Option<String>) -> anyhow::Result<()> {
     } else {
         println!("   🧪 Running all tests...");
     }
-    println!("   ⏳ Please wait...\n");
+    println!("   Please wait...\n");
 
     let mut cmd = std::process::Command::new("cargo");
     cmd.arg("test");
@@ -653,9 +760,9 @@ async fn run_tests(filter: Option<String>) -> anyhow::Result<()> {
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         anyhow::bail!(
-            "\n❌ Tests failed!\n\n\
+            "\nTests failed!\n\n\
             Error details:\n{}\n\n\
-            💡 Troubleshooting:\n\
+            Troubleshooting:\n\
             • Review the test output above for specific failures\n\
             • Run tests individually: cargo test <test_name>\n\
             • Run with output: cargo test -- --nocapture\n\
@@ -664,94 +771,27 @@ async fn run_tests(filter: Option<String>) -> anyhow::Result<()> {
         );
     }
 
-    println!("   ✅ All tests passed!");
+    println!("All tests passed!");
     Ok(())
 }
 
-async fn deploy_contract(_contract: &str, _chain: &str, _endpoint: &str) -> anyhow::Result<()> {
-    anyhow::bail!(
-        "\n❌ Contract deployment is not yet implemented.\n\n\
-        📋 This feature is planned for a future release.\n\
-        🔗 Track progress: https://github.com/kherldhussein/apexsdk/issues\n\n\
-        💡 Alternative: Deploy manually using:\n\
-        • Polkadot.js Apps: https://polkadot.js.org/apps/\n\
-        • Remix IDE: https://remix.ethereum.org/\n"
-    );
-}
-
-fn generate_account(_account_type: &str) -> anyhow::Result<()> {
-    anyhow::bail!(
-        "\n❌ Account generation is not yet fully implemented.\n\n\
-        📋 This feature is in development and currently shows example data only.\n\
-        🔗 Track progress: https://github.com/kherldhussein/apexsdk/issues\n\n\
-        💡 Alternative: Generate accounts using:\n\
-        • Substrate: subkey generate --scheme sr25519\n\
-        • EVM: Use MetaMask, MyEtherWallet, or similar tools\n\n\
-        🔒 Security: Always generate and store keys securely!\n"
-    );
-}
-
-fn import_account(_mnemonic: &str, _account_type: &str) -> anyhow::Result<()> {
-    anyhow::bail!(
-        "\n❌ Account import is not yet implemented.\n\n\
-        📋 This feature is planned for a future release.\n\
-        🔗 Track progress: https://github.com/kherldhussein/apexsdk/issues\n\n\
-        💡 Alternative: Use accounts programmatically in your code:\n\n\
-        ```rust\n\
-        use apex_sdk::{{ApexSDK, Chain}};\n\
-        use bip39::Mnemonic;\n\n\
-        let mnemonic = Mnemonic::from_phrase(\"your mnemonic here\", Language::English)?;\n\
-        let sdk = ApexSDK::builder()\n\
-            .with_substrate(Chain::Polkadot, \"wss://rpc.polkadot.io\")\n\
-            .build()?;\n\
-        ```\n\n\
-        🔒 Security: Never commit mnemonics or private keys to version control!\n"
-    );
-}
-
-fn list_accounts() -> anyhow::Result<()> {
-    anyhow::bail!(
-        "\n❌ Account listing is not yet implemented.\n\n\
-        📋 This feature requires persistent account storage, planned for a future release.\n\
-        🔗 Track progress: https://github.com/kherldhussein/apexsdk/issues\n\n\
-        💡 For now, manage accounts in your application code or use external tools:\n\
-        • Substrate: polkadot-js/apps or subkey\n\
-        • EVM: MetaMask, MyEtherWallet, or similar wallets\n"
-    );
-}
-
-async fn get_balance(_address: &str, _chain: &str, _endpoint: &str) -> anyhow::Result<()> {
-    anyhow::bail!(
-        "\n❌ Balance checking via CLI is not yet implemented.\n\n\
-        📋 This feature is planned for a future release.\n\
-        🔗 Track progress: https://github.com/kherldhussein/apexsdk/issues\n\n\
-        💡 Check balances programmatically in your code:\n\n\
-        ```rust\n\
-        use apex_sdk::{{ApexSDK, Chain, Address}};\n\n\
-        let sdk = ApexSDK::builder()\n\
-            .with_substrate(Chain::Polkadot, \"wss://rpc.polkadot.io\")\n\
-            .build()?;\n\n\
-        let balance = sdk.substrate()\n\
-            .get_balance(\"5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY\")\n\
-            .await?;\n\
-        println!(\"Balance: {{}}\", balance);\n\
-        ```\n\n\
-        🌐 Or use blockchain explorers:\n\
-        • Substrate: https://polkadot.subscan.io/\n\
-        • Ethereum: https://etherscan.io/\n"
-    );
-}
-
 fn list_chains() {
-    println!("\n   Substrate-based:");
+    println!("\n   Substrate Mainnets:");
     println!("     • polkadot    - Polkadot Relay Chain");
     println!("     • kusama      - Kusama Relay Chain");
-    println!("     • moonbeam    - Moonbeam Parachain");
-    println!("     • astar       - Astar Parachain");
+
+    println!("\n   Substrate Testnets:");
+    println!("     • paseo       - Paseo Testnet (Default)");
+    println!("     • westend     - Westend Testnet");
+
+    println!("\n   Parachains:");
+    println!("     • moonbeam    - Moonbeam (EVM-compatible)");
+    println!("     • astar       - Astar Multi-VM");
     println!("     • acala       - Acala DeFi Hub");
     println!("     • phala       - Phala Privacy Cloud");
     println!("     • bifrost     - Bifrost Liquid Staking");
-    println!("\n   EVM-compatible:");
+
+    println!("\n   EVM Mainnets:");
     println!("     • ethereum    - Ethereum Mainnet");
     println!("     • bsc         - Binance Smart Chain");
     println!("     • polygon     - Polygon (Matic)");
@@ -759,44 +799,200 @@ fn list_chains() {
     println!("     • arbitrum    - Arbitrum One (L2)");
     println!("     • optimism    - Optimism (L2)");
     println!("     • zksync      - zkSync Era (L2)");
+
+    println!("\n   EVM Testnets:");
+    println!("     • sepolia     - Ethereum Sepolia");
+
+    println!("\n   Use 'apex config show' to see configured endpoints");
 }
 
 async fn get_chain_info(chain: &str, endpoint: &str) -> anyhow::Result<()> {
-    println!("   Endpoint: {}", endpoint);
-    println!("   Connecting...");
-    println!("\n   Chain: {}", chain);
-    println!("   Block height: 12345678 (example)");
-    println!("   Network: Mainnet");
-    println!("   Version: 1.0.0");
+    use colored::Colorize;
+
+    println!("\n{}", "Chain Information".cyan().bold());
+    println!("{}", "═══════════════════════════════════════".dimmed());
+    println!("{}: {}", "Chain".dimmed(), chain);
+    println!("{}: {}", "Endpoint".dimmed(), endpoint);
+    println!();
+
+    let spinner = indicatif::ProgressBar::new_spinner();
+    spinner.set_message("Connecting to chain...");
+    spinner.enable_steady_tick(std::time::Duration::from_millis(100));
+
+    // Determine chain type
+    let is_substrate = endpoint.starts_with("ws://") || endpoint.starts_with("wss://");
+
+    if is_substrate {
+        // Substrate chain info
+        use subxt::{OnlineClient, PolkadotConfig};
+
+        let api = OnlineClient::<PolkadotConfig>::from_url(endpoint)
+            .await
+            .context("Failed to connect to Substrate endpoint")?;
+
+        spinner.set_message("Fetching chain data...");
+
+        // Get latest block
+        let block = api.blocks().at_latest().await?;
+        let block_number = block.number();
+        let block_hash = block.hash();
+
+        // Get runtime version
+        let runtime_version = api.runtime_version();
+
+        spinner.finish_and_clear();
+
+        println!("{}", "Network Information:".yellow().bold());
+        println!("  {}: {}", "Block Height".cyan(), block_number);
+        println!("  {}: {}", "Block Hash".dimmed(), block_hash);
+        println!();
+
+        println!("{}", "Runtime:".yellow().bold());
+        println!(
+            "  {}: {}",
+            "Spec Version".cyan(),
+            runtime_version.spec_version
+        );
+        println!(
+            "  {}: {}",
+            "Transaction Version".dimmed(),
+            runtime_version.transaction_version
+        );
+    } else {
+        // EVM chain info
+        use ethers::prelude::*;
+
+        let provider =
+            Provider::<Http>::try_from(endpoint).context("Failed to create EVM provider")?;
+
+        spinner.set_message("Fetching chain data...");
+
+        // Get chain ID
+        let chain_id = provider.get_chainid().await?;
+
+        // Get latest block number
+        let block_number = provider.get_block_number().await?;
+
+        // Get latest block
+        let block = provider
+            .get_block(block_number)
+            .await?
+            .ok_or_else(|| anyhow::anyhow!("Failed to fetch latest block"))?;
+
+        // Get network version
+        let network_version = provider.get_net_version().await?;
+
+        spinner.finish_and_clear();
+
+        println!("{}", "Network Information:".yellow().bold());
+        println!("  {}: {}", "Chain ID".cyan(), chain_id);
+        println!("  {}: {}", "Network Version".dimmed(), network_version);
+        println!("  {}: {}", "Block Height".cyan(), block_number);
+        println!(
+            "  {}: {:?}",
+            "Block Hash".dimmed(),
+            block.hash.unwrap_or_default()
+        );
+        println!();
+
+        println!("{}", "Block Details:".yellow().bold());
+        println!("  {}: {}", "Timestamp".dimmed(), block.timestamp);
+        println!("  {}: {}", "Gas Limit".dimmed(), block.gas_limit);
+        println!("  {}: {}", "Gas Used".dimmed(), block.gas_used);
+        println!(
+            "  {}: {}",
+            "Transactions".dimmed(),
+            block.transactions.len()
+        );
+
+        // Determine network name from chain ID
+        let network_name = match chain_id.as_u64() {
+            1 => "Ethereum Mainnet",
+            5 => "Goerli Testnet",
+            11155111 => "Sepolia Testnet",
+            137 => "Polygon Mainnet",
+            80001 => "Polygon Mumbai",
+            56 => "BSC Mainnet",
+            97 => "BSC Testnet",
+            43114 => "Avalanche C-Chain",
+            43113 => "Avalanche Fuji",
+            _ => "Unknown Network",
+        };
+
+        println!("\n{}: {}", "Network".green().bold(), network_name);
+    }
+
     Ok(())
 }
 
 async fn check_chain_health(endpoint: &str) -> anyhow::Result<()> {
-    println!("   Endpoint: {}", endpoint);
-    println!("   Checking connection...");
-    println!("   ✅ Connected successfully");
-    println!("   Latency: 45ms");
-    println!("   Status: Healthy");
-    Ok(())
-}
+    use colored::Colorize;
+    use std::time::Instant;
 
-async fn init_config(interactive: bool) -> anyhow::Result<()> {
-    if interactive {
-        println!("   Interactive configuration mode");
-        println!("   (Interactive mode will be implemented in a future version)");
+    println!("\n{}", "🏥 Chain Health Check".cyan().bold());
+    println!("{}", "═══════════════════════════════════════".dimmed());
+    println!("{}: {}", "Endpoint".dimmed(), endpoint);
+    println!();
+
+    let spinner = indicatif::ProgressBar::new_spinner();
+    spinner.set_message("Checking connection...");
+    spinner.enable_steady_tick(std::time::Duration::from_millis(100));
+
+    // Determine chain type
+    let is_substrate = endpoint.starts_with("ws://") || endpoint.starts_with("wss://");
+
+    if is_substrate {
+        // Substrate health check
+        use subxt::{OnlineClient, PolkadotConfig};
+
+        let start = Instant::now();
+        let api = OnlineClient::<PolkadotConfig>::from_url(endpoint)
+            .await
+            .context("Failed to connect to Substrate endpoint")?;
+
+        spinner.set_message("Fetching latest block...");
+
+        // Try to get latest block as a health check
+        let block = api.blocks().at_latest().await?;
+        let latency = start.elapsed();
+
+        spinner.finish_and_clear();
+
+        println!("{}", "Connection Successful".green().bold());
+        println!();
+        println!("{}", "Health Metrics:".yellow().bold());
+        println!("  {}: {}ms", "Latency".cyan(), latency.as_millis());
+        println!("  {}: {}", "Latest Block".dimmed(), block.number());
+        println!("  {}: Healthy", "Status".green().bold());
+    } else {
+        // EVM health check
+        use ethers::prelude::*;
+
+        let start = Instant::now();
+        let provider =
+            Provider::<Http>::try_from(endpoint).context("Failed to create EVM provider")?;
+
+        spinner.set_message("Fetching chain data...");
+
+        // Get block number as a health check
+        let block_number = provider.get_block_number().await?;
+
+        // Try to get chain ID
+        let chain_id = provider.get_chainid().await?;
+
+        let latency = start.elapsed();
+
+        spinner.finish_and_clear();
+
+        println!("{}", "Connection Successful".green().bold());
+        println!();
+        println!("{}", "Health Metrics:".yellow().bold());
+        println!("  {}: {}ms", "Latency".cyan(), latency.as_millis());
+        println!("  {}: {}", "Latest Block".dimmed(), block_number);
+        println!("  {}: {}", "Chain ID".dimmed(), chain_id);
+        println!("  {}: Healthy", "Status".green().bold());
     }
 
-    let config_path = std::env::current_dir()?.join(".apex");
-    std::fs::create_dir_all(&config_path)?;
-
-    let config = r#"{
-  "default_chain": "polkadot",
-  "default_endpoint": "wss://polkadot.api.onfinality.io/public-ws",
-  "accounts": []
-}
-"#;
-    std::fs::write(config_path.join("config.json"), config)?;
-    println!("   Configuration file created at: .apex/config.json");
     Ok(())
 }
 
