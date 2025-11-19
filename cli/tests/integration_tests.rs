@@ -189,10 +189,8 @@ fn test_bench_command() {
 #[cfg(test)]
 mod unit_tests {
     #[test]
-    fn test_keystore_operations() {
-    }
+    fn test_keystore_operations() {}
 
     #[test]
-    fn test_config_operations() {
-    }
+    fn test_config_operations() {}
 }
