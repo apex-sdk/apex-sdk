@@ -286,11 +286,10 @@ pub struct MetricsSnapshot {
     pub uptime: Duration,
 }
 
-impl MetricsSnapshot {
-    /// Format metrics as a human-readable string
-    #[allow(clippy::inherent_to_string_shadow_display)]
-    pub fn to_string(&self) -> String {
-        format!(
+impl std::fmt::Display for MetricsSnapshot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
             "Substrate Adapter Metrics:\n\
              RPC Calls: {}\n\
              Avg RPC Time: {:?}\n\
@@ -310,12 +309,6 @@ impl MetricsSnapshot {
             self.cache_hit_rate,
             self.uptime
         )
-    }
-}
-
-impl std::fmt::Display for MetricsSnapshot {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.to_string())
     }
 }
 
