@@ -84,10 +84,11 @@ fn generate_evm_account(name: Option<String>) -> Result<()> {
         bip39::Mnemonic::from_entropy(&entropy).context("Failed to generate mnemonic")?;
     let mnemonic_phrase = mnemonic.to_string();
 
-    // Generate wallet from mnemonic
-    let wallet_from_mnemonic = mnemonic_phrase
-        .parse::<ethers::signers::Wallet<ethers::core::k256::ecdsa::SigningKey>>()
-        .context("Failed to parse mnemonic")?;
+    // Generate wallet from mnemonic using MnemonicBuilder
+    let wallet_from_mnemonic = MnemonicBuilder::<coins_bip39::English>::default()
+        .phrase(mnemonic_phrase.as_str())
+        .build()
+        .context("Failed to build wallet from mnemonic")?;
     let address = format!("{:?}", wallet_from_mnemonic.address());
 
     // Display the account information
@@ -118,8 +119,6 @@ fn generate_evm_account(name: Option<String>) -> Result<()> {
 
 /// Import an account from mnemonic
 pub fn import_account(mnemonic: &str, account_type: &str, name: String) -> Result<()> {
-    use ethers::signers::Signer;
-
     // Validate mnemonic
     let mnemonic_obj: bip39::Mnemonic = mnemonic.parse().context("Invalid mnemonic phrase")?;
 
@@ -133,9 +132,11 @@ pub fn import_account(mnemonic: &str, account_type: &str, name: String) -> Resul
             save_account_interactive(name, AccountType::Substrate, address, mnemonic)?;
         }
         "evm" | "ethereum" | "eth" => {
-            let wallet = mnemonic
-                .parse::<ethers::signers::Wallet<ethers::core::k256::ecdsa::SigningKey>>()
-                .context("Failed to parse mnemonic")?;
+            use ethers::prelude::*;
+            let wallet = MnemonicBuilder::<coins_bip39::English>::default()
+                .phrase(mnemonic)
+                .build()
+                .context("Failed to build wallet from mnemonic")?;
             let address = format!("{:?}", wallet.address());
 
             save_account_interactive(name, AccountType::Evm, address, mnemonic)?;
