@@ -658,7 +658,6 @@ impl ContractClient {
     }
 
     /// Decode ContractExecResult from SCALE-encoded bytes
-    #[allow(clippy::result_large_err)]
     fn decode_contract_result(bytes: &[u8]) -> Result<Vec<u8>> {
         use parity_scale_codec::Decode;
 
@@ -746,7 +745,6 @@ impl ContractClient {
 
     // Helper methods
 
-    #[allow(clippy::result_large_err)]
     fn encode_gas_limit(limit: &GasLimit) -> Result<subxt::dynamic::Value> {
         Ok(subxt::dynamic::Value::named_composite([
             (
@@ -760,7 +758,6 @@ impl ContractClient {
         ]))
     }
 
-    #[allow(clippy::result_large_err)]
     fn encode_storage_deposit(limit: &StorageDepositLimit) -> Result<subxt::dynamic::Value> {
         match limit {
             StorageDepositLimit::NoLimit => {
@@ -775,7 +772,6 @@ impl ContractClient {
 }
 
 /// Parse contract metadata from JSON
-#[allow(clippy::result_large_err)]
 pub fn parse_metadata(json: &str) -> Result<ContractMetadata> {
     serde_json::from_str(json)
         .map_err(|e| Error::Metadata(format!("Failed to parse contract metadata: {}", e)))
