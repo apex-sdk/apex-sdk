@@ -69,6 +69,20 @@ jobs:
             echo "Expected lines like: test benchmark_name ... bench: X ns/iter (+/- Y)"
           fi
 
+      - name: Initialize gh-pages branch if needed
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          git fetch origin gh-pages:gh-pages || {
+            echo "gh-pages branch does not exist, creating it..."
+            git checkout --orphan gh-pages
+            git reset --hard
+            mkdir -p dev/bench
+            git add .
+            git commit --allow-empty -m "Initialize gh-pages branch for benchmarks"
+            git push origin gh-pages
+            git checkout -
+          }
+
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@v1
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
