@@ -88,13 +88,16 @@ jobs:
             git clean -fd
           }
 
+      - name: Copy benchmark output to safe location
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: cp output.txt /tmp/bench-output.txt
+
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@v1
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           tool: 'cargo'
-          output-file-path: output.txt
-          skip-fetch-gh-pages: true
+          output-file-path: /tmp/bench-output.txt
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: true
           alert-threshold: '150%'
