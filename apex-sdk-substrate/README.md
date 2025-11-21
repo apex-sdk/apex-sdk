@@ -27,7 +27,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-apex-sdk-substrate = "0.1.2"
+apex-sdk-substrate = "0.1.3"
 tokio = { version = "1.0", features = ["full"] }
 ```
 
@@ -35,7 +35,7 @@ tokio = { version = "1.0", features = ["full"] }
 
 ```toml
 [dependencies]
-apex-sdk-substrate = { version = "0.1.2", features = ["typed-westend"] }
+apex-sdk-substrate = { version = "0.1.3", features = ["typed-westend"] }
 ```
 
 Available features:
