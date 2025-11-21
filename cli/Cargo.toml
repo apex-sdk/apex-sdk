@@ -5,6 +5,12 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 description = "CLI tool for Apex SDK"
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords = ["blockchain", "substrate", "evm", "cli", "sdk"]
+categories = ["command-line-utilities", "cryptography::cryptocurrencies"]
+readme = "README.md"
 
 [package.metadata.cargo-udeps.ignore]
 normal = ["apex-sdk", "tracing"]
