@@ -91,21 +91,20 @@ impl Signer<subxt::PolkadotConfig> for Ed25519Signer {
 
 /// Enum to hold either SR25519 or ED25519 signer
 #[derive(Clone)]
-#[allow(clippy::large_enum_variant)]
 pub enum ApexSigner {
-    Sr25519(Sr25519Signer),
-    Ed25519(Ed25519Signer),
+    Sr25519(Box<Sr25519Signer>),
+    Ed25519(Box<Ed25519Signer>),
 }
 
 impl ApexSigner {
     /// Create from SR25519 pair
     pub fn from_sr25519(pair: sr25519::Pair) -> Self {
-        Self::Sr25519(Sr25519Signer::new(pair))
+        Self::Sr25519(Box::new(Sr25519Signer::new(pair)))
     }
 
     /// Create from ED25519 pair
     pub fn from_ed25519(pair: ed25519::Pair) -> Self {
-        Self::Ed25519(Ed25519Signer::new(pair))
+        Self::Ed25519(Box::new(Ed25519Signer::new(pair)))
     }
 }
 
