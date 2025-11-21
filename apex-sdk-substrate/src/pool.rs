@@ -159,7 +159,6 @@ impl ConnectionPool {
     }
 
     /// Get the next available healthy connection using round-robin
-    #[allow(clippy::result_large_err)]
     pub fn get_connection(&self) -> Result<Arc<SubstrateAdapter>> {
         let connections = self.connections.read();
         let healthy_count = connections
@@ -231,52 +230,67 @@ impl ConnectionPool {
     }
 
     /// Manually trigger health check for all endpoints
-    #[allow(clippy::await_holding_lock)]
     pub async fn health_check(&self) {
         debug!("Running health check on all endpoints");
 
-        let mut connections = self.connections.write();
+        // Collect endpoints that need reconnection
+        let reconnect_endpoints: Vec<String> = {
+            let mut connections = self.connections.write();
 
-        for conn in connections.iter_mut() {
-            let is_healthy = if let Some(adapter) = &conn.adapter {
-                // Simple health check: verify connection is still active
-                adapter.is_connected()
-            } else {
-                false
-            };
+            for conn in connections.iter_mut() {
+                let is_healthy = if let Some(adapter) = &conn.adapter {
+                    // Simple health check: verify connection is still active
+                    adapter.is_connected()
+                } else {
+                    false
+                };
 
-            conn.health_status = if is_healthy {
-                HealthStatus::Healthy
-            } else {
-                HealthStatus::Unhealthy
-            };
-            conn.last_check = Instant::now();
+                conn.health_status = if is_healthy {
+                    HealthStatus::Healthy
+                } else {
+                    HealthStatus::Unhealthy
+                };
+                conn.last_check = Instant::now();
 
-            if !is_healthy {
-                conn.failure_count += 1;
+                if !is_healthy {
+                    conn.failure_count += 1;
+                } else {
+                    // Reset failure count on success
+                    conn.failure_count = 0;
+                }
+            }
 
-                // Try to reconnect if failures are below threshold
-                if conn.failure_count <= self.config.max_retries {
-                    debug!("Attempting to reconnect to {}", conn.endpoint);
+            // Collect endpoints that need reconnection
+            connections
+                .iter()
+                .filter(|conn| {
+                    conn.health_status == HealthStatus::Unhealthy
+                        && conn.failure_count <= self.config.max_retries
+                })
+                .map(|conn| conn.endpoint.clone())
+                .collect()
+        }; // Lock is dropped here
 
-                    let mut chain_cfg = self.chain_config.clone();
-                    chain_cfg.endpoint = conn.endpoint.clone();
+        // Reconnect to unhealthy endpoints without holding the lock
+        for endpoint in reconnect_endpoints {
+            debug!("Attempting to reconnect to {}", endpoint);
 
-                    match SubstrateAdapter::connect_with_config(chain_cfg).await {
-                        Ok(adapter) => {
-                            info!("Successfully reconnected to {}", conn.endpoint);
-                            conn.adapter = Some(Arc::new(adapter));
-                            conn.health_status = HealthStatus::Healthy;
-                            conn.failure_count = 0;
-                        }
-                        Err(e) => {
-                            warn!("Failed to reconnect to {}: {}", conn.endpoint, e);
-                        }
+            let mut chain_cfg = self.chain_config.clone();
+            chain_cfg.endpoint = endpoint.clone();
+
+            match SubstrateAdapter::connect_with_config(chain_cfg).await {
+                Ok(adapter) => {
+                    info!("Successfully reconnected to {}", endpoint);
+                    let mut connections = self.connections.write();
+                    if let Some(conn) = connections.iter_mut().find(|c| c.endpoint == endpoint) {
+                        conn.adapter = Some(Arc::new(adapter));
+                        conn.health_status = HealthStatus::Healthy;
+                        conn.failure_count = 0;
                     }
                 }
-            } else {
-                // Reset failure count on success
-                conn.failure_count = 0;
+                Err(e) => {
+                    warn!("Failed to reconnect to {}: {}", endpoint, e);
+                }
             }
         }
     }
@@ -383,7 +397,6 @@ impl ConnectionPool {
     }
 
     /// Remove an endpoint from the pool
-    #[allow(clippy::result_large_err)]
     pub fn remove_endpoint(&self, endpoint: &str) -> Result<()> {
         info!("Removing endpoint from pool: {}", endpoint);
 
