@@ -1,0 +1,31 @@
+# Robots.txt for Apex SDK Protocol
+# https://kherldhussein.github.io/apex-sdk/
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://kherldhussein.github.io/apex-sdk/sitemap.xml
+
+# Crawl-delay for polite crawlers
+Crawl-delay: 1
+
+# Specific rules for major search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Block common bad bots
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10
+
+User-agent: DotBot
+Crawl-delay: 10

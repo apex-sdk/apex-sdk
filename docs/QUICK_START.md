@@ -16,7 +16,7 @@ Add Apex SDK to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-apex-sdk = "0.1.3"
+apex-sdk = "0.1.4"
 tokio = { version = "1.35", features = ["full"] }
 anyhow = "1.0"
 ```
@@ -326,52 +326,6 @@ cargo test test_transaction_builder
    - Issues: [github.com/kherldhussein/apexsdk/issues](https://github.com/kherldhussein/apex-sdk/issues)
    - Discussions: [github.com/kherldhussein/apexsdk/discussions](https://github.com/kherldhussein/apex-sdk/discussions)
 4. **Contribute**: See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
-
-## Testnet Development
-
-For development and testing, use testnets instead of mainnet:
-
-### Polkadot Testnets
-
-```rust
-use apex_sdk::prelude::*;
-
-#[tokio::main]
-async fn main() -> Result<()> {
-    // Paseo (default Polkadot testnet)
-    let sdk = ApexSDK::builder()
-        .with_substrate_endpoint("wss://paseo-rpc.polkadot.io")
-        .build()
-        .await?;
-
-    // Westend (legacy testnet)
-    let sdk_westend = ApexSDK::builder()
-        .with_substrate_endpoint("wss://westend-rpc.polkadot.io")
-        .build()
-        .await?;
-
-    // Test with free test tokens
-    println!("Connected to Paseo testnet");
-    
-    Ok(())
-}
-```
-
-### Ethereum Testnets
-
-```rust
-// Sepolia testnet
-let sdk = ApexSDK::builder()
-    .with_evm_endpoint("https://sepolia.infura.io/v3/YOUR_PROJECT_ID")
-    .build()
-    .await?;
-```
-
-### Getting Test Tokens
-
-- **Paseo (PAS)**: Get test tokens from [Polkadot faucet](https://faucet.polkadot.io)
-- **Westend (WND)**: Get test tokens from [Westend faucet](https://faucet.polkadot.io)
-- **Sepolia (ETH)**: Get test ETH from [Sepolia faucet](https://sepoliafaucet.com)
 
 ## Production Considerations
 

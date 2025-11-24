@@ -1,4 +1,4 @@
-# Apex SDK Security Audit Report
+# Apex SDK Protocol Security Audit Report
 
 ## Executive Summary
 
@@ -273,7 +273,7 @@ pub fn validate_endpoint(endpoint: &str) -> Result<(), Error> {
 3. **Enhanced Logging Controls**
    - Implement log levels
    - Sanitize sensitive data in logs
-   - **Timeline:** Next patch (0.1.3)
+   - **Timeline:** Next patch (0.1.4)
 
 ### Medium Priority
 

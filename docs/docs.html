@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Apex SDK Documentation - Comprehensive guides and API references">
+    <title>Documentation - Apex SDK</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/marked-highlight@2.0.1/lib/index.css">
+    <style>
+        :root {
+            /* Colors */
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --secondary-color: #8b5cf6;
+            --success-color: #10b981;
+
+            /* Light mode */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --bg-card: #ffffff;
+            --bg-code: #1e293b;
+            --bg-code-inline: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #64748b;
+            --text-code: #0f172a;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+            /* Typography */
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Courier New', Courier, monospace;
+
+            /* Spacing */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+
+            /* Sizes */
+            --sidebar-width: 280px;
+            --toc-width: 240px;
+            --nav-height: 64px;
+
+            /* Transitions */
+            --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-card: #1e293b;
+            --bg-code: #0f172a;
+            --bg-code-inline: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --text-code: #e2e8f0;
+            --border-color: #334155;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            line-height: 1.7;
+            transition: background var(--transition), color var(--transition);
+        }
+
+        /* Navigation */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--nav-height);
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            padding: 0 var(--spacing-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .nav-logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+        }
+
+        .nav-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-lg);
+        }
+
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: var(--spacing-sm) var(--spacing-md);
+            padding-left: 2.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 0.875rem;
+            transition: all var(--transition);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-tertiary);
+        }
+
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 2rem;
+            padding: var(--spacing-sm) var(--spacing-md);
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .github-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: 0.5rem;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .github-link:hover {
+            background: var(--bg-secondary);
+            color: var(--primary-color);
+        }
+
+        /* Layout */
+        .doc-layout {
+            display: flex;
+            margin-top: var(--nav-height);
+            min-height: calc(100vh - var(--nav-height));
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            left: 0;
+            top: var(--nav-height);
+            bottom: 0;
+            overflow-y: auto;
+            padding: var(--spacing-xl) 0;
+        }
+
+        .sidebar-section {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .sidebar-title {
+            padding: 0 var(--spacing-lg);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-tertiary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .sidebar-links {
+            list-style: none;
+        }
+
+        .sidebar-link {
+            display: block;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all var(--transition);
+            position: relative;
+            font-size: 0.9375rem;
+        }
+
+        .sidebar-link:hover {
+            color: var(--primary-color);
+            background: var(--bg-tertiary);
+        }
+
+        .sidebar-link.active {
+            color: var(--primary-color);
+            background: var(--bg-tertiary);
+            font-weight: 600;
+        }
+
+        .sidebar-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--primary-color);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            margin-right: var(--toc-width);
+            padding: var(--spacing-2xl);
+            max-width: 900px;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-xl);
+            font-size: 0.875rem;
+            color: var(--text-tertiary);
+        }
+
+        .breadcrumb a {
+            color: var(--text-tertiary);
+            text-decoration: none;
+            transition: color var(--transition);
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary-color);
+        }
+
+        .content-header {
+            margin-bottom: var(--spacing-2xl);
+            padding-bottom: var(--spacing-xl);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .content-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: var(--spacing-md);
+            color: var(--text-primary);
+        }
+
+        .content-description {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Markdown Content Styles */
+        .markdown-body {
+            color: var(--text-primary);
+        }
+
+        .markdown-body h1,
+        .markdown-body h2,
+        .markdown-body h3,
+        .markdown-body h4,
+        .markdown-body h5,
+        .markdown-body h6 {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            line-height: 1.3;
+            color: var(--text-primary);
+        }
+
+        .markdown-body h1 { font-size: 2rem; }
+        .markdown-body h2 { font-size: 1.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
+        .markdown-body h3 { font-size: 1.5rem; }
+        .markdown-body h4 { font-size: 1.25rem; }
+        .markdown-body h5 { font-size: 1.125rem; }
+        .markdown-body h6 { font-size: 1rem; }
+
+        .markdown-body p {
+            margin-bottom: 1.5rem;
+        }
+
+        .markdown-body a {
+            color: var(--primary-color);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color var(--transition);
+        }
+
+        .markdown-body a:hover {
+            border-bottom-color: var(--primary-color);
+        }
+
+        .markdown-body ul,
+        .markdown-body ol {
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+        }
+
+        .markdown-body li {
+            margin-bottom: 0.5rem;
+        }
+
+        .markdown-body code {
+            background: var(--bg-code-inline);
+            color: var(--text-code);
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: var(--font-mono);
+            font-size: 0.875em;
+        }
+
+        .markdown-body pre {
+            background: var(--bg-code);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .markdown-body pre code {
+            background: none;
+            color: #e2e8f0;
+            padding: 0;
+            font-size: 0.875rem;
+            line-height: 1.7;
+        }
+
+        .markdown-body blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1.5rem;
+            margin: 1.5rem 0;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .markdown-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+
+        .markdown-body th,
+        .markdown-body td {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        .markdown-body th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+        }
+
+        .markdown-body img {
+            max-width: 100%;
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .markdown-body hr {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 2rem 0;
+        }
+
+        /* Table of Contents */
+        .toc-sidebar {
+            width: var(--toc-width);
+            position: fixed;
+            right: 0;
+            top: var(--nav-height);
+            bottom: 0;
+            padding: var(--spacing-2xl) var(--spacing-lg);
+            overflow-y: auto;
+            border-left: 1px solid var(--border-color);
+        }
+
+        .toc-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-tertiary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .toc-list {
+            list-style: none;
+        }
+
+        .toc-link {
+            display: block;
+            padding: var(--spacing-xs) 0;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            transition: color var(--transition);
+            border-left: 2px solid transparent;
+            padding-left: var(--spacing-sm);
+        }
+
+        .toc-link:hover {
+            color: var(--primary-color);
+        }
+
+        .toc-link.active {
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .toc-link.level-3 {
+            padding-left: var(--spacing-md);
+            font-size: 0.8125rem;
+        }
+
+        /* Footer Navigation */
+        .doc-footer {
+            margin-top: var(--spacing-2xl);
+            padding-top: var(--spacing-2xl);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            gap: var(--spacing-lg);
+        }
+
+        .doc-nav-link {
+            flex: 1;
+            padding: var(--spacing-lg);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all var(--transition);
+        }
+
+        .doc-nav-link:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-md);
+        }
+
+        .doc-nav-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-tertiary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .doc-nav-title {
+            font-weight: 600;
+        }
+
+        .doc-nav-next {
+            text-align: right;
+        }
+
+        /* Edit Link */
+        .edit-link {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            margin-bottom: var(--spacing-xl);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: 0.5rem;
+            transition: all var(--transition);
+        }
+
+        .edit-link:hover {
+            background: var(--bg-secondary);
+            color: var(--primary-color);
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            font-size: 1.25rem;
+            color: var(--text-tertiary);
+        }
+
+        /* Mobile Menu */
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: var(--spacing-sm);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .toc-sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-right: 0;
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform var(--transition);
+                z-index: 50;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: var(--spacing-lg);
+            }
+
+            .mobile-toggle {
+                display: block;
+            }
+
+            .search-box {
+                display: none;
+            }
+
+            .content-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+        <a href="index.html" class="nav-logo">
+            <div class="nav-logo-icon">A</div>
+            <span>Apex SDK</span>
+        </a>
+        <div class="nav-right">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" id="search-input" placeholder="Search documentation...">
+            </div>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <span id="theme-icon">🌙</span>
+                <span id="theme-text">Dark</span>
+            </button>
+            <a href="https://github.com/kherldhussein/apex-sdk" class="github-link">
+                <span>GitHub</span>
+                <span>↗</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Layout -->
+    <div class="doc-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Getting Started</div>
+                <ul class="sidebar-links">
+                    <li><a href="?doc=QUICK_START" class="sidebar-link" data-doc="QUICK_START">Quick Start</a></li>
+                    <li><a href="?doc=CLI_GUIDE" class="sidebar-link" data-doc="CLI_GUIDE">CLI Guide</a></li>
+                    <li><a href="?doc=TESTNETS" class="sidebar-link" data-doc="TESTNETS">Testnets</a></li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Core Concepts</div>
+                <ul class="sidebar-links">
+                    <li><a href="?doc=SYSTEM_ARCHITECTURE" class="sidebar-link" data-doc="SYSTEM_ARCHITECTURE">Architecture</a></li>
+                    <li><a href="?doc=Substrate_Features" class="sidebar-link" data-doc="Substrate_Features">Substrate Features</a></li>
+                    <li><a href="?doc=TYPED_METADATA" class="sidebar-link" data-doc="TYPED_METADATA">Typed Metadata</a></li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">API Reference</div>
+                <ul class="sidebar-links">
+                    <li><a href="?doc=API" class="sidebar-link" data-doc="API">API Documentation</a></li>
+                    <li><a href="?doc=METADATA_GENERATION" class="sidebar-link" data-doc="METADATA_GENERATION">Metadata Generation</a></li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Development</div>
+                <ul class="sidebar-links">
+                    <li><a href="?doc=TESTING_FRAMEWORK" class="sidebar-link" data-doc="TESTING_FRAMEWORK">Testing Framework</a></li>
+                    <li><a href="?doc=CONTRIBUTING" class="sidebar-link" data-doc="CONTRIBUTING">Contributing</a></li>
+                    <li><a href="?doc=SECURITY" class="sidebar-link" data-doc="SECURITY">Security</a></li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Project</div>
+                <ul class="sidebar-links">
+                    <li><a href="?doc=ROADMAP" class="sidebar-link" data-doc="ROADMAP">Roadmap</a></li>
+                    <li><a href="?doc=ECOSYSTEM_INTEGRATION" class="sidebar-link" data-doc="ECOSYSTEM_INTEGRATION">Ecosystem</a></li>
+                    <li><a href="?doc=RESEARCH_INITIATIVES" class="sidebar-link" data-doc="RESEARCH_INITIATIVES">Research</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="index.html">Home</a>
+                <span>›</span>
+                <span id="breadcrumb-current">Documentation</span>
+            </div>
+
+            <div id="content-container" class="loading">
+                Loading documentation...
+            </div>
+        </main>
+
+        <!-- Table of Contents -->
+        <aside class="toc-sidebar">
+            <div class="toc-title">On This Page</div>
+            <ul class="toc-list" id="toc-list">
+                <!-- Generated dynamically -->
+            </ul>
+        </aside>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+    <script>
+        // Theme Management
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+
+            if (newTheme === 'dark') {
+                icon.textContent = '🌙';
+                text.textContent = 'Dark';
+            } else {
+                icon.textContent = '☀️';
+                text.textContent = 'Light';
+            }
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        if (savedTheme === 'light') {
+            document.getElementById('theme-icon').textContent = '☀️';
+            document.getElementById('theme-text').textContent = 'Light';
+        }
+
+        // Mobile Sidebar Toggle
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // Get doc parameter from URL
+        function getDocParam() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('doc') || 'QUICK_START';
+        }
+
+        // Load and render markdown
+        async function loadDoc(docName) {
+            const container = document.getElementById('content-container');
+            const breadcrumb = document.getElementById('breadcrumb-current');
+
+            try {
+                container.innerHTML = '<div class="loading">Loading documentation...</div>';
+
+                const response = await fetch(`${docName}.md`);
+                if (!response.ok) throw new Error('Document not found');
+
+                const markdown = await response.text();
+
+                // Configure marked
+                marked.setOptions({
+                    breaks: true,
+                    gfm: true,
+                    headerIds: true,
+                    mangle: false
+                });
+
+                const html = marked.parse(markdown);
+                container.innerHTML = `
+                    <a href="https://github.com/kherldhussein/apex-sdk/edit/main/docs/${docName}.md" class="edit-link">
+                        <span>✏️</span>
+                        <span>Edit this page on GitHub</span>
+                    </a>
+                    <div class="markdown-body">${html}</div>
+                `;
+
+                // Update breadcrumb
+                breadcrumb.textContent = docName.replace(/_/g, ' ');
+
+                // Update active link
+                document.querySelectorAll('.sidebar-link').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.dataset.doc === docName) {
+                        link.classList.add('active');
+                    }
+                });
+
+                // Generate TOC
+                generateTOC();
+
+                // Add scroll spy
+                addScrollSpy();
+
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="content-header">
+                        <h1 class="content-title">Document Not Found</h1>
+                        <p class="content-description">
+                            The requested documentation could not be loaded.
+                            <a href="?doc=QUICK_START">Return to Quick Start</a>
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        // Generate Table of Contents
+        function generateTOC() {
+            const headings = document.querySelectorAll('.markdown-body h2, .markdown-body h3');
+            const tocList = document.getElementById('toc-list');
+
+            tocList.innerHTML = '';
+
+            headings.forEach(heading => {
+                const link = document.createElement('a');
+                link.href = `#${heading.id}`;
+                link.className = `toc-link ${heading.tagName === 'H3' ? 'level-3' : ''}`;
+                link.textContent = heading.textContent;
+                link.dataset.target = heading.id;
+
+                const li = document.createElement('li');
+                li.appendChild(link);
+                tocList.appendChild(li);
+            });
+        }
+
+        // Scroll Spy
+        function addScrollSpy() {
+            const headings = document.querySelectorAll('.markdown-body h2, .markdown-body h3');
+            const tocLinks = document.querySelectorAll('.toc-link');
+
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            tocLinks.forEach(link => {
+                                link.classList.remove('active');
+                                if (link.dataset.target === entry.target.id) {
+                                    link.classList.add('active');
+                                }
+                            });
+                        }
+                    });
+                },
+                { rootMargin: '-80px 0px -80% 0px' }
+            );
+
+            headings.forEach(heading => observer.observe(heading));
+        }
+
+        // Search Functionality
+        document.getElementById('search-input')?.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const links = document.querySelectorAll('.sidebar-link');
+
+            links.forEach(link => {
+                const text = link.textContent.toLowerCase();
+                const parent = link.closest('li');
+                if (text.includes(query) || query === '') {
+                    parent.style.display = 'block';
+                } else {
+                    parent.style.display = 'none';
+                }
+            });
+        });
+
+        // Initialize
+        const docName = getDocParam();
+        loadDoc(docName);
+
+        // Handle navigation
+        window.addEventListener('popstate', () => {
+            const docName = getDocParam();
+            loadDoc(docName);
+        });
+    </script>
+</body>
+</html>

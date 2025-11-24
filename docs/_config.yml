@@ -1,137 +1,42 @@
 # Site settings
-title: Apex SDK Documentation
-description: Unified Rust SDK for Substrate & EVM Blockchain Development
-theme: jekyll-theme-cayman
-show_downloads: true
+title: Apex SDK Protocol - Unified Rust SDK for Substrate & EVM Blockchain Development
+description: Compile-time safe, unified Rust SDK enabling cross-chain development across Substrate and EVM ecosystems. Build secure blockchain applications with type safety, native performance, and seamless cross-chain communication.
+author: Apex SDK Team
+url: https://kherldhussein.github.io
+baseurl: /apex-sdk
+lang: en_US
+
+# Use custom HTML instead of Jekyll theme
+# To properly serve index.html, we disable the theme
+# theme: jekyll-theme-cayman
+
+show_downloads: false
 github:
   repository_url: https://github.com/kherldhussein/apex-sdk
   zip_url: https://github.com/kherldhussein/apex-sdk/archive/refs/heads/main.zip
   tar_url: https://github.com/kherldhussein/apex-sdk/archive/refs/heads/main.tar.gz
   repository_name: apex-sdk
 
-# Navigation
-navigation:
-  Getting Started:
-    - title: Quick Start
-      url: /QUICK_START
-      description: Get up and running in 5 minutes
-    - title: Installation
-      url: /QUICK_START#installation
-      description: Install Apex SDK
-  Documentation:
-    - title: API Reference
-      url: /API
-      description: Complete API documentation
-    - title: CLI Guide
-      url: /CLI_GUIDE
-      description: Command-line interface guide
-    - title: Testing Framework
-      url: /TESTING_FRAMEWORK
-      description: Testing and validation tools
-  Guides:
-    - title: Substrate Features
-      url: /Substrate_Features
-      description: Substrate-specific functionality
-    - title: Ecosystem Integration
-      url: /ECOSYSTEM_INTEGRATION
-      description: Integration with other tools
-    - title: Typed Metadata
-      url: /TYPED_METADATA
-      description: Working with typed metadata
-  Community:
-    - title: Contributing
-      url: /CONTRIBUTING
-      description: How to contribute to Apex SDK
-    - title: Roadmap
-      url: /ROADMAP
-      description: Future development plans
-    - title: Research Initiatives
-      url: /RESEARCH_INITIATIVES
-      description: Ongoing research projects
-  Security:
-    - title: Security Policy
-      url: /SECURITY
-      description: Security guidelines and reporting
-    - title: Security Audit
-      url: /SECURITY_AUDIT
-      description: Security audit reports
+# Social media
+twitter:
+  username: apexsdk
+  card: summary_large_image
 
-# Supported Chains
-supported_chains:
-  substrate:
-    - name: Polkadot
-      description: Polkadot relay chain
-      testnet: Paseo (default)
-      icon: 🟣
-    - name: Kusama
-      description: Kusama canary network
-      testnet: Westend
-      icon: 🟡
-    - name: Acala
-      description: DeFi hub for Polkadot
-      icon: 🔴
-    - name: Moonbeam
-      description: Ethereum-compatible parachain
-      type: Hybrid
-      icon: 🌙
-  evm:
-    - name: Ethereum
-      description: Ethereum mainnet
-      testnet: Sepolia
-      icon: ⟠
-    - name: Polygon
-      description: Ethereum L2 scaling solution
-      testnet: Mumbai
-      icon: 🟣
-    - name: BSC
-      description: Binance Smart Chain
-      testnet: BSC Testnet
-      icon: 🟡
-    - name: Avalanche
-      description: High-performance blockchain
-      testnet: Fuji
-      icon: 🔴
+# SEO settings
+logo: /assets/logo.png
+social:
+  name: Apex SDK Protocol
+  links:
+    - https://github.com/kherldhussein/apex-sdk
+    - https://twitter.com/apexsdk
 
-# Feature highlights
-features:
-  - title: Unified Interface
-    description: Single API for both Substrate and EVM blockchains
-    icon: 🔗
-  - title: Type Safety
-    description: Rust's compile-time guarantees prevent runtime errors
-    icon: 🛡️
-  - title: Performance
-    description: Native Rust performance with zero-cost abstractions
-    icon: ⚡
-  - title: Cross-Chain
-    description: Built-in cross-chain communication support
-    icon: 🌉
-  - title: Modular
-    description: Extensible architecture for future blockchain protocols
-    icon: 🧩
-  - title: Developer-Friendly
-    description: Comprehensive docs, examples, and community support
-    icon: 👥
-
-# Markdown settings
+# Markdown settings for .md files
 markdown: kramdown
 kramdown:
   input: GFM
   syntax_highlighter: rouge
   auto_ids: true
-  toc_levels: 1..6
-
-highlighter: rouge
-
-# Plugins
-plugins:
-  - jekyll-github-metadata
-  - jekyll-relative-links
-
-# Enable relative links processing
-relative_links:
-  enabled: true
-  collections: true
+  toc_levels: 1..3
 
 # Exclude from processing
 exclude:
@@ -139,24 +44,13 @@ exclude:
   - Gemfile.lock
   - node_modules
   - vendor
-  - "*.gemspec"
   - README.md
 
-# Collections
-collections:
-  docs:
-    output: true
-    permalink: /:collection/:name/
+# Include HTML files
+include:
+  - index.html
 
-# Defaults
-defaults:
-  - scope:
-      path: ""
-      type: "pages"
-    values:
-      layout: "default"
-  - scope:
-      path: ""
-      type: "docs"
-    values:
-      layout: "default"
+# Plugins
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap

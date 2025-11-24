@@ -1,65 +1,144 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Apex SDK - Unified Rust SDK for Substrate & EVM Blockchain Development">
-    <meta name="keywords" content="Rust, Blockchain, SDK, Substrate, EVM, Polkadot, Ethereum, Cross-chain">
+
+    <!-- Primary Meta Tags -->
+    <title>Apex SDK Protocol - Unified Rust SDK for Substrate & EVM Blockchain Development</title>
+    <meta name="title" content="Apex SDK Protocol - Unified Rust SDK for Substrate & EVM Blockchain Development">
+    <meta name="description" content="Apex SDK Protocol is a compile-time safe, unified Rust SDK enabling cross-chain development across Substrate and EVM ecosystems. Build secure blockchain applications with type safety, native performance, and seamless cross-chain communication.">
+    <meta name="keywords" content="Apex SDK, Rust blockchain SDK, Substrate SDK, EVM SDK, cross-chain development, Polkadot SDK, Ethereum SDK, blockchain development, Web3 Rust, Kusama SDK, smart contract SDK, DeFi development, blockchain integration, compile-time safety, type-safe blockchain">
     <meta name="author" content="Apex SDK Team">
-    <title>Apex SDK - Unified Rust SDK for Substrate & EVM</title>
-    
-    <!-- Open Graph / Social Media -->
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="7 days">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://kherldhussein.github.io/apex-sdk/">
+
+    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://kherldhussein.github.io/apex-sdk/">
-    <meta property="og:title" content="Apex SDK - Unified Rust SDK for Substrate & EVM">
-    <meta property="og:description" content="Build cross-chain applications with a single, type-safe Rust SDK">
-    <meta property="og:image" content="https://kherldhussein.github.io/apex-sdk/assets/apex-sdk-banner.svg">
-    
-    <!-- Favicons -->
-    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-    
-    <!-- Fonts -->
+    <meta property="og:title" content="Apex SDK Protocol - Unified Rust SDK for Substrate & EVM Blockchain Development">
+    <meta property="og:description" content="Build secure cross-chain blockchain applications with Apex SDK Protocol. Unified Rust SDK for Substrate and EVM ecosystems with compile-time safety and native performance.">
+    <meta property="og:image" content="https://kherldhussein.github.io/apex-sdk/assets/og-image.png">
+    <meta property="og:site_name" content="Apex SDK Protocol">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://kherldhussein.github.io/apex-sdk/">
+    <meta name="twitter:title" content="Apex SDK Protocol - Unified Rust SDK for Substrate & EVM">
+    <meta name="twitter:description" content="Build secure cross-chain blockchain applications with compile-time safety. Unified Rust SDK for Substrate and EVM ecosystems.">
+    <meta name="twitter:image" content="https://kherldhussein.github.io/apex-sdk/assets/og-image.png">
+    <meta name="twitter:creator" content="@apexsdk">
+
+    <!-- Additional SEO Meta Tags -->
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Apex SDK">
+    <meta name="application-name" content="Apex SDK Protocol">
+    <meta name="msapplication-TileColor" content="#3b82f6">
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Apex SDK Protocol",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Cross-platform",
+      "description": "Compile-time safe, unified Rust SDK for Substrate and EVM blockchain development with cross-chain capabilities",
+      "url": "https://kherldhussein.github.io/apex-sdk/",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "Apex SDK Team",
+        "url": "https://github.com/kherldhussein/apex-sdk"
+      },
+      "programmingLanguage": "Rust",
+      "keywords": "Rust, Blockchain, SDK, Substrate, EVM, Polkadot, Ethereum, Cross-chain, Web3",
+      "softwareVersion": "0.1.4",
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
+      "codeRepository": "https://github.com/kherldhussein/apex-sdk"
+    }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    
-    <!-- Additional styles -->
-    <link rel="stylesheet" href="assets/docs.css">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
+            /* Light theme */
             --primary-color: #3b82f6;
             --primary-hover: #2563eb;
             --secondary-color: #8b5cf6;
+            --secondary-hover: #7c3aed;
             --accent-color: #06b6d4;
             --success-color: #10b981;
             --warning-color: #f59e0b;
             --error-color: #ef4444;
-            
-            --bg-dark: #0f172a;
-            --bg-darker: #020617;
+
+            /* Light mode colors */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --bg-card: #ffffff;
+            --bg-code: #1e293b;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+            /* Typography */
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Courier New', Courier, monospace;
+
+            /* Spacing */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            --spacing-3xl: 4rem;
+
+            /* Border radius */
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-full: 9999px;
+
+            /* Transitions */
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
             --bg-card: #1e293b;
-            --bg-card-hover: #334155;
-            --bg-code: #0f1419;
-            
+            --bg-code: #0f172a;
             --text-primary: #f8fafc;
             --text-secondary: #cbd5e1;
-            --text-muted: #64748b;
-            
-            --border-color: rgba(255, 255, 255, 0.1);
-            --border-hover: rgba(255, 255, 255, 0.2);
-            
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-            
-            --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            --gradient-accent: linear-gradient(135deg, var(--accent-color), var(--primary-color));
-            
-            --border-radius: 8px;
-            --border-radius-lg: 12px;
-            --border-radius-xl: 16px;
+            --text-tertiary: #94a3b8;
+            --border-color: #334155;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
         }
 
         * {
@@ -68,88 +147,132 @@
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: var(--text-primary);
-            background: var(--bg-dark);
-            overflow-x: hidden;
+        html {
+            scroll-behavior: smooth;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
+        body {
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            transition: background var(--transition-base), color var(--transition-base);
         }
 
         /* Navigation */
         nav {
-            position: fixed;
+            position: sticky;
             top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
             z-index: 1000;
-            transition: all 0.3s ease;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-sm);
         }
 
         .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-lg);
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            padding: 1rem 0;
+            align-items: center;
+            height: 70px;
         }
 
         .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
             font-size: 1.5rem;
             font-weight: 700;
-            color: var(--primary-color);
+            color: var(--text-primary);
             text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .nav-logo:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: white;
         }
 
         .nav-links {
             display: flex;
+            gap: var(--spacing-xl);
             list-style: none;
-            gap: 2rem;
+            align-items: center;
         }
 
         .nav-links a {
             color: var(--text-secondary);
             text-decoration: none;
             font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: var(--border-radius);
-            transition: all 0.2s ease;
+            transition: color var(--transition-fast);
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: width var(--transition-base);
         }
 
         .nav-links a:hover {
-            color: var(--text-primary);
-            background: var(--bg-card);
+            color: var(--primary-color);
         }
 
-        .nav-toggle {
-            display: none;
-            flex-direction: column;
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-full);
+            padding: var(--spacing-sm) var(--spacing-md);
             cursor: pointer;
-            padding: 0.5rem;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
         }
 
-        .nav-toggle span {
-            width: 24px;
-            height: 3px;
-            background: var(--text-primary);
-            margin: 3px 0;
-            transition: 0.3s;
-            border-radius: 2px;
+        .theme-toggle:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            cursor: pointer;
         }
 
         /* Hero Section */
         .hero {
-            background: var(--gradient-primary);
-            padding: 120px 0 80px;
-            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            padding: 100px var(--spacing-lg) 120px;
             position: relative;
             overflow: hidden;
         }
@@ -161,85 +284,126 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" fill="none"><defs><radialGradient id="grid" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:rgba(255,255,255,0.1)"/><stop offset="100%" style="stop-color:transparent"/></radialGradient></defs><g opacity="0.3"><path d="M0 0h1000v1000H0z" fill="url(%23grid)"/></g></svg>') center/cover;
+            background: url('data:image/svg+xml,<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
+            opacity: 0.5;
         }
 
-        .hero-content {
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
             position: relative;
             z-index: 1;
         }
 
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-xl);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
         .hero h1 {
             font-size: clamp(2.5rem, 5vw, 4rem);
-            margin-bottom: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #ffffff, #e2e8f0);
+            font-weight: 800;
+            margin-bottom: var(--spacing-lg);
+            color: white;
+            line-height: 1.2;
+        }
+
+        .hero-gradient-text {
+            background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
         .hero-subtitle {
-            font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+            font-size: clamp(1.125rem, 2vw, 1.5rem);
             color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 2rem;
-            max-width: 600px;
+            margin-bottom: var(--spacing-2xl);
+            max-width: 700px;
             margin-left: auto;
             margin-right: auto;
+            line-height: 1.7;
         }
 
-        .hero-actions {
+        .hero-cta {
             display: flex;
-            gap: 1rem;
+            gap: var(--spacing-lg);
             justify-content: center;
             flex-wrap: wrap;
-            margin-bottom: 3rem;
+            margin-bottom: var(--spacing-3xl);
         }
 
         .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
             padding: 1rem 2rem;
-            border-radius: var(--border-radius);
+            border-radius: var(--radius-lg);
             text-decoration: none;
             font-weight: 600;
-            font-size: 1.1rem;
-            transition: all 0.2s ease;
-            border: 2px solid transparent;
+            font-size: 1rem;
+            transition: all var(--transition-base);
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            border: none;
             cursor: pointer;
             position: relative;
             overflow: hidden;
         }
 
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width var(--transition-slow), height var(--transition-slow);
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
         .btn-primary {
             background: white;
-            color: var(--primary-color);
+            color: #667eea;
+            box-shadow: 0 4px 14px 0 rgba(255, 255, 255, 0.3);
         }
 
         .btn-primary:hover {
-            background: #f8fafc;
             transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
         }
 
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.15);
             color: white;
-            border-color: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(10px);
         }
 
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.25);
+            border-color: white;
             transform: translateY(-2px);
         }
 
         .hero-stats {
             display: flex;
             justify-content: center;
-            gap: 3rem;
+            gap: var(--spacing-3xl);
             flex-wrap: wrap;
         }
 
@@ -247,54 +411,78 @@
             text-align: center;
         }
 
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
             color: white;
             display: block;
+            margin-bottom: var(--spacing-xs);
         }
 
         .stat-label {
             color: rgba(255, 255, 255, 0.8);
-            font-size: 0.9rem;
+            font-size: 0.875rem;
+            font-weight: 500;
         }
 
-        /* Features Section */
-        .features {
-            padding: 80px 0;
-            background: var(--bg-dark);
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-lg);
+        }
+
+        /* Section */
+        section {
+            padding: var(--spacing-3xl) 0;
         }
 
         .section-header {
             text-align: center;
-            margin-bottom: 4rem;
+            margin-bottom: var(--spacing-3xl);
+        }
+
+        .section-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: var(--spacing-xs) var(--spacing-md);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: var(--spacing-md);
         }
 
         .section-title {
             font-size: clamp(2rem, 4vw, 3rem);
-            margin-bottom: 1rem;
-            font-weight: 700;
+            font-weight: 800;
+            margin-bottom: var(--spacing-md);
+            color: var(--text-primary);
         }
 
-        .section-subtitle {
+        .section-description {
+            font-size: 1.125rem;
             color: var(--text-secondary);
-            font-size: 1.2rem;
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
+            line-height: 1.7;
         }
 
+        /* Feature Grid */
         .feature-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: var(--spacing-xl);
         }
 
         .feature-card {
             background: var(--bg-card);
-            padding: 2rem;
-            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-xl);
             border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
+            transition: all var(--transition-base);
             position: relative;
             overflow: hidden;
         }
@@ -304,18 +492,18 @@
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--gradient-primary);
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
             transform: scaleX(0);
             transform-origin: left;
-            transition: transform 0.3s ease;
+            transition: transform var(--transition-base);
         }
 
         .feature-card:hover {
             transform: translateY(-5px);
-            border-color: var(--border-hover);
             box-shadow: var(--shadow-xl);
+            border-color: var(--primary-color);
         }
 
         .feature-card:hover::before {
@@ -323,273 +511,256 @@
         }
 
         .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1.5rem;
-            display: block;
-        }
-
-        .feature-title {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-
-        .feature-description {
-            color: var(--text-secondary);
-            line-height: 1.7;
-        }
-
-        /* Code Example Section */
-        .code-showcase {
-            background: var(--bg-darker);
-            padding: 80px 0;
-            position: relative;
-        }
-
-        .code-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 3rem;
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
             align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--shadow-md);
         }
 
-        .code-content h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1.5rem;
+        .feature-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-md);
             color: var(--text-primary);
         }
 
-        .code-content p {
+        .feature-card p {
             color: var(--text-secondary);
-            font-size: 1.1rem;
-            margin-bottom: 2rem;
             line-height: 1.7;
         }
 
-        .code-features {
-            list-style: none;
+        /* Code Section */
+        .code-section {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .code-features li {
-            padding: 0.5rem 0;
-            color: var(--text-secondary);
-            position: relative;
-            padding-left: 1.5rem;
-        }
-
-        .code-features li::before {
-            content: '✓';
-            color: var(--success-color);
-            font-weight: bold;
-            position: absolute;
-            left: 0;
-        }
-
-        .code-block {
+        .code-container {
             position: relative;
             background: var(--bg-code);
-            border-radius: var(--border-radius-lg);
-            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
             overflow: hidden;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border-color);
         }
 
         .code-header {
-            background: var(--bg-card);
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.05);
+            padding: var(--spacing-md) var(--spacing-lg);
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .code-header::before {
-            content: '●';
-            color: var(--success-color);
+        .code-header-left {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        .code-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .code-dot:nth-child(1) { background: #ff5f57; }
+        .code-dot:nth-child(2) { background: #ffbd2e; }
+        .code-dot:nth-child(3) { background: #28ca42; }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            padding: var(--spacing-xs) var(--spacing-md);
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-family: var(--font-mono);
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .copy-btn.copied {
+            background: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
         }
 
         pre {
             margin: 0;
-            padding: 1.5rem;
+            padding: var(--spacing-xl);
             overflow-x: auto;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
-            line-height: 1.6;
+            font-size: 0.875rem;
+            line-height: 1.7;
         }
 
         code {
+            font-family: var(--font-mono);
             color: #e2e8f0;
         }
 
-        /* Syntax highlighting */
         .code-keyword { color: #c792ea; }
-        .code-string { color: #c3e88d; }
         .code-function { color: #82aaff; }
-        .code-comment { color: #546e7a; }
-        .code-number { color: #f78c6c; }
+        .code-string { color: #c3e88d; }
+        .code-comment { color: #546e7a; font-style: italic; }
+        .code-type { color: #ffcb6b; }
 
-        /* Supported Chains Section */
-        .chains-section {
-            padding: 80px 0;
-            background: var(--bg-card);
-        }
-
-        .chains-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-
-        .chain-category {
-            background: var(--bg-dark);
-            padding: 2rem;
-            border-radius: var(--border-radius-lg);
-            border: 1px solid var(--border-color);
-            text-align: center;
-        }
-
-        .chain-category h3 {
-            color: var(--primary-color);
-            margin-bottom: 1.5rem;
-            font-size: 1.5rem;
-        }
-
-        .chain-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .chain-item {
-            background: var(--bg-card);
-            padding: 1rem;
-            border-radius: var(--border-radius);
-            border: 1px solid var(--border-color);
-            transition: all 0.2s ease;
-        }
-
-        .chain-item:hover {
-            border-color: var(--primary-color);
-            transform: scale(1.02);
-        }
-
-        .chain-name {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
-
-        .chain-description {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        /* Documentation Grid */
-        .docs-section {
-            padding: 80px 0;
-        }
-
+        /* Docs Grid */
         .docs-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-top: 3rem;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--spacing-lg);
         }
 
         .doc-card {
             background: var(--bg-card);
-            padding: 2rem;
-            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
             text-decoration: none;
             color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
-            display: block;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .doc-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--gradient-accent);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.3s ease;
+            transition: all var(--transition-base);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
         }
 
         .doc-card:hover {
-            border-color: var(--primary-color);
             transform: translateY(-3px);
             box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
         }
 
-        .doc-card:hover::before {
-            transform: scaleX(1);
+        .doc-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
         }
 
         .doc-card h3 {
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-            font-size: 1.3rem;
-            font-weight: 600;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
         }
 
         .doc-card p {
             color: var(--text-secondary);
+            font-size: 0.9375rem;
             line-height: 1.6;
+            margin: 0;
         }
 
-        .doc-meta {
+        .doc-arrow {
+            color: var(--primary-color);
+            font-size: 1.25rem;
+            margin-left: auto;
+        }
+
+        /* Chains Section */
+        .chains-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .chain-card {
+            background: var(--bg-card);
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            text-align: center;
+            transition: all var(--transition-base);
+        }
+
+        .chain-card:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .chain-logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto var(--spacing-md);
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            color: var(--text-muted);
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        .chain-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
+            color: var(--text-primary);
+        }
+
+        .chain-list {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            list-style: none;
+        }
+
+        .chain-list li {
+            padding: var(--spacing-xs) 0;
         }
 
         /* Footer */
         footer {
-            background: var(--bg-darker);
-            padding: 60px 0 30px;
+            background: var(--bg-secondary);
             border-top: 1px solid var(--border-color);
+            padding: var(--spacing-3xl) 0 var(--spacing-xl);
         }
 
         .footer-content {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 3rem;
-            margin-bottom: 3rem;
+            gap: var(--spacing-3xl);
+            margin-bottom: var(--spacing-2xl);
         }
 
         .footer-section h4 {
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-            font-size: 1.2rem;
-            font-weight: 600;
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-lg);
+            color: var(--text-primary);
         }
 
         .footer-links {
             list-style: none;
-        }
-
-        .footer-links li {
-            margin-bottom: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
         }
 
         .footer-links a {
             color: var(--text-secondary);
             text-decoration: none;
-            transition: color 0.2s ease;
+            transition: color var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
         }
 
         .footer-links a:hover {
@@ -598,172 +769,64 @@
 
         .footer-bottom {
             text-align: center;
-            padding-top: 2rem;
+            padding-top: var(--spacing-xl);
             border-top: 1px solid var(--border-color);
-            color: var(--text-muted);
+            color: var(--text-tertiary);
+            font-size: 0.875rem;
         }
 
-        /* Responsive Design */
+        /* Responsive */
         @media (max-width: 768px) {
             .nav-links {
-                position: fixed;
-                top: 70px;
-                left: -100%;
-                width: 100%;
-                height: calc(100vh - 70px);
-                background: var(--bg-dark);
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero {
+                padding: 60px var(--spacing-md) 80px;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .hero-cta {
                 flex-direction: column;
-                align-items: center;
-                justify-content: flex-start;
-                padding-top: 2rem;
-                transition: left 0.3s ease;
-                border-top: 1px solid var(--border-color);
-            }
-
-            .nav-links.active {
-                left: 0;
-            }
-
-            .nav-toggle {
-                display: flex;
-            }
-
-            .code-container {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-            }
-
-            .hero-actions {
-                flex-direction: column;
-                align-items: center;
+                gap: var(--spacing-md);
             }
 
             .hero-stats {
-                gap: 2rem;
+                gap: var(--spacing-xl);
             }
 
-            .feature-grid {
+            .stat-value {
+                font-size: 2rem;
+            }
+
+            section {
+                padding: var(--spacing-2xl) 0;
+            }
+
+            .feature-grid,
+            .docs-grid,
+            .chains-grid {
                 grid-template-columns: 1fr;
             }
 
-            .container {
-                padding: 0 1rem;
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-xl);
             }
         }
 
-        /* Copy button styles */
-        .copy-btn {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.8rem;
-            cursor: pointer;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-            color: var(--text-secondary);
-        }
-
-        pre:hover .copy-btn {
-            opacity: 1;
-        }
-
-        .copy-btn:hover {
-            background: var(--bg-card-hover);
-            color: var(--text-primary);
-        }
-
-        /* Search functionality styles */
-        .search-container {
-            position: relative;
-            margin-left: auto;
-        }
-
-        .search-input {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: 0.5rem 1rem;
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            width: 250px;
-            transition: border-color 0.2s ease;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        .search-results {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-top: none;
-            border-radius: 0 0 var(--border-radius) var(--border-radius);
-            max-height: 300px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-        }
-
-        .search-result-item {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid var(--border-color);
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        .search-result-item:hover {
-            background: var(--bg-card-hover);
-        }
-
-        .search-result-item:last-child {
-            border-bottom: none;
-        }
-
-        .search-result-title {
-            color: var(--primary-color);
-            font-weight: 500;
-            margin-bottom: 0.25rem;
-        }
-
-        .search-result-content {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .search-no-results {
-            padding: 1rem;
-            text-align: center;
-            color: var(--text-muted);
-            font-style: italic;
-        }
-
-        /* Back to top button - defined in JavaScript */
-
-        /* Enhanced loading states */
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--border-color);
-            border-radius: 50%;
-            border-top-color: var(--primary-color);
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Scroll animations */
+        /* Animations */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -775,371 +838,287 @@
             }
         }
 
-        .animate-on-scroll {
-            animation: fadeInUp 0.6s ease forwards;
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
         }
 
-        /* Additional hover effects */
-        .feature-card,
-        .doc-card,
-        .chain-category {
-            transform-origin: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Scroll reveal */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
         }
 
-        .feature-card:hover,
-        .doc-card:hover {
-            transform: translateY(-5px) scale(1.02);
-        }
-
-        .chain-category:hover {
-            transform: translateY(-3px);
-        }
-
-        /* Improved focus states for accessibility */
-        .btn:focus,
-        .nav-links a:focus,
-        .doc-card:focus {
-            outline: 2px solid var(--primary-color);
-            outline-offset: 2px;
-        }
-
-        /* Print styles */
-        @media print {
-            .nav-toggle,
-            .search-container,
-            .copy-btn,
-            .back-to-top {
-                display: none !important;
-            }
-
-            .hero,
-            .features,
-            .docs-section {
-                break-inside: avoid;
-            }
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
         }
     </style>
 </head>
 <body>
     <!-- Navigation -->
-    <nav id="navbar">
-        <div class="container">
-            <div class="nav-container">
-                <a href="#" class="nav-logo">⚡ Apex SDK</a>
-                <ul class="nav-links">
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#docs">Docs</a></li>
-                    <li><a href="#chains">Chains</a></li>
-                    <li><a href="https://github.com/kherldhussein/apex-sdk">GitHub</a></li>
-                </ul>
-                <div class="nav-toggle">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-            </div>
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <div class="nav-logo-icon">A</div>
+                <span>Apex SDK</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#code">Quick Start</a></li>
+                <li><a href="#docs">Documentation</a></li>
+                <li><a href="#chains">Chains</a></li>
+                <li><a href="https://github.com/kherldhussein/apex-sdk">GitHub</a></li>
+            </ul>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <span id="theme-icon">🌙</span>
+                <span id="theme-text">Dark</span>
+            </button>
+            <button class="mobile-menu-btn">☰</button>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section id="home" class="hero">
-        <div class="container">
-            <div class="hero-content">
-                <div style="margin-bottom: 1rem;">
-                    <span style="display: inline-block; padding: 0.5rem 1rem; background: rgba(255,255,255,0.15); border-radius: 50px; font-size: 0.9rem; font-weight: 600; backdrop-filter: blur(10px);">
-                        📦 v0.1.3 - Latest Release
-                    </span>
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-badge animate-fade-in-up">
+                Now supporting Paseo testnet
+            </div>
+            <h1 class="animate-fade-in-up" style="animation-delay: 0.1s;">
+                Build <span class="hero-gradient-text">Cross-Chain</span><br>
+                Applications with Confidence
+            </h1>
+            <p class="hero-subtitle animate-fade-in-up" style="animation-delay: 0.2s;">
+                Unified Rust SDK for Substrate & EVM blockchain development. One API, infinite possibilities.
+                Compile-time safety meets native performance.
+            </p>
+            <div class="hero-cta animate-fade-in-up" style="animation-delay: 0.3s;">
+                <a href="QUICK_START.html" class="btn btn-primary">
+                    <span>Get Started</span>
+                    <span>→</span>
+                </a>
+                <a href="https://github.com/kherldhussein/apex-sdk" class="btn btn-secondary">
+                    <span>View on GitHub</span>
+                    <span>⭐</span>
+                </a>
+            </div>
+            <div class="hero-stats animate-fade-in-up" style="animation-delay: 0.4s;">
+                <div class="stat">
+                    <span class="stat-value">10+</span>
+                    <span class="stat-label">Supported Chains</span>
                 </div>
-                <h1>Apex SDK</h1>
-                <p class="hero-subtitle">
-                    The unified Rust SDK for Substrate & EVM blockchain development.
-                    Build cross-chain applications with type safety and performance.
-                </p>
-                <div class="hero-actions">
-                    <a href="QUICK_START.html" class="btn btn-primary">
-                        🚀 Get Started
-                    </a>
-                    <a href="https://github.com/kherldhussein/apex-sdk" class="btn btn-secondary">
-                        ⭐ View on GitHub
-                    </a>
+                <div class="stat">
+                    <span class="stat-value">6x</span>
+                    <span class="stat-label">Faster Performance</span>
                 </div>
-                <div class="hero-stats">
-                    <div class="stat">
-                        <span class="stat-number">15+</span>
-                        <span class="stat-label">Supported Chains</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number">100%</span>
-                        <span class="stat-label">Type Safe</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number">6x</span>
-                        <span class="stat-label">Faster</span>
-                    </div>
+                <div class="stat">
+                    <span class="stat-value">100%</span>
+                    <span class="stat-label">Type Safe</span>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="features">
+    <section id="features">
         <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Why Choose Apex SDK?</h2>
-                <p class="section-subtitle">
-                    Built from the ground up for developers who demand performance, safety, and simplicity.
+            <div class="section-header scroll-reveal">
+                <div class="section-badge">Why Choose Apex SDK</div>
+                <h2 class="section-title">Built for Modern Blockchain Development</h2>
+                <p class="section-description">
+                    Everything you need to build production-ready cross-chain applications with confidence and speed.
                 </p>
             </div>
             <div class="feature-grid">
-                <div class="feature-card">
-                    <span class="feature-icon">🔗</span>
-                    <h3 class="feature-title">Unified Interface</h3>
-                    <p class="feature-description">
-                        Single API for both Substrate and EVM blockchains. Build cross-chain applications 
-                        without learning multiple SDKs or dealing with integration complexity.
-                    </p>
+                <div class="feature-card scroll-reveal">
+                    <div class="feature-icon">&gt;</div>
+                    <h3>Unified Interface</h3>
+                    <p>Single, consistent API for both Substrate and EVM blockchains. Build cross-chain applications without learning multiple SDKs.</p>
                 </div>
-                <div class="feature-card">
-                    <span class="feature-icon">🛡️</span>
-                    <h3 class="feature-title">Compile-Time Safety</h3>
-                    <p class="feature-description">
-                        Catch errors before deployment with Rust's powerful type system. 
-                        No more runtime surprises, failed transactions, or debugging nightmares.
-                    </p>
+                <div class="feature-card scroll-reveal">
+                    <div class="feature-icon">&gt;</div>
+                    <h3>Compile-Time Safety</h3>
+                    <p>Catch errors before deployment with Rust's powerful type system. Zero runtime surprises, maximum confidence.</p>
                 </div>
-                <div class="feature-card">
-                    <span class="feature-icon">⚡</span>
-                    <h3 class="feature-title">Native Performance</h3>
-                    <p class="feature-description">
-                        Rust-based implementation delivers optimal execution speed with zero-cost abstractions. 
-                        Up to 6x faster than JavaScript alternatives.
-                    </p>
+                <div class="feature-card scroll-reveal">
+                    <div class="feature-icon">&gt;</div>
+                    <h3>Native Performance</h3>
+                    <p>Rust-based implementation delivers optimal execution speed. Up to 6x faster than JavaScript alternatives.</p>
                 </div>
-                <div class="feature-card">
-                    <span class="feature-icon">🌉</span>
-                    <h3 class="feature-title">Cross-Chain Ready</h3>
-                    <p class="feature-description">
-                        Built-in support for cross-chain communication between Substrate and EVM ecosystems. 
-                        XCM, bridges, and multi-chain workflows made simple.
-                    </p>
+                <div class="feature-card scroll-reveal">
+                    <div class="feature-icon">&gt;</div>
+                    <h3>Cross-Chain Ready</h3>
+                    <p>Built-in support for cross-chain communication between Substrate and EVM ecosystems. Bridge the gap seamlessly.</p>
                 </div>
-                <div class="feature-card">
-                    <span class="feature-icon">🧩</span>
-                    <h3 class="feature-title">Modular Architecture</h3>
-                    <p class="feature-description">
-                        Easily extend with new blockchain protocols and features. 
-                        Clean separation of concerns and plugin-based design.
-                    </p>
+                <div class="feature-card scroll-reveal">
+                    <div class="feature-icon">🧩</div>
+                    <h3>Modular Architecture</h3>
+                    <p>Easily extend with new blockchain protocols. Clean separation of concerns for maintainable code.</p>
                 </div>
-                <div class="feature-card">
-                    <span class="feature-icon">👥</span>
-                    <h3 class="feature-title">Developer Experience</h3>
-                    <p class="feature-description">
-                        Comprehensive documentation, working examples, active community support, 
-                        and tools that make blockchain development enjoyable.
-                    </p>
+                <div class="feature-card scroll-reveal">
+                    <div class="feature-icon">💎</div>
+                    <h3>Developer Experience</h3>
+                    <p>Comprehensive documentation, rich examples, and an intuitive CLI. Start building in minutes, not hours.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Code Showcase -->
-    <section class="code-showcase">
+    <!-- Code Section -->
+    <section id="code" class="code-section">
         <div class="container">
-            <div class="code-container">
-                <div class="code-content">
-                    <h2>Simple. Powerful. Type-Safe.</h2>
-                    <p>
-                        Build cross-chain applications with just a few lines of code. 
-                        Apex SDK handles the complexity while providing compile-time guarantees.
-                    </p>
-                    <ul class="code-features">
-                        <li>Automatic chain detection and routing</li>
-                        <li>Built-in wallet management</li>
-                        <li>Transaction fee optimization</li>
-                        <li>Error handling and retries</li>
-                        <li>Real-time event subscriptions</li>
-                        <li>Comprehensive testing framework</li>
-                    </ul>
-                </div>
-                <div class="code-block">
-                    <div class="code-header">
-                        src/main.rs
+            <div class="section-header scroll-reveal">
+                <div class="section-badge">Quick Start</div>
+                <h2 class="section-title">Start Building in Minutes</h2>
+                <p class="section-description">
+                    Get up and running with just a few lines of code. Here's a complete cross-chain transaction example.
+                </p>
+            </div>
+            <div class="code-container scroll-reveal">
+                <div class="code-header">
+                    <div class="code-header-left">
+                        <div class="code-dot"></div>
+                        <div class="code-dot"></div>
+                        <div class="code-dot"></div>
                     </div>
-                    <pre><code><span class="code-keyword">use</span> apex_sdk::prelude::*;
-
-<span class="code-comment">// Cross-chain transfer in just a few lines</span>
-<span class="code-keyword">#[tokio::main]</span>
-<span class="code-keyword">async fn</span> <span class="code-function">main</span>() -> Result&lt;()&gt; {
-    <span class="code-comment">// Initialize with multiple chains</span>
-    <span class="code-keyword">let</span> sdk = ApexSDK::builder()
-        .with_substrate_endpoint(<span class="code-string">"wss://paseo-rpc.polkadot.io"</span>)
-        .with_evm_endpoint(<span class="code-string">"https://eth.llamarpc.com"</span>)
-        .build().<span class="code-keyword">await</span>?;
-
-    <span class="code-comment">// Create cross-chain transaction</span>
-    <span class="code-keyword">let</span> tx = sdk.transaction()
-        .from_substrate_account(ALICE)
-        .to_evm_address(<span class="code-string">"0x742d35...b9e7595f0bEb7"</span>)
-        .amount(<span class="code-number">1000_u128</span>)
-        .build()?;
-
-    <span class="code-comment">// Execute with automatic routing</span>
-    <span class="code-keyword">let</span> result = sdk.execute(tx).<span class="code-keyword">await</span>?;
-    <span class="code-function">println!</span>(<span class="code-string">"Success: {:?}"</span>, result);
-    
-    <span class="code-keyword">Ok</span>(())
-}</code></pre>
+                    <button class="copy-btn" onclick="copyCode()">Copy</button>
                 </div>
+                <pre><code><span class="code-keyword">use</span> apex_sdk::prelude::*;
+
+<span class="code-comment">// Initialize SDK with unified configuration</span>
+<span class="code-keyword">let</span> sdk = ApexSDK::builder()
+    .with_substrate_endpoint(<span class="code-string">"wss://paseo.rpc.amforc.com"</span>)
+    .with_evm_endpoint(<span class="code-string">"https://eth-mainnet.g.alchemy.com/v2/YOUR_KEY"</span>)
+    .build()
+    .<span class="code-keyword">await</span>?;
+
+<span class="code-comment">// Create a cross-chain transaction</span>
+<span class="code-keyword">let</span> tx = sdk
+    .transaction()
+    .from_substrate_account(<span class="code-string">"Alice"</span>)
+    .to_evm_address(<span class="code-string">"0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7"</span>)
+    .amount(<span class="code-type">1000_u128</span>)
+    .with_nonce(<span class="code-type">1</span>)
+    .build()?;
+
+<span class="code-comment">// Execute with automatic routing and deterministic hashing</span>
+<span class="code-keyword">let</span> result = sdk.execute(tx).<span class="code-keyword">await</span>?;
+println!(<span class="code-string">"Transaction hash: {}"</span>, result.hash());
+</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- Documentation Section -->
+    <section id="docs">
+        <div class="container">
+            <div class="section-header scroll-reveal">
+                <div class="section-badge">Documentation</div>
+                <h2 class="section-title">Everything You Need to Succeed</h2>
+                <p class="section-description">
+                    Comprehensive guides, API references, and examples to help you build faster.
+                </p>
+            </div>
+            <div class="docs-grid">
+                <a href="viewer.html" class="doc-card scroll-reveal" style="grid-column: 1 / -1; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border-color: transparent;">
+                    <div class="doc-icon" style="background: rgba(255, 255, 255, 0.2);">📖</div>
+                    <h3 style="color: white;">Interactive Documentation Viewer</h3>
+                    <p style="color: rgba(255, 255, 255, 0.9);">Browse all documentation with search, navigation, and syntax highlighting in one unified interface</p>
+                    <span class="doc-arrow">→</span>
+                </a>
+                <a href="QUICK_START.html" class="doc-card scroll-reveal">
+                    <div class="doc-icon">&gt;</div>
+                    <h3>Quick Start</h3>
+                    <p>Get up and running in under 5 minutes with our step-by-step guide</p>
+                    <span class="doc-arrow">→</span>
+                </a>
+                <a href="API.html" class="doc-card scroll-reveal">
+                    <div class="doc-icon">&gt;</div>
+                    <h3>API Reference</h3>
+                    <p>Complete API documentation with detailed examples and explanations</p>
+                    <span class="doc-arrow">→</span>
+                </a>
+                <a href="CLI_GUIDE.html" class="doc-card scroll-reveal">
+                    <div class="doc-icon">&gt;</div>
+                    <h3>CLI Guide</h3>
+                    <p>Master the command-line interface for rapid development</p>
+                    <span class="doc-arrow">→</span>
+                </a>
+                <a href="TESTNETS.html" class="doc-card scroll-reveal">
+                    <div class="doc-icon">&gt;</div>
+                    <h3>Testnets</h3>
+                    <p>Test your applications on Paseo and other supported testnets</p>
+                    <span class="doc-arrow">→</span>
+                </a>
+                <a href="SECURITY.html" class="doc-card scroll-reveal">
+                    <div class="doc-icon">🔒</div>
+                    <h3>Security</h3>
+                    <p>Learn about our security model and best practices</p>
+                    <span class="doc-arrow">→</span>
+                </a>
+                <a href="CONTRIBUTING.html" class="doc-card scroll-reveal">
+                    <div class="doc-icon">&gt;</div>
+                    <h3>Contributing</h3>
+                    <p>Help us build the future of cross-chain development</p>
+                    <span class="doc-arrow">→</span>
+                </a>
+                <a href="SYSTEM_ARCHITECTURE.html" class="doc-card scroll-reveal">
+                    <div class="doc-icon">&gt;</div>
+                    <h3>Architecture</h3>
+                    <p>Understand the system design and component interactions</p>
+                    <span class="doc-arrow">→</span>
+                </a>
+                <a href="ROADMAP.html" class="doc-card scroll-reveal">
+                    <div class="doc-icon">&gt;</div>
+                    <h3>Roadmap</h3>
+                    <p>See what's coming next and our long-term vision</p>
+                    <span class="doc-arrow">→</span>
+                </a>
             </div>
         </div>
     </section>
 
     <!-- Supported Chains -->
-    <section id="chains" class="chains-section">
+    <section id="chains" class="code-section">
         <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Supported Blockchain Ecosystems</h2>
-                <p class="section-subtitle">
-                    Connect to 15+ blockchains across Substrate, EVM, and hybrid ecosystems with Paseo as the default testnet.
+            <div class="section-header scroll-reveal">
+                <div class="section-badge">Interoperability</div>
+                <h2 class="section-title">Support for Major Blockchains</h2>
+                <p class="section-description">
+                    Connect to the most popular Substrate and EVM chains with a single, unified interface.
                 </p>
             </div>
             <div class="chains-grid">
-                <div class="chain-category">
-                    <h3>🟣 Substrate Chains</h3>
-                    <div class="chain-list">
-                        <div class="chain-item">
-                            <div class="chain-name">Polkadot</div>
-                            <div class="chain-description">Relay chain • Testnet: Paseo</div>
-                        </div>
-                        <div class="chain-item">
-                            <div class="chain-name">Kusama</div>
-                            <div class="chain-description">Canary network • Testnet: Westend</div>
-                        </div>
-                        <div class="chain-item">
-                            <div class="chain-name">Acala</div>
-                            <div class="chain-description">DeFi hub for Polkadot</div>
-                        </div>
-                        <div class="chain-item">
-                            <div class="chain-name">Phala</div>
-                            <div class="chain-description">Privacy cloud computing</div>
-                        </div>
-                    </div>
+                <div class="chain-card scroll-reveal">
+                    <div class="chain-logo">S</div>
+                    <h3>Substrate Chains</h3>
+                    <ul class="chain-list">
+                        <li>Polkadot</li>
+                        <li>Kusama</li>
+                        <li>Paseo (Testnet)</li>
+                        <li>Westend (Testnet)</li>
+                    </ul>
                 </div>
-                <div class="chain-category">
-                    <h3>⟠ EVM Chains</h3>
-                    <div class="chain-list">
-                        <div class="chain-item">
-                            <div class="chain-name">Ethereum</div>
-                            <div class="chain-description">L1 • Testnet: Sepolia</div>
-                        </div>
-                        <div class="chain-item">
-                            <div class="chain-name">Polygon</div>
-                            <div class="chain-description">L2 scaling solution</div>
-                        </div>
-                        <div class="chain-item">
-                            <div class="chain-name">BSC</div>
-                            <div class="chain-description">Binance Smart Chain</div>
-                        </div>
-                        <div class="chain-item">
-                            <div class="chain-name">Avalanche</div>
-                            <div class="chain-description">High-performance blockchain</div>
-                        </div>
-                    </div>
+                <div class="chain-card scroll-reveal">
+                    <div class="chain-logo">E</div>
+                    <h3>EVM Chains</h3>
+                    <ul class="chain-list">
+                        <li>Ethereum</li>
+                        <li>Binance Smart Chain</li>
+                        <li>Polygon</li>
+                        <li>Avalanche</li>
+                    </ul>
                 </div>
-                <div class="chain-category">
-                    <h3>🌙 Hybrid Chains</h3>
-                    <div class="chain-list">
-                        <div class="chain-item">
-                            <div class="chain-name">Moonbeam</div>
-                            <div class="chain-description">Ethereum-compatible parachain</div>
-                        </div>
-                        <div class="chain-item">
-                            <div class="chain-name">Astar</div>
-                            <div class="chain-description">Multi-VM smart contract platform</div>
-                        </div>
-                    </div>
+                <div class="chain-card scroll-reveal">
+                    <div class="chain-logo">H</div>
+                    <h3>Hybrid Chains</h3>
+                    <ul class="chain-list">
+                        <li>Moonbeam</li>
+                        <li>Moonriver</li>
+                        <li>Astar</li>
+                        <li>More coming soon</li>
+                    </ul>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Documentation -->
-    <section id="docs" class="docs-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Documentation & Resources</h2>
-                <p class="section-subtitle">
-                    Everything you need to build, deploy, and scale your cross-chain applications.
-                </p>
-            </div>
-            <div class="docs-grid">
-                <a href="QUICK_START.html" class="doc-card">
-                    <h3>🚀 Quick Start</h3>
-                    <p>Get up and running with Apex SDK in under 5 minutes. Install, configure, and deploy your first cross-chain transaction.</p>
-                    <div class="doc-meta">
-                        <span>5 min read</span>
-                        <span>Beginner</span>
-                    </div>
-                </a>
-                <a href="API.html" class="doc-card">
-                    <h3>📚 API Reference</h3>
-                    <p>Complete API documentation with examples, parameters, return types, and error handling for all SDK methods.</p>
-                    <div class="doc-meta">
-                        <span>Reference</span>
-                        <span>All levels</span>
-                    </div>
-                </a>
-                <a href="CLI_GUIDE.html" class="doc-card">
-                    <h3>⚡ CLI Guide</h3>
-                    <p>Command-line interface for project scaffolding, code generation, testing, and deployment automation.</p>
-                    <div class="doc-meta">
-                        <span>10 min read</span>
-                        <span>Intermediate</span>
-                    </div>
-                </a>
-                <a href="Substrate_Features.html" class="doc-card">
-                    <h3>🔗 Substrate Features</h3>
-                    <p>Deep dive into Substrate-specific functionality including XCM, runtime calls, and pallet interactions.</p>
-                    <div class="doc-meta">
-                        <span>20 min read</span>
-                        <span>Advanced</span>
-                    </div>
-                </a>
-                <a href="TESTING_FRAMEWORK.html" class="doc-card">
-                    <h3>🧪 Testing Framework</h3>
-                    <p>Comprehensive testing tools for unit tests, integration tests, and cross-chain scenario validation.</p>
-                    <div class="doc-meta">
-                        <span>15 min read</span>
-                        <span>Intermediate</span>
-                    </div>
-                </a>
-                <a href="RESEARCH_INITIATIVES.html" class="doc-card">
-                    <h3>🔬 Research</h3>
-                    <p>Ongoing research initiatives in cross-chain optimization, zero-knowledge proofs, and performance improvements.</p>
-                    <div class="doc-meta">
-                        <span>Academic</span>
-                        <span>Research</span>
-                    </div>
-                </a>
-                <a href="https://github.com/kherldhussein/apex-sdk/tree/main/examples" class="doc-card">
-                    <h3>💡 Examples</h3>
-                    <p>Real-world examples including DeFi protocols, NFT marketplaces, DAO governance, and cross-chain bridges.</p>
-                    <div class="doc-meta">
-                        <span>Code samples</span>
-                        <span>All levels</span>
-                    </div>
-                </a>
-                <a href="CONTRIBUTING.html" class="doc-card">
-                    <h3>🤝 Contributing</h3>
-                    <p>Join our community! Learn how to contribute code, documentation, examples, and help build the future of cross-chain.</p>
-                    <div class="doc-meta">
-                        <span>Community</span>
-                        <span>Open source</span>
-                    </div>
-                </a>
             </div>
         </div>
     </section>
@@ -1149,39 +1128,36 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h4>Getting Started</h4>
-                    <ul class="footer-links">
-                        <li><a href="QUICK_START.html">Quick Start Guide</a></li>
-                        <li><a href="API.html">API Documentation</a></li>
-                        <li><a href="CLI_GUIDE.html">CLI Reference</a></li>
-                        <li><a href="https://github.com/kherldhussein/apex-sdk/tree/main/examples">Examples</a></li>
-                    </ul>
+                    <h4>Apex SDK Protocol</h4>
+                    <p style="color: var(--text-secondary); line-height: 1.7;">
+                        Building the future of cross-chain development with Rust's power and safety.
+                    </p>
                 </div>
                 <div class="footer-section">
-                    <h4>Features</h4>
+                    <h4>Documentation</h4>
                     <ul class="footer-links">
-                        <li><a href="Substrate_Features.html">Substrate Integration</a></li>
-                        <li><a href="ECOSYSTEM_INTEGRATION.html">EVM Compatibility</a></li>
-                        <li><a href="TYPED_METADATA.html">Typed Metadata</a></li>
-                        <li><a href="TESTING_FRAMEWORK.html">Testing Tools</a></li>
+                        <li><a href="QUICK_START.html">Quick Start</a></li>
+                        <li><a href="API.html">API Reference</a></li>
+                        <li><a href="CLI_GUIDE.html">CLI Guide</a></li>
+                        <li><a href="TESTNETS.html">Testnets</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h4>Community</h4>
                     <ul class="footer-links">
+                        <li><a href="https://github.com/kherldhussein/apex-sdk">GitHub</a></li>
+                        <li><a href="https://github.com/kherldhussein/apex-sdk/issues">Issues</a></li>
                         <li><a href="CONTRIBUTING.html">Contributing</a></li>
                         <li><a href="https://github.com/kherldhussein/apex-sdk/discussions">Discussions</a></li>
-                        <li><a href="https://github.com/kherldhussein/apex-sdk/issues">Issues</a></li>
-                        <li><a href="ROADMAP.html">Roadmap</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h4>Resources</h4>
                     <ul class="footer-links">
-                        <li><a href="SECURITY.html">Security Policy</a></li>
-                        <li><a href="RESEARCH_INITIATIVES.html">Research</a></li>
+                        <li><a href="SECURITY.html">Security</a></li>
+                        <li><a href="ROADMAP.html">Roadmap</a></li>
+                        <li><a href="SYSTEM_ARCHITECTURE.html">Architecture</a></li>
                         <li><a href="https://github.com/kherldhussein/apex-sdk/blob/main/LICENSE">License</a></li>
-                        <li><a href="https://github.com/kherldhussein/apex-sdk/releases">Releases</a></li>
                     </ul>
                 </div>
             </div>
@@ -1192,12 +1168,69 @@
     </footer>
 
     <script>
-        // Navigation toggle for mobile
-        document.querySelector('.nav-toggle').addEventListener('click', function() {
-            document.querySelector('.nav-links').classList.toggle('active');
+        // Theme Toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+
+            if (newTheme === 'dark') {
+                icon.textContent = '🌙';
+                text.textContent = 'Dark';
+            } else {
+                icon.textContent = '☀️';
+                text.textContent = 'Light';
+            }
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        if (savedTheme === 'light') {
+            document.getElementById('theme-icon').textContent = '☀️';
+            document.getElementById('theme-text').textContent = 'Light';
+        }
+
+        // Copy code
+        function copyCode() {
+            const code = document.querySelector('pre code').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Scroll reveal animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-reveal').forEach((el) => {
+            observer.observe(el);
         });
 
-        // Smooth scrolling for navigation links
+        // Smooth scroll for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -1210,37 +1243,6 @@
                 }
             });
         });
-
-        // Navbar background on scroll
-        window.addEventListener('scroll', function() {
-            const navbar = document.getElementById('navbar');
-            if (window.scrollY > 50) {
-                navbar.style.background = 'rgba(15, 23, 42, 0.98)';
-            } else {
-                navbar.style.background = 'rgba(15, 23, 42, 0.95)';
-            }
-        });
-
-        // Simple animation on scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('animate-on-scroll');
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.feature-card, .doc-card, .chain-category').forEach(el => {
-            observer.observe(el);
-        });
     </script>
-    
-    <!-- Enhanced JavaScript -->
-    <script src="assets/main.js"></script>
 </body>
 </html>
