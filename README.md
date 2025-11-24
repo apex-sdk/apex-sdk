@@ -1,101 +1,132 @@
-# Apex SDK
+# Apex SDK Protocol - Unified Rust SDK for Substrate & EVM Blockchain Development
 
 [![CI](https://github.com/kherldhussein/apex-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/kherldhussein/apex-sdk/actions/workflows/ci.yml)
 [![Security](https://github.com/kherldhussein/apex-sdk/actions/workflows/security.yml/badge.svg)](https://github.com/kherldhussein/apex-sdk/actions/workflows/security.yml/badge.svg)
 [![Benchmarks](https://github.com/kherldhussein/apex-sdk/actions/workflows/benchmarks.yml/badge.svg)](https://github.com/kherldhussein/apex-sdk/actions/workflows/benchmarks.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Rust](https://img.shields.io/badge/Rust-1.85%2B-orange.svg)](https://www.rust-lang.org/)
+[![Docs](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://kherldhussein.github.io/apex-sdk/)
+[![Crates.io](https://img.shields.io/crates/v/apex-sdk.svg)](https://crates.io/crates/apex-sdk)
 
-> **Unified Rust SDK for cross-chain development across Substrate and EVM ecosystems**
+> **Build secure, cross-chain blockchain applications with compile-time safety**
 
-Apex SDK provides a compile-time safe, unified interface for building blockchain applications. Write once, deploy across Polkadot, Ethereum, and compatible chains with a single API.
+Apex SDK Protocol is a compile-time safe, unified Rust SDK that enables developers to build cross-chain applications spanning Substrate and EVM ecosystems. With a single, intuitive API, reduce development complexity while ensuring type safety and native performance across Polkadot, Kusama, Ethereum, and more.
 
-**Key Features:** Type-safe · Cross-chain · Metadata-driven · Production-ready
+## Features
 
----
-
-## Overview
-
-| Aspect | Details |
-|--------|---------|
-| **Purpose** | Unified SDK for Substrate and EVM blockchain development |
-| **Language** | Rust 1.85+ |
-| **Type Safety** | Compile-time guarantees via metadata-driven code generation |
-| **Supported Chains** | Polkadot, Kusama, Ethereum, Polygon, BSC, Avalanche, [+more](./docs/SUPPORTED_CHAINS.md) |
-| **Status** | Beta - Production ready for testing |
-
-**[→ Read Full Objectives & Goals](./docs/PROJECT_OBJECTIVES.md)**
+- **Unified Interface**: Single API for both Substrate and EVM blockchains
+- **Compile-Time Type Safety**: Catch errors before deployment, not in production
+- **Native Performance**: Rust-based implementation for optimal execution speed
+- **Metadata-Driven**: Automatic type generation from blockchain runtime metadata
+- **Cross-Chain Ready**: Built-in support for cross-chain communication
+- **Modular Architecture**: Easy to extend with new blockchain protocols
+- **Comprehensive Testing**: Built-in testing framework for cross-chain scenarios
+- **Developer Friendly**: Extensive documentation and examples
 
 ## Quick Start
 
+Get started with Apex SDK in under 5 mins:
+
 ```bash
-# Install CLI
+# Install Apex SDK CLI
 cargo install apex-sdk-cli
 
-# Create new project
-apex new my-app
-cd my-app
+# Create a new cross-chain project
+apex new my-cross-chain-app
 
-# Build and run
+# Navigate to project directory
+cd my-cross-chain-app
+
+# Build and test
 cargo build
 cargo test
 ```
 
-**[→ Complete Setup Guide](./docs/INSTALLATION.md)**
-
 ## Installation
 
-**Prerequisites:** Rust 1.85+, OpenSSL dev libraries
+### Requirements
 
-**Add to Cargo.toml:**
+- Rust 1.85 or higher
+- Cargo package manager
+
+### Via Cargo
+
 ```toml
+# Add to your Cargo.toml
 [dependencies]
-apex-sdk = "0.1.3"
-apex-sdk-substrate = "0.1.3"  # For Substrate chains
-apex-sdk-evm = "0.1.3"        # For EVM chains
+apex-sdk = "0.1.0"
+apex-sdk-substrate = "0.1.0"
+apex-sdk-evm = "0.1.0"
 ```
 
-**CLI Installation:**
+### From Source
+
 ```bash
-cargo install apex-sdk-cli
-apex --version
-```
+# Clone the repository
+git clone https://github.com/kherldhussein/apex-sdk.git
+cd apex-sdk
 
-**[→ Detailed Installation Instructions](./docs/INSTALLATION.md)** | **[→ Troubleshooting](./docs/TROUBLESHOOTING.md)**
+# Build from source
+cargo build --release
+
+# Run tests
+cargo test --all-features
+
+# Install locally
+cargo install --path ./cli
+```
 
 ## Supported Chains
 
-**Substrate:** Polkadot · Kusama · Paseo · Westend · Moonbeam · Astar
-**EVM:** Ethereum · Polygon · BSC · Avalanche · Arbitrum · Optimism
-**Testnets:** Sepolia · Paseo · Westend
+### Currently Supported
 
-**[→ Complete Chain Support Matrix](./docs/SUPPORTED_CHAINS.md)** | **[→ Roadmap](./docs/ROADMAP.md)**
+| Chain | Type | Status | Features |
+|-------|------|--------|----------|
+| Polkadot | Substrate | Stable | Full support |
+| Kusama | Substrate | Stable | Full support |
+| Ethereum | EVM | Stable | Full support |
+| BSC | EVM | Stable | Full support |
+| Polygon | EVM | Stable | Full support |
+| Avalanche | EVM | Stable | Full support |
+| Moonbeam | Hybrid | Stable | Substrate + EVM |
+| Astar | Hybrid | Stable | Substrate + EVM |
 
-## Architecture & Dependencies
+### Coming Soon
 
-**Core Stack:** Rust · Substrate · EVM · WebAssembly
-**Key Libraries:** subxt · ethers · tokio · serde
-
-**[→ Full Technology Stack](./docs/DEPENDENCIES.md)** | **[→ Architecture Overview](./docs/ARCHITECTURE.md)**
+- Cosmos SDK chains (via IBC)
+- Solana
+- Near Protocol
+- Arbitrum & Optimism (L2s)
 
 ## Documentation
 
-| Resource | Link |
-|----------|------|
-| **Documentation Hub** | [Complete Guide](./docs/DOCUMENTATION_HUB.md) |
-| **Quick Start** | [5-minute setup](./docs/QUICK_START.md) |
-| **API Reference** | [Full API docs](./docs/API.md) |
-| **CLI Guide** | [Command-line tools](./docs/CLI_GUIDE.md) |
-| **Examples** | [Working code samples](./examples/) |
+**[Complete Documentation Hub](./docs/DOCUMENTATION_HUB.md)** - Your one-stop guide
+
+### Quick Links
+
+| Resource | Description |
+|----------|-------------|
+| [**Quick Start**](./docs/QUICK_START.md) | Get started in 5 minutes |
+| [**API Reference**](./docs/API.md) | Complete API documentation |
+| [**CLI Guide**](./docs/CLI_GUIDE.md) | Command-line tools guide |
+| [**Roadmap**](./docs/ROADMAP.md) | Development roadmap & priorities |
+| [**Security**](./docs/SECURITY.md) | Security policies & reporting |
 
 ### Examples
 
-- **[Account Manager](./examples/account-manager/)** - Multi-chain account management
-- **[Price Oracle](./examples/price-oracle/)** - Cross-chain price aggregation
-- **[Contract Orchestration](./examples/contract-orchestration/)** - Smart contract deployment
-- **[Parachain Assets](./examples/parachain-assets/)** - Asset management
+Check out the [`examples/`](./examples) directory for complete working examples:
 
-**[→ Browse All Examples](./examples/)**
+- [`account-manager/`](./examples/account-manager/) - Multi-chain account management
+- [`price-oracle/`](./examples/price-oracle/) - Cross-chain price aggregation
+- [`contract-orchestration/`](./examples/contract-orchestration/) - Smart contract deployment
+- [`parachain-assets/`](./examples/parachain-assets/) - Parachain asset management
+
+### Advanced Topics
+
+- [**Typed Metadata**](./docs/TYPED_METADATA.md) - Compile-time type safety
+- [**Testing Framework**](./docs/TESTING_FRAMEWORK.md) - Comprehensive testing
+- [**Security Audit**](./docs/SECURITY_AUDIT.md) - Security review results
+- [**Ecosystem Integration**](./docs/ECOSYSTEM_INTEGRATION.md) - Third-party integrations
 
 ## Contributing
 
@@ -118,4 +149,4 @@ cargo test --all-features
 
 ## License
 
-[Apache 2.0](LICENSE) © 2024 Apex SDK Contributors 
+[Apache 2.0](LICENSE)
