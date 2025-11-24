@@ -37,6 +37,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `anyhow` and `thiserror` from apex-sdk-core
   - `anyhow` from apex-sdk-substrate
   - `hex` from apex-sdk-types
+- Added cargo-udeps ignore annotations for dependencies used in generated code:
+  - `sp-runtime` in apex-sdk-substrate (used in generated metadata files)
 
 ### Known Issues
 - `trie-db v0.30.0` has future incompatibility warnings related to never type fallback
