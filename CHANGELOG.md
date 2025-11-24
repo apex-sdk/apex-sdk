@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2025-11-24
+
+### Changed
+- **BREAKING**: Migrated from ethers-rs to Alloy for EVM blockchain support
+  - Updated all EVM provider types to use Alloy's modern API
+  - Replaced `TypedTransaction` with `TransactionRequest` throughout
+  - Updated transaction building to use Alloy's builder pattern
+  - Changed hash types from `H256` to `B256` for consistency
+  - Simplified provider architecture with unified HTTP support
+- Updated transaction execution methods to use Alloy's native APIs
+  - `estimate_gas` now uses `TransactionRequest::clone()`
+  - `get_block_by_number` simplified to single-parameter API
+  - Gas price and fee estimation updated for EIP-1559 support
+- Enhanced `ProviderType` with cleaner public API
+  - Made `get_chain_id()` public for external access
+  - Added `AlloyHttpProvider` type alias to reduce type complexity
+- Updated CLI to use non-deprecated Alloy methods
+  - Replaced `on_http` with `connect_http` across all commands
+  - Fixed type conversions for gas calculations
+
+### Fixed
+- Resolved all clippy warnings related to type complexity
+- Fixed provider method access patterns in transaction executor
+- Corrected arithmetic operations to use proper U256 conversions
+- Fixed CLI deploy command to work with new provider API
+
 ## [0.1.3] - 2025-01-19
 
 ### Added
