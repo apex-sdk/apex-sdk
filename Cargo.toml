@@ -57,7 +57,7 @@ sha3 = "0.10"
 # Dev-dependencies
 proptest = "1.4"
 criterion = "0.7.0"
-mockall = "0.13.1"
+mockall = "0.14.0"
 
 # Internal workspace dependencies
 apex-sdk-core = { path = "apex-sdk-core" }
