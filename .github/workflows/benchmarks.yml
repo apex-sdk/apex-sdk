@@ -88,9 +88,9 @@ jobs:
             git clean -fd
           }
 
-      - name: Copy benchmark output to safe location
+      - name: Move benchmark output to safe location
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: cp output.txt /tmp/bench-output.txt
+        run: mv output.txt /tmp/bench-output.txt
 
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@v1

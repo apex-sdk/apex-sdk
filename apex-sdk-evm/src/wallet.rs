@@ -7,21 +7,22 @@
 //! - Message signing (EIP-191, EIP-712)
 
 use crate::Error;
-use ethers::prelude::*;
-use ethers::signers::{coins_bip39::English, LocalWallet, Signer};
-use ethers::types::{
-    transaction::eip2718::TypedTransaction, transaction::eip712::Eip712, Address as EthAddress,
-    Signature,
+use alloy::primitives::{Address as EthAddress, Signature, B256};
+use alloy::signers::{
+    local::{coins_bip39::English, MnemonicBuilder, PrivateKeySigner},
+    Signer,
 };
 use std::str::FromStr;
 
 /// Wallet for managing EVM accounts and signing transactions
 #[derive(Clone)]
 pub struct Wallet {
-    /// The underlying ethers wallet
-    inner: LocalWallet,
+    /// The underlying Alloy signer
+    inner: PrivateKeySigner,
     /// The address of this wallet
     address: EthAddress,
+    /// Optional chain ID for EIP-155 replay protection
+    chain_id: Option<u64>,
 }
 
 impl Wallet {
@@ -35,12 +36,16 @@ impl Wallet {
     /// println!("Address: {}", wallet.address());
     /// ```
     pub fn new_random() -> Self {
-        let inner = LocalWallet::new(&mut rand::thread_rng());
+        let inner = PrivateKeySigner::random();
         let address = inner.address();
 
         tracing::info!("Created new random wallet: {}", address);
 
-        Self { inner, address }
+        Self {
+            inner,
+            address,
+            chain_id: None,
+        }
     }
 
     /// Create a wallet from a private key (hex string with or without 0x prefix)
@@ -59,14 +64,18 @@ impl Wallet {
     pub fn from_private_key(private_key: &str) -> Result<Self, Error> {
         let key = private_key.trim_start_matches("0x");
 
-        let inner = LocalWallet::from_str(key)
+        let inner = PrivateKeySigner::from_str(key)
             .map_err(|e| Error::Other(format!("Invalid private key: {}", e)))?;
 
         let address = inner.address();
 
         tracing::info!("Loaded wallet from private key: {}", address);
 
-        Ok(Self { inner, address })
+        Ok(Self {
+            inner,
+            address,
+            chain_id: None,
+        })
     }
 
     /// Create a wallet from a mnemonic phrase
@@ -85,14 +94,14 @@ impl Wallet {
     /// ).unwrap();
     /// ```
     pub fn from_mnemonic(mnemonic: &str, index: u32) -> Result<Self, Error> {
-        let wallet = MnemonicBuilder::<English>::default()
+        let signer = MnemonicBuilder::<English>::default()
             .phrase(mnemonic)
             .index(index)
             .map_err(|e| Error::Other(format!("Invalid index: {}", e)))?
             .build()
             .map_err(|e| Error::Other(format!("Failed to build wallet from mnemonic: {}", e)))?;
 
-        let address = wallet.address();
+        let address = signer.address();
 
         tracing::info!(
             "Loaded wallet from mnemonic at index {}: {}",
@@ -101,8 +110,9 @@ impl Wallet {
         );
 
         Ok(Self {
-            inner: wallet,
+            inner: signer,
             address,
+            chain_id: None,
         })
     }
 
@@ -110,7 +120,7 @@ impl Wallet {
     ///
     /// This is important for EIP-155 replay protection
     pub fn with_chain_id(mut self, chain_id: u64) -> Self {
-        self.inner = self.inner.with_chain_id(chain_id);
+        self.chain_id = Some(chain_id);
         tracing::debug!("Set wallet chain ID to {}", chain_id);
         self
     }
@@ -125,17 +135,17 @@ impl Wallet {
         self.address
     }
 
-    /// Sign a transaction
+    /// Sign a transaction hash
     ///
     /// # Arguments
-    /// * `tx` - The transaction to sign
+    /// * `hash` - The transaction hash to sign
     ///
     /// # Returns
-    /// The signature as bytes
-    pub async fn sign_transaction(&self, tx: &TypedTransaction) -> Result<Signature, Error> {
+    /// The signature
+    pub async fn sign_transaction_hash(&self, hash: &B256) -> Result<Signature, Error> {
         let signature = self
             .inner
-            .sign_transaction(tx)
+            .sign_hash(hash)
             .await
             .map_err(|e| Error::Transaction(format!("Failed to sign transaction: {}", e)))?;
 
@@ -150,14 +160,14 @@ impl Wallet {
     /// * `message` - The message to sign
     ///
     /// # Returns
-    /// The signature as bytes
+    /// The signature
     pub async fn sign_message<S: AsRef<[u8]> + Send + Sync>(
         &self,
         message: S,
     ) -> Result<Signature, Error> {
         let signature = self
             .inner
-            .sign_message(message)
+            .sign_message(message.as_ref())
             .await
             .map_err(|e| Error::Transaction(format!("Failed to sign message: {}", e)))?;
 
@@ -169,17 +179,15 @@ impl Wallet {
     /// Sign typed data (EIP-712)
     ///
     /// # Arguments
-    /// * `data` - The typed data to sign
+    /// * `hash` - The EIP-712 hash to sign
     ///
     /// # Returns
-    /// The signature as bytes
-    pub async fn sign_typed_data<T: Eip712 + Send + Sync>(
-        &self,
-        data: &T,
-    ) -> Result<Signature, Error> {
+    /// The signature
+    pub async fn sign_typed_data_hash(&self, hash: &B256) -> Result<Signature, Error> {
+        // For EIP-712, we sign the hash directly
         let signature = self
             .inner
-            .sign_typed_data(data)
+            .sign_hash(hash)
             .await
             .map_err(|e| Error::Transaction(format!("Failed to sign typed data: {}", e)))?;
 
@@ -190,7 +198,7 @@ impl Wallet {
 
     /// Get the chain ID configured for this wallet
     pub fn chain_id(&self) -> Option<u64> {
-        Some(self.inner.chain_id())
+        self.chain_id
     }
 
     /// Export private key (WARNING: Handle with extreme care!)
@@ -199,7 +207,7 @@ impl Wallet {
     /// This exposes the private key. Only use in secure contexts.
     pub fn export_private_key(&self) -> String {
         tracing::warn!("Private key exported - ensure secure handling!");
-        format!("0x{}", hex::encode(self.inner.signer().to_bytes()))
+        format!("0x{}", hex::encode(self.inner.to_bytes()))
     }
 }
 
@@ -333,8 +341,8 @@ mod tests {
 
         let signature = wallet.sign_message(message).await.unwrap();
 
-        // Signature should be 65 bytes (r: 32, s: 32, v: 1)
-        let sig_bytes = signature.to_vec();
+        // Signature should be valid
+        let sig_bytes = signature.as_bytes();
         assert_eq!(sig_bytes.len(), 65);
     }
 

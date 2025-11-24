@@ -1,13 +1,16 @@
-# Apex SDK Protocol
+# Apex SDK Protocol - Unified Rust SDK for Substrate & EVM Blockchain Development
 
 [![CI](https://github.com/kherldhussein/apex-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/kherldhussein/apex-sdk/actions/workflows/ci.yml)
 [![Security](https://github.com/kherldhussein/apex-sdk/actions/workflows/security.yml/badge.svg)](https://github.com/kherldhussein/apex-sdk/actions/workflows/security.yml/badge.svg)
 [![Benchmarks](https://github.com/kherldhussein/apex-sdk/actions/workflows/benchmarks.yml/badge.svg)](https://github.com/kherldhussein/apex-sdk/actions/workflows/benchmarks.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Rust](https://img.shields.io/badge/Rust-1.85%2B-orange.svg)](https://www.rust-lang.org/)
-[![Docs](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://docs.apex-sdk.io)
+[![Docs](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://kherldhussein.github.io/apex-sdk/)
+[![Crates.io](https://img.shields.io/crates/v/apex-sdk.svg)](https://crates.io/crates/apex-sdk)
 
-Apex SDK Protocol is a compile-time safe, unified Rust SDK that enables developers to build cross-chain apps spanning Substrate and EVM ecosystems with a single, intuitive API reducing development complexity while ensuring type safety and native performance.
+> **Build secure, cross-chain blockchain applications with compile-time safety**
+
+Apex SDK Protocol is a compile-time safe, unified Rust SDK that enables developers to build cross-chain applications spanning Substrate and EVM ecosystems. With a single, intuitive API, reduce development complexity while ensuring type safety and native performance across Polkadot, Kusama, Ethereum, and more.
 
 ## Features
 
@@ -51,9 +54,9 @@ cargo test
 ```toml
 # Add to your Cargo.toml
 [dependencies]
-apex-sdk = "0.1.3"
-apex-sdk-substrate = "0.1.3"
-apex-sdk-evm = "0.1.3"
+apex-sdk = "0.1.0"
+apex-sdk-substrate = "0.1.0"
+apex-sdk-evm = "0.1.0"
 ```
 
 ### From Source
@@ -81,8 +84,6 @@ cargo install --path ./cli
 |-------|------|--------|----------|
 | Polkadot | Substrate | Stable | Full support |
 | Kusama | Substrate | Stable | Full support |
-| Paseo | Substrate | Stable | Testnet, full support |
-| Westend | Substrate | Stable | Testnet (legacy) |
 | Ethereum | EVM | Stable | Full support |
 | BSC | EVM | Stable | Full support |
 | Polygon | EVM | Stable | Full support |
@@ -129,32 +130,23 @@ Check out the [`examples/`](./examples) directory for complete working examples:
 
 ## Contributing
 
-Please read our [Contributing Guide](CONTRIBUTING.md) to get started.
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-### Development Setup
-
+**Quick Start:**
 ```bash
-# Clone your fork
 git clone https://github.com/kherldhussein/apex-sdk.git
 cd apex-sdk
-
-# Install development dependencies
-make setup
-
-# Run the test suite
-make test
-
-# Run benchmarks
-make bench
-
-# Generate documentation
-make docs
+cargo test --all-features
 ```
+
+**[→ Development Guide](./docs/DEVELOPMENT.md)** | **[→ Code of Conduct](./CODE_OF_CONDUCT.md)**
 
 ## Security
 
-- **Security Contact**: kherld@duck.com
+**Report vulnerabilities:** kherld@duck.com
+
+**[→ Security Policy](./docs/SECURITY.md)** | **[→ Security Audit](./docs/SECURITY_AUDIT.md)**
 
 ## License
 
-Apache 2.0 
+[Apache 2.0](LICENSE)

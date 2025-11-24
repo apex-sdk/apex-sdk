@@ -56,7 +56,8 @@ impl MultiChainAccount {
     fn address_for_chain(&self, chain: &Chain) -> &str {
         match chain.chain_type() {
             ChainType::Substrate => &self.substrate_address,
-            ChainType::EVM => &self.evm_address,
+            ChainType::Evm => &self.evm_address,
+            ChainType::Hybrid => &self.evm_address, // Hybrid chains default to EVM address
         }
     }
 }

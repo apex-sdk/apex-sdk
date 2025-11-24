@@ -7,6 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2025-11-24
+
+### Changed
+- **BREAKING**: Migrated from ethers-rs to Alloy for EVM blockchain support
+  - Updated all EVM provider types to use Alloy's modern API
+  - Replaced `TypedTransaction` with `TransactionRequest` throughout
+  - Updated transaction building to use Alloy's builder pattern
+  - Changed hash types from `H256` to `B256` for consistency
+  - Simplified provider architecture with unified HTTP support
+- Updated transaction execution methods to use Alloy's native APIs
+  - `estimate_gas` now uses `TransactionRequest::clone()`
+  - `get_block_by_number` simplified to single-parameter API
+  - Gas price and fee estimation updated for EIP-1559 support
+- Enhanced `ProviderType` with cleaner public API
+  - Made `get_chain_id()` public for external access
+  - Added `AlloyHttpProvider` type alias to reduce type complexity
+- Updated CLI to use non-deprecated Alloy methods
+  - Replaced `on_http` with `connect_http` across all commands
+  - Fixed type conversions for gas calculations
+- Updated dependencies to latest versions:
+  - `thiserror` 1.0 → 2.0.17 in apex-sdk-types
+  - `rand` 0.8 → 0.9.2 in apex-sdk-core
+  - Migrated to new rand 0.9 API (`thread_rng()` → `rng()`, `gen()` → `random()`)
+  - All crates now use workspace-defined versions for consistency
+
+### Fixed
+- Resolved all clippy warnings related to type complexity
+- Fixed provider method access patterns in transaction executor
+- Corrected arithmetic operations to use proper U256 conversions
+- Fixed CLI deploy command to work with new provider API
+- Removed unused dependencies:
+  - `sp-keyring` from apex-sdk-cli
+  - `anyhow` and `thiserror` from apex-sdk-core
+  - `anyhow` from apex-sdk-substrate
+  - `hex` from apex-sdk-types
+- Added cargo-udeps ignore annotations for dependencies used in generated code:
+  - `sp-runtime` in apex-sdk-substrate (used in generated metadata files)
+- Fixed CI dependency check to only validate root dependencies
+  - Added `--root-deps-only` flag to cargo-outdated check
+  - Transitive dependencies are managed by upstream crates (Alloy, Substrate)
+
+### Known Issues
+- `trie-db v0.30.0` has future incompatibility warnings related to never type fallback
+  - This is a transitive dependency from Substrate packages (sp-trie, sp-state-machine)
+  - Will be resolved when Parity updates the trie-db crate upstream
+  - Does not affect current functionality
+
 ## [0.1.3] - 2025-01-19
 
 ### Added

@@ -6,6 +6,15 @@
 //! - SS58 address encoding
 //! - Message and transaction signing
 //! - Multi-wallet management
+//!
+//! # Security
+//!
+//! This module handles sensitive cryptographic material (private keys).
+//! The underlying `sp_core::Pair` types implement secure memory handling.
+//! For additional safety:
+//! - Avoid unnecessary cloning of wallet instances
+//! - Use `Arc<Wallet>` for shared access
+//! - Ensure wallets are dropped when no longer needed
 
 use crate::{Error, Result};
 use parking_lot::RwLock;
@@ -28,9 +37,39 @@ pub enum KeyPairType {
 /// A unified wallet that can hold either SR25519 or ED25519 keys
 ///
 /// # Security
-/// This struct implements `Clone` to support wallet management operations.
-/// Be aware that cloning duplicates private key material in memory.
-/// For shared access without duplication, consider wrapping in `Arc<Wallet>`.
+///
+/// This struct handles sensitive cryptographic material and implements
+/// secure memory practices:
+///
+/// - **Cloning**: This struct implements `Clone` to support wallet management.
+///   Cloning duplicates private key material in memory. For shared access
+///   without duplication, wrap in `Arc<Wallet>`.
+///
+/// - **Memory Zeroing**: The underlying `sp_core::Pair` types (SR25519 and ED25519)
+///   implement secure memory clearing on drop. However, cloned instances each
+///   maintain their own copy until dropped.
+///
+/// - **Best Practices**:
+///   - Minimize the lifetime of wallet instances
+///   - Use `Arc<Wallet>` for shared access
+///   - Avoid logging or printing wallet contents
+///   - Drop wallets explicitly when no longer needed
+///
+/// # Example
+///
+/// ```rust
+/// use apex_sdk_substrate::wallet::{Wallet, KeyPairType};
+/// use std::sync::Arc;
+///
+/// // For single ownership
+/// let wallet = Wallet::new_random();
+/// // Use wallet...
+/// drop(wallet); // Explicitly drop when done
+///
+/// // For shared access (recommended)
+/// let wallet = Arc::new(Wallet::new_random());
+/// let wallet_clone = Arc::clone(&wallet); // Increments reference count, no key duplication
+/// ```
 #[derive(Clone)]
 pub struct Wallet {
     /// The key pair type
@@ -277,6 +316,18 @@ impl std::fmt::Debug for Wallet {
             .field("address", &self.address())
             .field("ss58_format", &self.ss58_format)
             .finish()
+    }
+}
+
+impl Drop for Wallet {
+    fn drop(&mut self) {
+        // Log wallet cleanup for security auditing
+        // Note: sp_core::Pair types handle actual memory zeroing internally
+        debug!(
+            "Dropping wallet of type {:?} at address {}",
+            self.key_type,
+            self.address()
+        );
     }
 }
 

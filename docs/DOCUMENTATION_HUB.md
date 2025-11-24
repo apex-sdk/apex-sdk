@@ -1,4 +1,6 @@
-# Apex SDK Documentation Hub
+# Apex SDK Protocol Documentation Hub
+
+> Your complete guide to building cross-chain applications with Apex SDK
 
 ## Getting Started
 
@@ -70,6 +72,7 @@ Find documentation specific to your needs:
 - [Event Indexing](#indexing) - Index blockchain events
 - [RPC Services](#rpc) - Set up RPC infrastructure
 
+---
 
 ## Developer Tools
 
@@ -97,6 +100,7 @@ apex deploy             # Not implemented - see alternatives
 - `Cargo.toml` - Dependencies and metadata
 - `.github/workflows/` - CI/CD pipelines
 
+---
 
 ## Examples & Templates
 
@@ -121,6 +125,7 @@ apex new my-nft --template nft
 apex new my-app --template basic
 ```
 
+---
 
 ## API Reference
 
@@ -161,34 +166,35 @@ apex new my-app --template basic
 ## Supported Blockchains
 
 ### Substrate Ecosystem
-- **Polkadot** - Relay chain
-- **Kusama** - Canary network
-- **Westend** - Testnet
-- **Parachains** - Moonbeam, Astar, Acala
+- **Polkadot** - Relay chain (Stable)
+- **Kusama** - Canary network (Stable)
+- **Westend** - Testnet (In Development)
+- **Parachains** - Moonbeam, Astar, Acala (In Development)
 
 ### EVM Ecosystem
-- **Ethereum** - Mainnet
-- **BSC** - Binance Smart Chain
-- **Polygon** - Matic Network
-- **Avalanche** - C-Chain
+- **Ethereum** - Mainnet (Stable)
+- **BSC** - Binance Smart Chain (Stable)
+- **Polygon** - Matic Network (Stable)
+- **Avalanche** - C-Chain (Stable)
 - **Arbitrum** - L2 (Coming soon)
 - **Optimism** - L2 (Coming soon)
 
-**Legend:** Stable | In Development
+---
 
 ## Community & Support
 
 ### Get Help
-- [GitHub Discussions](https://github.com/kherldhussein/apexsdk/discussions) - Ask questions
-- [Issue Tracker](https://github.com/kherldhussein/apexsdk/issues) - Report bugs
+- [GitHub Discussions](https://github.com/kh3rld/apexsdk/discussions) - Ask questions
+- [Issue Tracker](https://github.com/kh3rld/apexsdk/issues) - Report bugs
 - [Security Reports](SECURITY.md) - Report vulnerabilities
 - [Contributing Guide](CONTRIBUTING.md) - Contribute code
 
 ### Stay Updated
-- [Star on GitHub](https://github.com/kherldhussein/apexsdk)
+- [Star on GitHub](https://github.com/kh3rld/apexsdk)
 - [Changelog](../CHANGELOG.md) - Latest changes
 - [Roadmap](#roadmap) - Upcoming features
 
+---
 
 ## What's Next?
 
@@ -198,6 +204,7 @@ See our [Development Roadmap](ROADMAP.md) for:
 - How to contribute
 - Community priorities
 
+---
 
 ## Quick Reference
 
@@ -265,13 +272,14 @@ let balance = sdk.substrate()
 - Ignoring gas/fee estimation
 - Using example addresses in production
 
+---
 
 ## Quick Links
 
 | Resource | Link |
 |----------|------|
-| **Main Repository** | [github.com/kherldhussein/apexsdk](https://github.com/kherldhussein/apexsdk) |
-| **Issues** | [Report a bug](https://github.com/kherldhussein/apexsdk/issues/new) |
+| **Main Repository** | [github.com/kh3rld/apexsdk](https://github.com/kh3rld/apexsdk) |
+| **Issues** | [Report a bug](https://github.com/kh3rld/apexsdk/issues/new) |
 | **Examples** | [Browse examples](../examples/) |
 | **API Docs** | [API Reference](API.md) |
 | **CLI Guide** | [Command-line tools](CLI_GUIDE.md) |
@@ -280,6 +288,8 @@ let balance = sdk.substrate()
 
 <div align="center">
 
-[Get Started](QUICK_START.md) • [View on GitHub](https://github.com/kherldhussein/apexsdk) • [Join Discussion](https://github.com/kherldhussein/apexsdk/discussions)
+**Built by the Apex SDK community**
+
+[Get Started](QUICK_START.md) • [View on GitHub](https://github.com/kh3rld/apexsdk) • [Join Discussion](https://github.com/kh3rld/apexsdk/discussions)
 
 </div>

@@ -8,6 +8,7 @@
 //! cargo test --package apex-sdk-evm --test integration_test -- --ignored
 //! ```
 
+use alloy::primitives::U256;
 use apex_sdk_core::ChainAdapter;
 use apex_sdk_evm::EvmAdapter;
 use apex_sdk_types::TransactionStatus;
@@ -40,7 +41,7 @@ async fn test_get_balance() {
     let balance_wei = balance.unwrap();
 
     // Vitalik's address should have more than 0 ETH
-    assert!(balance_wei > 0.into(), "Expected non-zero balance");
+    assert!(balance_wei > U256::ZERO, "Expected non-zero balance");
 }
 
 /// Test querying balance in ETH format

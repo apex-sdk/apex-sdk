@@ -10,16 +10,15 @@
 //! - Caching
 //! - Metrics
 
+use alloy::primitives::{Address as EthAddress, U256};
 use apex_sdk_evm::{
     cache::EvmCache,
     metrics::MetricsCollector,
     pool::ConnectionPool,
-    transaction::{GasConfig, RetryConfig, TransactionExecutor},
+    transaction::{GasConfig, RetryConfig},
     wallet::{Wallet, WalletManager},
     EvmAdapter,
 };
-use ethers::types::{Address as EthAddress, U256};
-use std::str::FromStr;
 use std::sync::Arc;
 
 // Helper function to get test endpoint
@@ -69,7 +68,7 @@ async fn test_wallet_sign_message() {
     let message = "Hello Ethereum!";
 
     let signature = wallet.sign_message(message).await.unwrap();
-    let sig_bytes = signature.to_vec();
+    let sig_bytes = signature.as_bytes();
     assert_eq!(sig_bytes.len(), 65); // r (32) + s (32) + v (1)
 }
 
@@ -120,10 +119,14 @@ fn test_wallet_export_private_key() {
 #[ignore] // Requires network
 async fn test_gas_estimation() {
     let adapter = EvmAdapter::connect(&test_endpoint()).await.unwrap();
-    let executor = TransactionExecutor::new(adapter.provider().clone());
+    let executor = adapter.transaction_executor();
 
-    let from = EthAddress::from_str("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045").unwrap();
-    let to = EthAddress::from_str("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7").unwrap();
+    let from = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+        .parse::<EthAddress>()
+        .unwrap();
+    let to = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7"
+        .parse::<EthAddress>()
+        .unwrap();
     let value = U256::from(1_000_000_000_000_000u64); // 0.001 ETH
 
     let estimate = executor
@@ -131,9 +134,9 @@ async fn test_gas_estimation() {
         .await
         .unwrap();
 
-    assert!(estimate.gas_limit > U256::zero());
-    assert!(estimate.gas_price > U256::zero());
-    assert!(estimate.total_cost > U256::zero());
+    assert!(estimate.gas_limit > 0);
+    assert!(estimate.gas_price > 0);
+    assert!(estimate.total_cost > 0);
 
     println!("Gas estimate:");
     println!("  Limit: {}", estimate.gas_limit);
@@ -151,17 +154,21 @@ async fn test_gas_estimation_with_config() {
         ..Default::default()
     };
 
-    let executor = TransactionExecutor::new(adapter.provider().clone()).with_gas_config(gas_config);
+    let executor = adapter.transaction_executor().with_gas_config(gas_config);
 
-    let from = EthAddress::from_str("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045").unwrap();
-    let to = EthAddress::from_str("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7").unwrap();
+    let from = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+        .parse::<EthAddress>()
+        .unwrap();
+    let to = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7"
+        .parse::<EthAddress>()
+        .unwrap();
 
     let estimate = executor
         .estimate_gas(from, Some(to), Some(U256::from(1000)), None)
         .await
         .unwrap();
 
-    assert!(estimate.gas_limit > U256::zero());
+    assert!(estimate.gas_limit > 0);
 }
 
 // ============================================================================
@@ -172,10 +179,12 @@ async fn test_gas_estimation_with_config() {
 #[ignore] // Requires network
 async fn test_build_transaction() {
     let adapter = EvmAdapter::connect(&test_endpoint()).await.unwrap();
-    let executor = TransactionExecutor::new(adapter.provider().clone());
+    let executor = adapter.transaction_executor();
 
     let wallet = Wallet::new_random().with_chain_id(1);
-    let to = EthAddress::from_str("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7").unwrap();
+    let to = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7"
+        .parse::<EthAddress>()
+        .unwrap();
     let value = U256::from(1000);
 
     let tx = executor
@@ -392,11 +401,13 @@ async fn test_full_workflow_with_all_features() {
     let wallet = Wallet::new_random().with_chain_id(1);
 
     // Create transaction executor
-    let executor = TransactionExecutor::new(conn.adapter().provider().clone());
+    let executor = conn.adapter().transaction_executor();
 
     // Test gas estimation
     let from = wallet.eth_address();
-    let to = EthAddress::from_str("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7").unwrap();
+    let to = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7"
+        .parse::<EthAddress>()
+        .unwrap();
 
     let start = std::time::Instant::now();
     let estimate = executor
@@ -438,8 +449,9 @@ async fn test_retry_logic_simulation() {
         use_jitter: true,
     };
 
-    let _executor =
-        TransactionExecutor::new(adapter.provider().clone()).with_retry_config(retry_config);
+    let _executor = adapter
+        .transaction_executor()
+        .with_retry_config(retry_config);
 
     // Even though we can't actually test failed transactions without funds,
     // we can verify the executor is configured correctly

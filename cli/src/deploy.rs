@@ -1,6 +1,7 @@
 //! Contract deployment functionality for Substrate (WASM) and EVM
 
 use anyhow::{Context, Result};
+use apex_sdk_types::Chain;
 use colored::Colorize;
 use std::path::Path;
 
@@ -12,21 +13,11 @@ pub async fn deploy_contract(
     account_name: Option<String>,
     dry_run: bool,
 ) -> Result<()> {
-    // Determine chain type
-    let is_substrate = endpoint.starts_with("ws://")
-        || endpoint.starts_with("wss://")
-        || matches!(
-            chain.to_lowercase().as_str(),
-            "polkadot"
-                | "kusama"
-                | "paseo"
-                | "westend"
-                | "moonbeam"
-                | "astar"
-                | "acala"
-                | "phala"
-                | "bifrost"
-        );
+    // Determine chain type using centralized logic
+    let is_substrate = Chain::is_substrate_endpoint(endpoint)
+        || Chain::from_str_case_insensitive(chain)
+            .map(|c| c.chain_type() == apex_sdk_types::ChainType::Substrate)
+            .unwrap_or(false);
 
     if is_substrate {
         deploy_substrate_contract(contract_path, chain, endpoint, account_name, dry_run).await
@@ -86,6 +77,20 @@ async fn deploy_substrate_contract(
         }
     }
 
+    // Validate contract file size
+    const MAX_CONTRACT_SIZE: u64 = 10 * 1024 * 1024; // 10 MB - reasonable limit for WASM contracts
+    let metadata =
+        std::fs::metadata(contract_path).context("Failed to read contract file metadata")?;
+
+    if metadata.len() > MAX_CONTRACT_SIZE {
+        anyhow::bail!(
+            "Contract file too large: {} bytes (max {} MB). \
+            Consider optimizing your contract or splitting functionality.",
+            metadata.len(),
+            MAX_CONTRACT_SIZE / (1024 * 1024)
+        );
+    }
+
     // Read contract file
     let spinner = indicatif::ProgressBar::new_spinner();
     spinner.set_message("Reading contract file...");
@@ -103,7 +108,7 @@ async fn deploy_substrate_contract(
             .context("Failed to read password")?;
 
         let keystore_path = crate::keystore::get_keystore_path()?;
-        let keystore = crate::keystore::Keystore::load(&keystore_path)?;
+        let mut keystore = crate::keystore::Keystore::load(&keystore_path)?;
 
         let mnemonic_bytes = keystore.get_account(&name, &password)?;
         let mnemonic = String::from_utf8(mnemonic_bytes).context("Failed to decode mnemonic")?;
@@ -276,9 +281,8 @@ async fn deploy_evm_contract(
     account_name: Option<String>,
     dry_run: bool,
 ) -> Result<()> {
-    use ethers::middleware::SignerMiddleware;
-    use ethers::prelude::*;
-    use ethers::types::transaction::eip2718::TypedTransaction;
+    use alloy::primitives::U256;
+    use apex_sdk_evm::{wallet::Wallet, EvmAdapter};
 
     let title = if dry_run {
         "Dry-Run: EVM Contract Deployment"
@@ -303,6 +307,20 @@ async fn deploy_evm_contract(
     let path = Path::new(contract_path);
     if !path.exists() {
         anyhow::bail!("Contract file not found: {}", contract_path);
+    }
+
+    // Validate contract file size
+    const MAX_CONTRACT_SIZE: u64 = 50 * 1024 * 1024; // 50 MB for EVM contracts (includes JSON metadata)
+    let metadata =
+        std::fs::metadata(contract_path).context("Failed to read contract file metadata")?;
+
+    if metadata.len() > MAX_CONTRACT_SIZE {
+        anyhow::bail!(
+            "Contract file too large: {} bytes (max {} MB). \
+            Consider optimizing your contract.",
+            metadata.len(),
+            MAX_CONTRACT_SIZE / (1024 * 1024)
+        );
     }
 
     // Check if it's bytecode (.bin) or ABI+bytecode (.json)
@@ -355,7 +373,7 @@ async fn deploy_evm_contract(
             .context("Failed to read password")?;
 
         let keystore_path = crate::keystore::get_keystore_path()?;
-        let keystore = crate::keystore::Keystore::load(&keystore_path)?;
+        let mut keystore = crate::keystore::Keystore::load(&keystore_path)?;
 
         let mnemonic_bytes = keystore.get_account(&name, &password)?;
         let mnemonic = String::from_utf8(mnemonic_bytes).context("Failed to decode mnemonic")?;
@@ -377,39 +395,42 @@ async fn deploy_evm_contract(
 
     spinner.set_message("Connecting to chain...");
 
-    // Create provider
-    let provider = Provider::<Http>::try_from(endpoint).context("Failed to create provider")?;
+    // Connect to EVM chain using apex-sdk-evm
+    let adapter = EvmAdapter::connect(endpoint)
+        .await
+        .context("Failed to connect to EVM endpoint")?;
 
-    // Create wallet from mnemonic
-    let wallet: LocalWallet = mnemonic.parse().context("Failed to parse mnemonic")?;
+    // Create wallet from mnemonic using apex-sdk-evm
+    let wallet =
+        Wallet::from_mnemonic(&mnemonic, 0).context("Failed to create wallet from mnemonic")?;
 
-    let chain_id = provider.get_chainid().await?;
-    let wallet = wallet.with_chain_id(chain_id.as_u64());
+    // Get chain ID from provider
+    let chain_id = adapter
+        .provider()
+        .get_chain_id()
+        .await
+        .context("Failed to get chain ID")?;
 
-    spinner.set_message("Preparing deployment transaction...");
+    let wallet = wallet.with_chain_id(chain_id);
 
-    // Create deployment transaction
-    let tx = TransactionRequest::new()
-        .data(contract_data.clone())
-        .from(wallet.address());
-
-    // Convert to TypedTransaction for gas estimation
-    let typed_tx: TypedTransaction = tx.clone().into();
-
-    // Estimate gas
     spinner.set_message("Estimating gas...");
-    let gas_estimate = provider
-        .estimate_gas(&typed_tx, None)
+
+    // Create transaction executor
+    let executor = adapter.transaction_executor();
+
+    // Estimate gas for deployment (to address is zero for contract creation)
+    let dummy_to = "0x0000000000000000000000000000000000000000"
+        .parse()
+        .unwrap();
+    let gas_estimate = executor
+        .estimate_gas(
+            wallet.eth_address(),
+            Some(dummy_to),
+            Some(U256::ZERO),
+            Some(contract_data.clone()),
+        )
         .await
         .context("Failed to estimate gas")?;
-
-    // Get gas price
-    let gas_price = provider.get_gas_price().await?;
-
-    // Create final transaction with gas settings
-    let _tx = tx
-        .gas(gas_estimate * 120 / 100) // Add 20% buffer
-        .gas_price(gas_price);
 
     spinner.finish_and_clear();
 
@@ -422,20 +443,19 @@ async fn deploy_evm_contract(
         contract_data.len()
     );
     println!("{}: {}", "Deployer".dimmed(), signer_name);
-    println!("{}: {:?}", "From Address".dimmed(), wallet.address());
+    println!("{}: {}", "From Address".dimmed(), wallet.address());
     println!("{}: {}", "Chain ID".dimmed(), chain_id);
-    println!("{}: {}", "Gas Estimate".dimmed(), gas_estimate);
+    println!("{}: {}", "Gas Estimate".dimmed(), gas_estimate.gas_limit);
     println!(
         "{}: {} gwei",
         "Gas Price".dimmed(),
-        ethers::utils::format_units(gas_price, "gwei").unwrap_or_default()
+        gas_estimate.gas_price_gwei()
     );
 
-    let total_cost = gas_estimate * gas_price;
     println!(
         "{}: {} ETH",
         "Est. Cost".yellow().bold(),
-        ethers::utils::format_units(total_cost, "ether").unwrap_or_default()
+        gas_estimate.total_cost_eth()
     );
 
     if dry_run {
@@ -462,7 +482,7 @@ async fn deploy_evm_contract(
         println!("  -Wait for confirmation");
         println!(
             "  -Spend ~{} ETH in gas fees",
-            ethers::utils::format_units(total_cost, "ether").unwrap_or_default()
+            gas_estimate.total_cost_eth()
         );
     } else {
         println!("\n{}", "Ready to Deploy".yellow().bold());
@@ -481,34 +501,29 @@ async fn deploy_evm_contract(
 
         println!("\n{}", "Broadcasting transaction...".cyan());
 
-        // Create client with signer
-        let client = SignerMiddleware::new(provider.clone(), wallet.clone());
+        // For contract deployment, send to zero address with bytecode as data
+        let zero_address = "0x0000000000000000000000000000000000000000"
+            .parse()
+            .unwrap();
 
-        // Build the final transaction
-        let tx = TransactionRequest::new()
-            .data(contract_data.clone())
-            .from(wallet.address())
-            .gas(gas_estimate * 120 / 100)
-            .gas_price(gas_price);
-
-        // Send the transaction
-        let pending_tx = client
-            .send_transaction(tx, None)
+        // Send the deployment transaction
+        let tx_hash = executor
+            .send_transaction(&wallet, zero_address, U256::ZERO, Some(contract_data))
             .await
             .context("Failed to send deployment transaction")?;
 
-        let tx_hash = pending_tx.tx_hash();
         println!("{}: {:?}", "Transaction Hash".cyan(), tx_hash);
 
         // Wait for confirmation
         println!("{}", "Waiting for confirmation...".yellow());
 
-        let receipt = pending_tx
+        let receipt = executor
+            .wait_for_confirmation(tx_hash, 1)
             .await
             .context("Failed to get transaction receipt")?
             .ok_or_else(|| anyhow::anyhow!("Transaction receipt not found"))?;
 
-        // Extract contract address
+        // Extract contract address (for deployment transactions)
         let contract_address = receipt
             .contract_address
             .ok_or_else(|| anyhow::anyhow!("Contract address not found in receipt"))?;
@@ -524,21 +539,21 @@ async fn deploy_evm_contract(
         println!(
             "{}: {}",
             "Block Number".dimmed(),
-            receipt.block_number.unwrap_or_default()
+            receipt
+                .block_number
+                .map(|n| n.to_string())
+                .unwrap_or_else(|| "unknown".to_string())
         );
-        println!(
-            "{}: {}",
-            "Gas Used".dimmed(),
-            receipt.gas_used.unwrap_or_default()
-        );
+        println!("{}: {}", "Gas Used".dimmed(), receipt.gas_used);
 
-        let actual_cost =
-            receipt.gas_used.unwrap_or_default() * receipt.effective_gas_price.unwrap_or_default();
-        println!(
-            "{}: {} ETH",
-            "Actual Cost".yellow(),
-            ethers::utils::format_units(actual_cost, "ether").unwrap_or_default()
-        );
+        // Calculate actual cost
+        let gas_used = receipt.gas_used as u128;
+        let gas_price = receipt.effective_gas_price;
+        let actual_cost_wei = gas_used * gas_price;
+
+        // Format to ETH
+        let actual_cost_eth = format_wei_to_eth(actual_cost_wei);
+        println!("{}: {} ETH", "Actual Cost".yellow(), actual_cost_eth);
 
         println!("\n{}", "Next Steps:".cyan());
         println!("  -Verify contract on block explorer");
@@ -550,6 +565,24 @@ async fn deploy_evm_contract(
 }
 
 use std::io::Write;
+
+/// Format wei to ETH (helper function)
+fn format_wei_to_eth(wei: u128) -> String {
+    let eth_divisor = 10_u128.pow(18);
+    let eth_whole = wei / eth_divisor;
+    let remainder = wei % eth_divisor;
+
+    if remainder == 0 {
+        format!("{}", eth_whole)
+    } else {
+        // Format with up to 18 decimal places, trimming trailing zeros
+        let formatted = format!("{}.{:018}", eth_whole, remainder);
+        formatted
+            .trim_end_matches('0')
+            .trim_end_matches('.')
+            .to_string()
+    }
+}
 
 #[cfg(test)]
 mod tests {

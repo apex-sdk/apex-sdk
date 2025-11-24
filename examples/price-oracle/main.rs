@@ -401,13 +401,13 @@ fn current_timestamp() -> u64 {
 fn encode_oracle_update(asset: &str, price: f64) -> Vec<u8> {
     let mut data = vec![0x4F]; // oracle::update
     data.extend_from_slice(asset.as_bytes());
-    data.extend_from_slice(&(price * 100_000_000.0) as u128.to_le_bytes());
+    data.extend_from_slice(&((price * 100_000_000.0) as u128).to_le_bytes());
     data
 }
 
 fn encode_oracle_update_evm(asset: &str, price: f64) -> Vec<u8> {
     let mut data = vec![0x8a, 0xfd, 0xbc, 0x3c]; // updatePrice(string,uint256)
     data.extend_from_slice(asset.as_bytes());
-    data.extend_from_slice(&(price * 100_000_000.0) as u128.to_be_bytes()[16 - 8..]);
+    data.extend_from_slice(&((price * 100_000_000.0) as u128).to_be_bytes()[16 - 8..]);
     data
 }

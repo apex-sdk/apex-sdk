@@ -1,4 +1,4 @@
-# Apex SDK Documentation
+# Apex SDK Protocol Documentation
 
 Welcome to Apex SDK! Build cross-chain applications with confidence using Rust's type safety and performance.
 
@@ -83,7 +83,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-apex-sdk = "0.1.3"
+apex-sdk = "0.1.4"
 tokio = { version = "1.35", features = ["full"] }
 ```
 

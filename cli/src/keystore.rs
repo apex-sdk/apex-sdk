@@ -1,4 +1,27 @@
 //! Secure keystore implementation for managing accounts
+//!
+//! # Security Features
+//!
+//! - AES-256-GCM authenticated encryption
+//! - Argon2id password-based key derivation (OWASP recommended parameters)
+//! - Memory zeroing for sensitive data
+//! - Rate limiting and failed attempt tracking
+//! - Password strength validation
+//! - Restricted file permissions (Unix: 0o600)
+//!
+//! # Threat Model
+//!
+//! Protects against:
+//! - Offline brute-force attacks (via Argon2)
+//! - Memory dumps (via zeroizing)
+//! - Unauthorized file access (via permissions)
+//! - Weak passwords (via validation)
+//! - Online brute-force (via rate limiting)
+//!
+//! Does NOT protect against:
+//! - Malicious code with same user privileges
+//! - Keyloggers or memory scanners while keys are in use
+//! - Physical access to unlocked system
 
 use aes_gcm::{
     aead::{Aead, KeyInit, OsRng},
@@ -7,13 +30,32 @@ use aes_gcm::{
 use anyhow::{Context, Result};
 use argon2::{
     password_hash::{PasswordHasher, SaltString},
-    Argon2,
+    Argon2, ParamsBuilder, Version,
 };
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+use std::time::{Duration, Instant};
 use zeroize::Zeroize;
 
 const NONCE_SIZE: usize = 12;
+const KEYSTORE_VERSION: u32 = 1;
+
+// OWASP recommended Argon2 parameters (2023)
+const ARGON2_MEM_COST: u32 = 19 * 1024; // 19 MiB
+const ARGON2_TIME_COST: u32 = 2; // 2 iterations
+const ARGON2_PARALLELISM: u32 = 1; // Single thread
+
+// Rate limiting
+const MAX_FAILED_ATTEMPTS: u32 = 5;
+const LOCKOUT_DURATION_SECS: u64 = 300; // 5 minutes
+
+// Password requirements
+const MIN_PASSWORD_LENGTH: usize = 12;
+const REQUIRE_UPPERCASE: bool = true;
+const REQUIRE_LOWERCASE: bool = true;
+const REQUIRE_DIGIT: bool = true;
+const REQUIRE_SPECIAL: bool = false; // Optional for better UX
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EncryptedAccount {
@@ -24,6 +66,8 @@ pub struct EncryptedAccount {
     pub nonce: Vec<u8>,
     pub salt: Vec<u8>,
     pub created_at: u64,
+    #[serde(default)]
+    pub encryption_version: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -42,9 +86,27 @@ impl std::fmt::Display for AccountType {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Keystore {
     pub accounts: Vec<EncryptedAccount>,
+    #[serde(default = "default_version")]
+    pub version: u32,
+    #[serde(skip)]
+    failed_attempts: HashMap<String, Vec<Instant>>,
+}
+
+fn default_version() -> u32 {
+    KEYSTORE_VERSION
+}
+
+impl Default for Keystore {
+    fn default() -> Self {
+        Self {
+            accounts: Vec::new(),
+            version: KEYSTORE_VERSION,
+            failed_attempts: HashMap::new(),
+        }
+    }
 }
 
 impl Keystore {
@@ -82,6 +144,78 @@ impl Keystore {
         Ok(())
     }
 
+    /// Validate password strength
+    fn validate_password(password: &str) -> Result<()> {
+        if password.len() < MIN_PASSWORD_LENGTH {
+            anyhow::bail!(
+                "Password must be at least {} characters long (current: {})",
+                MIN_PASSWORD_LENGTH,
+                password.len()
+            );
+        }
+
+        if REQUIRE_UPPERCASE && !password.chars().any(|c| c.is_uppercase()) {
+            anyhow::bail!("Password must contain at least one uppercase letter");
+        }
+
+        if REQUIRE_LOWERCASE && !password.chars().any(|c| c.is_lowercase()) {
+            anyhow::bail!("Password must contain at least one lowercase letter");
+        }
+
+        if REQUIRE_DIGIT && !password.chars().any(|c| c.is_numeric()) {
+            anyhow::bail!("Password must contain at least one digit");
+        }
+
+        if REQUIRE_SPECIAL && !password.chars().any(|c| !c.is_alphanumeric()) {
+            anyhow::bail!("Password must contain at least one special character");
+        }
+
+        // Check against common weak passwords
+        const WEAK_PASSWORDS: &[&str] = &[
+            "password123",
+            "123456789",
+            "qwerty123",
+            "admin123",
+            "letmein123",
+            "welcome123",
+        ];
+
+        if WEAK_PASSWORDS.contains(&password.to_lowercase().as_str()) {
+            anyhow::bail!("Password is too common. Please choose a stronger password.");
+        }
+
+        Ok(())
+    }
+
+    /// Check if account is locked out due to failed attempts
+    fn is_locked_out(&mut self, account_name: &str) -> bool {
+        let now = Instant::now();
+
+        // Clean up old failed attempts
+        if let Some(attempts) = self.failed_attempts.get_mut(account_name) {
+            attempts
+                .retain(|&t| now.duration_since(t) < Duration::from_secs(LOCKOUT_DURATION_SECS));
+
+            attempts.len() >= MAX_FAILED_ATTEMPTS as usize
+        } else {
+            false
+        }
+    }
+
+    /// Record a failed decryption attempt
+    fn record_failed_attempt(&mut self, account_name: &str) {
+        let attempts = self
+            .failed_attempts
+            .entry(account_name.to_string())
+            .or_default();
+        attempts.push(Instant::now());
+    }
+
+    /// Clear failed attempts for an account (on successful access)
+    fn clear_failed_attempts(&mut self, account_name: &str) {
+        self.failed_attempts.remove(account_name);
+    }
+
     /// Encrypt and add an account
     pub fn add_account(
         &mut self,
@@ -91,6 +225,9 @@ impl Keystore {
         secret_data: &[u8],
         password: &str,
     ) -> Result<()> {
+        // Validate password strength
+        Self::validate_password(password)?;
+
         // Check if account name already exists
         if self.accounts.iter().any(|a| a.name == name) {
             anyhow::bail!("Account with name '{}' already exists", name);
@@ -107,8 +244,9 @@ impl Keystore {
             salt,
             created_at: std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
-                .unwrap()
+                .context("Failed to get system time")?
                 .as_secs(),
+            encryption_version: KEYSTORE_VERSION,
         };
 
         self.accounts.push(account);
@@ -116,19 +254,57 @@ impl Keystore {
     }
 
     /// Decrypt and retrieve account data
-    pub fn get_account(&self, name: &str, password: &str) -> Result<Vec<u8>> {
+    pub fn get_account(&mut self, name: &str, password: &str) -> Result<Vec<u8>> {
+        // Check for lockout
+        if self.is_locked_out(name) {
+            anyhow::bail!(
+                "Account '{}' is temporarily locked due to too many failed attempts. \
+                 Please wait {} minutes before trying again.",
+                name,
+                LOCKOUT_DURATION_SECS / 60
+            );
+        }
+
         let account = self
             .accounts
             .iter()
             .find(|a| a.name == name)
             .ok_or_else(|| anyhow::anyhow!("Account '{}' not found", name))?;
 
-        decrypt_data(
+        // Attempt decryption
+        match decrypt_data(
             &account.encrypted_data,
             &account.nonce,
             &account.salt,
             password,
-        )
+        ) {
+            Ok(data) => {
+                // Success - clear failed attempts
+                self.clear_failed_attempts(name);
+                Ok(data)
+            }
+            Err(_e) => {
+                // Failed - record attempt
+                self.record_failed_attempt(name);
+
+                // Check if now locked out
+                let remaining_attempts = MAX_FAILED_ATTEMPTS.saturating_sub(
+                    self.failed_attempts.get(name).map(|v| v.len()).unwrap_or(0) as u32,
+                );
+
+                if remaining_attempts > 0 {
+                    Err(anyhow::anyhow!(
+                        "Incorrect password. {} attempt(s) remaining before lockout.",
+                        remaining_attempts
+                    ))
+                } else {
+                    Err(anyhow::anyhow!(
+                        "Incorrect password. Account is now locked for {} minutes.",
+                        LOCKOUT_DURATION_SECS / 60
+                    ))
+                }
+            }
+        }
     }
 
     /// List all account names
@@ -155,8 +331,25 @@ impl Keystore {
 }
 
 /// Derive encryption key from password using Argon2 with a given salt
+///
+/// Uses OWASP recommended Argon2id parameters (2023):
+/// - Memory cost: 19 MiB
+/// - Time cost: 2 iterations
+/// - Parallelism: 1 thread
 fn derive_key(password: &str, salt: &SaltString) -> Result<[u8; 32]> {
-    let argon2 = Argon2::default();
+    // Configure Argon2 with OWASP recommended parameters
+    let params = ParamsBuilder::new()
+        .m_cost(ARGON2_MEM_COST)
+        .t_cost(ARGON2_TIME_COST)
+        .p_cost(ARGON2_PARALLELISM)
+        .build()
+        .map_err(|e| anyhow::anyhow!("Failed to build Argon2 parameters: {}", e))?;
+
+    let argon2 = Argon2::new(
+        argon2::Algorithm::Argon2id, // Most secure variant
+        Version::V0x13,              // Latest version
+        params,
+    );
 
     let password_hash = argon2
         .hash_password(password.as_bytes(), salt)
@@ -269,7 +462,7 @@ mod tests {
     #[test]
     fn test_keystore_add_get() {
         let mut keystore = Keystore::default();
-        let password = "test_pass";
+        let password = "TestPassword123";
 
         keystore
             .add_account(
@@ -288,6 +481,7 @@ mod tests {
     #[test]
     fn test_keystore_duplicate_name() {
         let mut keystore = Keystore::default();
+        let password = "TestPassword123";
 
         keystore
             .add_account(
@@ -295,7 +489,7 @@ mod tests {
                 AccountType::Substrate,
                 "addr1".to_string(),
                 b"data1",
-                "pass",
+                password,
             )
             .unwrap();
 
@@ -304,7 +498,7 @@ mod tests {
             AccountType::Evm,
             "addr2".to_string(),
             b"data2",
-            "pass",
+            password,
         );
 
         assert!(result.is_err());
@@ -313,6 +507,7 @@ mod tests {
     #[test]
     fn test_keystore_remove() {
         let mut keystore = Keystore::default();
+        let password = "TestPassword123";
 
         keystore
             .add_account(
@@ -320,7 +515,7 @@ mod tests {
                 AccountType::Substrate,
                 "addr".to_string(),
                 b"data",
-                "pass",
+                password,
             )
             .unwrap();
 

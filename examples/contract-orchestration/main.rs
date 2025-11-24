@@ -99,7 +99,9 @@ async fn main() -> Result<()> {
 
     println!("  Transaction built:");
     println!("    Gas Limit: 200,000");
-    println!("    Data: 0x{}", hex::encode(&swap_tx.data[..20.min(swap_tx.data.len())]));
+    if let Some(data) = &swap_tx.data {
+        println!("    Data: 0x{}", hex::encode(&data[..20.min(data.len())]));
+    };
 
     // Execute the swap (in production)
     let swap_result = sdk.execute(swap_tx).await?;
@@ -224,7 +226,7 @@ async fn main() -> Result<()> {
 /// Helper function to encode EVM swap call data
 /// In production, use the contract's ABI
 fn encode_swap_call(token_in: &str, token_out: &str, amount: u128) -> Vec<u8> {
-    // Simplified encoding - in production use ethers-rs or alloy
+    // Simplified encoding - in production use Alloy's sol! macro for type-safe ABI encoding
     let mut data = vec![0x38, 0xed, 0x17, 0x39]; // swapExactTokensForTokens selector
     data.extend_from_slice(&amount.to_be_bytes()[8..]);
     // ... additional encoding would go here

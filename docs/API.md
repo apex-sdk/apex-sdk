@@ -1,6 +1,6 @@
-# Apex SDK API Reference
+# Apex SDK Protocol API Reference - Complete Developer Documentation
 
-Complete API reference for Apex SDK v0.1.3
+Comprehensive API reference for Apex SDK Protocol v0.1.4 - Your guide to building cross-chain blockchain applications with Rust, Substrate, and EVM.
 
 ## Table of Contents
 
@@ -11,6 +11,7 @@ Complete API reference for Apex SDK v0.1.3
 - [Addresses](#addresses)
 - [Chains](#chains)
 - [Error Types](#error-types)
+- [Feature Flags](#feature-flags)
 
 ## Core Types
 
@@ -641,17 +642,117 @@ if let Some(dest_tx) = result.destination_tx_hash {
 
 ## Feature Flags
 
-Currently, Apex SDK does not use feature flags. All functionality is available by default.
+Apex SDK provides optional feature flags to enable specific functionality:
 
----
+### Core Features
+
+#### `apex-sdk-core`
+
+**`mocks`**
+- Enables mock implementations for testing
+- Includes tokio runtime for mock testing
+- Useful for unit testing and integration testing
+
+```toml
+[dependencies]
+apex-sdk-core = { version = "0.1.4", features = ["mocks"] }
+```
+
+### Substrate Features
+
+#### `apex-sdk-substrate`
+
+**`typed`**
+- Base feature for typed metadata support
+- Enables compile-time type safety for runtime interactions
+- Required by all chain-specific typed features
+
+**`typed-polkadot`**
+- Typed metadata for Polkadot relay chain
+- Includes `typed` feature automatically
+- Provides compile-time verified Polkadot runtime types
+
+**`typed-kusama`**
+- Typed metadata for Kusama canary network
+- Includes `typed` feature automatically
+- Provides compile-time verified Kusama runtime types
+
+**`typed-westend`**
+- Typed metadata for Westend testnet
+- Includes `typed` feature automatically
+- Provides compile-time verified Westend runtime types
+
+```toml
+[dependencies]
+# Enable typed metadata for Polkadot
+apex-sdk-substrate = { version = "0.1.4", features = ["typed-polkadot"] }
+
+# Enable multiple chains
+apex-sdk-substrate = { version = "0.1.4", features = ["typed-polkadot", "typed-kusama"] }
+```
+
+### Default Configuration
+
+By default, all crates use minimal dependencies. Enable features as needed for your use case:
+
+```toml
+[dependencies]
+# Minimal configuration (default)
+apex-sdk = "0.1.4"
+
+# With testing support
+apex-sdk-core = { version = "0.1.4", features = ["mocks"] }
+
+# With typed Substrate metadata
+apex-sdk-substrate = { version = "0.1.4", features = ["typed-polkadot"] }
+```
+
+### Usage Examples
+
+#### Testing with Mocks
+
+```rust
+#[cfg(feature = "mocks")]
+use apex_sdk_core::mocks::MockAdapter;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_with_mock() {
+        let mock_adapter = MockAdapter::new();
+        // Test your code with mock adapter
+    }
+}
+```
+
+#### Typed Metadata for Polkadot
+
+```rust
+#[cfg(feature = "typed-polkadot")]
+use apex_sdk_substrate::polkadot;
+
+async fn polkadot_example() -> Result<()> {
+    let adapter = SubstrateAdapter::connect("wss://polkadot.api.onfinality.io/public-ws").await?;
+
+    // Use typed metadata for compile-time safety
+    #[cfg(feature = "typed-polkadot")]
+    {
+        let balance = adapter.typed_balance::<polkadot::Runtime>(&address).await?;
+    }
+
+    Ok(())
+}
+```
+
 
 ## Version Compatibility
 
-- **Rust**: 1.75 or higher (MSRV)
+- **Rust**: 1.85 or higher (MSRV)
 - **Edition**: 2021
 - **Dependencies**: See `Cargo.toml` for specific versions
 
----
 
 ## Further Reading
 
@@ -659,8 +760,3 @@ Currently, Apex SDK does not use feature flags. All functionality is available b
 - [Examples](examples/)
 - [Contributing Guide](CONTRIBUTING.md)
 - [Security Policy](SECURITY.md)
-
----
-
-**Last Updated**: 2025-11-01
-**Version**: 0.1.3

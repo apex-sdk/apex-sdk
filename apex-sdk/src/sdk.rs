@@ -208,7 +208,8 @@ impl ApexSDK {
             | Chain::Acala
             | Chain::Phala
             | Chain::Bifrost
-            | Chain::Westend => self.substrate_adapter.is_some(),
+            | Chain::Westend
+            | Chain::Paseo => self.substrate_adapter.is_some(),
             Chain::Ethereum
             | Chain::Polygon
             | Chain::BinanceSmartChain
@@ -235,7 +236,8 @@ impl ApexSDK {
             | Chain::Acala
             | Chain::Phala
             | Chain::Bifrost
-            | Chain::Westend => self
+            | Chain::Westend
+            | Chain::Paseo => self
                 .substrate()?
                 .get_transaction_status(tx_hash)
                 .await
@@ -291,7 +293,8 @@ impl ApexSDK {
             | Chain::Acala
             | Chain::Phala
             | Chain::Bifrost
-            | Chain::Westend => {
+            | Chain::Westend
+            | Chain::Paseo => {
                 self.substrate()?;
             }
             Chain::Ethereum

@@ -47,6 +47,13 @@ pub use xcm::{
     XcmExecutor, XcmTransferType, XcmVersion,
 };
 
+/// Number of block confirmations required to consider a transaction finalized
+/// In Substrate, finalization typically occurs after ~10-12 blocks depending on the chain
+const FINALIZATION_THRESHOLD: u32 = 10;
+
+/// Maximum number of blocks to search when looking up transaction history
+const MAX_BLOCK_SEARCH_DEPTH: u32 = 100;
+
 /// Substrate adapter error
 #[derive(Error, Debug)]
 pub enum Error {
@@ -133,6 +140,17 @@ impl ChainConfig {
             ss58_prefix: 42,
             token_symbol: "WND".to_string(),
             token_decimals: 12,
+        }
+    }
+
+    /// Create configuration for Paseo (testnet)
+    pub fn paseo() -> Self {
+        Self {
+            name: "Paseo".to_string(),
+            endpoint: "wss://paseo.rpc.amforc.com".to_string(),
+            ss58_prefix: 42,
+            token_symbol: "PAS".to_string(),
+            token_decimals: 10,
         }
     }
 
@@ -251,13 +269,13 @@ impl SubstrateAdapter {
 
         let latest_number = latest_block.number();
 
-        // Search backwards through recent blocks (up to 100 blocks)
+        // Search backwards through recent blocks
         let mut blocks_to_check = vec![];
-        let start_num = latest_number.saturating_sub(100);
+        let start_num = latest_number.saturating_sub(MAX_BLOCK_SEARCH_DEPTH);
 
         // Subscribe to finalized blocks and iterate backwards
         let mut current_block = latest_block;
-        for _ in 0..100 {
+        for _ in 0..MAX_BLOCK_SEARCH_DEPTH {
             blocks_to_check.push((current_block.number(), current_block.hash()));
 
             // Try to get parent block
@@ -326,8 +344,8 @@ impl SubstrateAdapter {
                     let confirmations = latest_number - block_num;
 
                     return if success {
-                        // If confirmations >= 10, consider it finalized (Substrate-specific)
-                        if confirmations >= 10 {
+                        // Check if transaction has enough confirmations to be considered finalized
+                        if confirmations >= FINALIZATION_THRESHOLD {
                             Ok(TransactionStatus::Finalized {
                                 block_hash: block_hash.to_string(),
                                 block_number: block_num as u64,
@@ -503,6 +521,12 @@ mod tests {
         assert_eq!(kusama.name, "Kusama");
         assert_eq!(kusama.ss58_prefix, 2);
         assert_eq!(kusama.token_symbol, "KSM");
+
+        let paseo = ChainConfig::paseo();
+        assert_eq!(paseo.name, "Paseo");
+        assert_eq!(paseo.ss58_prefix, 42);
+        assert_eq!(paseo.token_symbol, "PAS");
+        assert_eq!(paseo.endpoint, "wss://paseo.rpc.amforc.com");
     }
 
     #[tokio::test]

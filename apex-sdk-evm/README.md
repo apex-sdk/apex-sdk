@@ -6,6 +6,8 @@
 
 EVM blockchain adapter for the Apex SDK, providing seamless interaction with Ethereum and EVM-compatible chains.
 
+> **Note**: This package has been fully migrated from ethers-rs to [Alloy](https://alloy.rs/). Examples in this README are being updated. For the latest API usage, see the [source code](src/) and [tests](tests/).
+
 ## Overview
 
 `apex-sdk-evm` enables developers to interact with Ethereum and other EVM-compatible blockchains through a unified, type-safe Rust API. It supports HTTP and WebSocket connections, transaction building, smart contract interaction, and wallet management.
@@ -13,10 +15,12 @@ EVM blockchain adapter for the Apex SDK, providing seamless interaction with Eth
 ## Features
 
 - **Multi-Chain Support**: Ethereum, Polygon, BSC, Arbitrum, Optimism, and other EVM chains
+- **Modern Alloy Integration**: Built on [Alloy](https://alloy.rs/), the modern Ethereum library
 - **Connection Management**: HTTP and WebSocket provider support with connection pooling
-- **Wallet Integration**: Key management, transaction signing, and account creation
-- **Smart Contracts**: Type-safe contract interaction and deployment
-- **Transaction Building**: Comprehensive transaction builder with gas estimation
+- **Wallet Integration**: BIP-39 mnemonic support, private key management, transaction signing
+- **Transaction Building**: EIP-1559 and legacy transactions with automatic gas estimation
+- **Message Signing**: EIP-191 (personal sign) and EIP-712 (typed data) support
+- **Type Safety**: Compile-time guarantees with Alloy's strong typing
 - **Caching Layer**: Intelligent caching for improved performance
 - **Metrics**: Built-in monitoring and observability
 
@@ -35,17 +39,21 @@ tokio = { version = "1.0", features = ["full"] }
 ### Basic Connection
 
 ```rust
-use apex_sdk_evm::{EvmAdapter, ProviderConfig};
+use apex_sdk_evm::EvmAdapter;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Connect to Ethereum mainnet
-    let adapter = EvmAdapter::new("https://eth.llamarpc.com");
-    
+    let adapter = EvmAdapter::connect("https://eth.llamarpc.com").await?;
+
     // Get latest block number
-    let block_number = adapter.get_latest_block().await?;
+    let block_number = adapter.get_block_number().await?;
     println!("Latest block: {}", block_number);
-    
+
+    // Get chain ID
+    let chain_id = adapter.get_chain_id().await?;
+    println!("Chain ID: {}", chain_id);
+
     Ok(())
 }
 ```
@@ -53,15 +61,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 ### Using WebSocket
 
 ```rust
-use apex_sdk_evm::{EvmAdapter, ProviderConfig};
+use apex_sdk_evm::EvmAdapter;
 
-let config = ProviderConfig::websocket("wss://eth.llamarpc.com");
-let adapter = EvmAdapter::with_config(config).await?;
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Connect via WebSocket
+    let adapter = EvmAdapter::connect("wss://eth.llamarpc.com").await?;
 
-// Subscribe to new blocks
-let mut stream = adapter.subscribe_blocks().await?;
-while let Some(block) = stream.next().await {
-    println!("New block: {}", block.number);
+    // Query blockchain data
+    let block_number = adapter.get_block_number().await?;
+    println!("Latest block: {}", block_number);
+
+    Ok(())
 }
 ```
 
@@ -108,8 +119,8 @@ println!("Transaction sent: {}", hash);
 ### Calling Contract Methods
 
 ```rust
-use apex_sdk_evm::{Contract, EvmAdapter};
-use ethers::abi::Abi;
+use apex_sdk_evm::EvmAdapter;
+use alloy::primitives::Address;
 
 let adapter = EvmAdapter::new("https://eth.llamarpc.com");
 

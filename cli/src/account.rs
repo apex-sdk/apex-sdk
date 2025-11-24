@@ -73,7 +73,7 @@ fn generate_substrate_account(name: Option<String>) -> Result<()> {
 /// Generate an EVM account
 fn generate_evm_account(name: Option<String>) -> Result<()> {
     use ::rand::RngCore;
-    use ethers::prelude::*;
+    use alloy::signers::local::{coins_bip39::English, MnemonicBuilder};
 
     // Generate random entropy (16 bytes = 128 bits = 12 words)
     let mut entropy = [0u8; 16];
@@ -84,12 +84,12 @@ fn generate_evm_account(name: Option<String>) -> Result<()> {
         bip39::Mnemonic::from_entropy(&entropy).context("Failed to generate mnemonic")?;
     let mnemonic_phrase = mnemonic.to_string();
 
-    // Generate wallet from mnemonic using MnemonicBuilder
-    let wallet_from_mnemonic = MnemonicBuilder::<coins_bip39::English>::default()
+    // Generate wallet from mnemonic using Alloy
+    let wallet = MnemonicBuilder::<English>::default()
         .phrase(mnemonic_phrase.as_str())
         .build()
         .context("Failed to build wallet from mnemonic")?;
-    let address = format!("{:?}", wallet_from_mnemonic.address());
+    let address = format!("{:?}", wallet.address());
 
     // Display the account information
     println!("\n{}", "EVM Account Generated".green().bold());
@@ -119,6 +119,8 @@ fn generate_evm_account(name: Option<String>) -> Result<()> {
 
 /// Import an account from mnemonic
 pub fn import_account(mnemonic: &str, account_type: &str, name: String) -> Result<()> {
+    use alloy::signers::local::{coins_bip39::English, MnemonicBuilder};
+
     // Validate mnemonic
     let mnemonic_obj: bip39::Mnemonic = mnemonic.parse().context("Invalid mnemonic phrase")?;
 
@@ -132,8 +134,7 @@ pub fn import_account(mnemonic: &str, account_type: &str, name: String) -> Resul
             save_account_interactive(name, AccountType::Substrate, address, mnemonic)?;
         }
         "evm" | "ethereum" | "eth" => {
-            use ethers::prelude::*;
-            let wallet = MnemonicBuilder::<coins_bip39::English>::default()
+            let wallet = MnemonicBuilder::<English>::default()
                 .phrase(mnemonic)
                 .build()
                 .context("Failed to build wallet from mnemonic")?;
@@ -241,7 +242,7 @@ pub fn list_accounts() -> Result<()> {
 /// Export account mnemonic
 pub fn export_account(name: &str) -> Result<()> {
     let keystore_path = crate::keystore::get_keystore_path()?;
-    let keystore = Keystore::load(&keystore_path)?;
+    let mut keystore = Keystore::load(&keystore_path)?;
 
     if !keystore.has_account(name) {
         anyhow::bail!("Account '{}' not found", name);

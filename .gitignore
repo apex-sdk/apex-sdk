@@ -1,5 +1,6 @@
 # Rust
 /target/
+examples/**/target/
 **/*.rs.bk
 *.pdb
 Cargo.lock

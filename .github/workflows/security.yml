@@ -77,7 +77,9 @@ jobs:
         run: cargo install --locked cargo-outdated
 
       - name: Check for outdated dependencies
-        run: cargo outdated --exit-code 1 || echo "Some dependencies are outdated"
+        run: |
+          echo "Checking root dependencies only (transitive deps are managed by upstream crates)..."
+          cargo outdated --root-deps-only --exit-code 1 || echo "Some direct dependencies are outdated"
 
   # Scan for common security issues
   cargo-deny:

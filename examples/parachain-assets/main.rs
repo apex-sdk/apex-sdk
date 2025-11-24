@@ -197,9 +197,9 @@ async fn main() -> Result<()> {
         let transfer_tx = sdk
             .transaction()
             .from_substrate_account(creator)
-            .to_substrate_account(recipient)
+            .to_substrate_account(*recipient)
             .amount(*amount)
-            .with_data(encode_transfer_asset(asset_id, recipient, *amount))
+            .with_data(encode_transfer_asset(asset_id, *recipient, *amount))
             .build()?;
 
         let transfer_result = sdk.execute(transfer_tx).await?;

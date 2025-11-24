@@ -1,8 +1,8 @@
-# Apex SDK Development Roadmap
+# Apex SDK Protocol Development Roadmap
 
 > Strategic plan for evolving Apex SDK into the industry-standard cross-chain development toolkit
 
-## Current Status (v0.1.3)
+## Current Status (v0.1.4)
 
 ### Completed Features
 - Core SDK architecture with Substrate and EVM adapters
@@ -316,7 +316,7 @@
 
 ## Success Metrics
 
-### Foundation Phase Targets
+### Phase 1 Targets
 - 100% of documented CLI features implemented
 -  85%+ test coverage
 -  <100ms average SDK initialization
@@ -329,18 +329,20 @@
 -  Active community engagement and contributions
 -  Recognition as a reliable cross-chain tool
 
-### Enterprise Phase Targets
--  Enterprise clients using SDK in production
--  Professional security audit validation
--  High-availability production deployments
--  Multi-language SDK ecosystem
--  Industry recognition and partnerships
+### Phase 3 Targets
+- Enterprise clients using SDK
+- Professional security audit passed
+- 99.9% uptime for production apps
+- Multi-language SDK support
+- Industry recognition
 
-### Innovation Phase Targets
--  Support for emerging blockchain ecosystems
--  AI-powered optimization features
--  Contribution to industry standards
--  Leading cross-chain development toolkit
+### Phase 4 Targets
+- 10+ blockchain ecosystems
+- AI-powered features live
+- Decentralized infrastructure
+- Industry standard status
+
+---
 
 ## Community Priorities
 

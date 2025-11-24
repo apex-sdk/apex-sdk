@@ -43,6 +43,9 @@ impl Default for Config {
     fn default() -> Self {
         let mut endpoints = std::collections::HashMap::new();
 
+        // Default chain configuration
+        const DEFAULT_CHAIN: &str = "paseo";
+
         // Substrate mainnets
         endpoints.insert(
             "polkadot".to_string(),
@@ -81,9 +84,15 @@ impl Default for Config {
             "https://ethereum-sepolia-rpc.publicnode.com".to_string(),
         );
 
+        // Get default endpoint from the map to avoid duplication
+        let default_endpoint = endpoints
+            .get(DEFAULT_CHAIN)
+            .cloned()
+            .expect("Default chain must have an endpoint configured");
+
         Self {
-            default_chain: "paseo".to_string(),
-            default_endpoint: "wss://paseo.rpc.amforc.com".to_string(),
+            default_chain: DEFAULT_CHAIN.to_string(),
+            default_endpoint,
             default_account: None,
             endpoints,
             preferences: Preferences::default(),

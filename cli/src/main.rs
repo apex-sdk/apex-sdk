@@ -860,45 +860,38 @@ async fn get_chain_info(chain: &str, endpoint: &str) -> anyhow::Result<()> {
         );
     } else {
         // EVM chain info
-        use ethers::prelude::*;
+        use alloy::providers::{Provider, ProviderBuilder};
+        use alloy::rpc::types::BlockNumberOrTag;
 
         let provider =
-            Provider::<Http>::try_from(endpoint).context("Failed to create EVM provider")?;
+            ProviderBuilder::new().connect_http(endpoint.parse().context("Invalid endpoint URL")?);
 
         spinner.set_message("Fetching chain data...");
 
         // Get chain ID
-        let chain_id = provider.get_chainid().await?;
+        let chain_id = provider.get_chain_id().await?;
 
         // Get latest block number
         let block_number = provider.get_block_number().await?;
 
         // Get latest block
         let block = provider
-            .get_block(block_number)
+            .get_block_by_number(BlockNumberOrTag::Latest)
             .await?
             .ok_or_else(|| anyhow::anyhow!("Failed to fetch latest block"))?;
-
-        // Get network version
-        let network_version = provider.get_net_version().await?;
 
         spinner.finish_and_clear();
 
         println!("{}", "Network Information:".yellow().bold());
         println!("  {}: {}", "Chain ID".cyan(), chain_id);
-        println!("  {}: {}", "Network Version".dimmed(), network_version);
         println!("  {}: {}", "Block Height".cyan(), block_number);
-        println!(
-            "  {}: {:?}",
-            "Block Hash".dimmed(),
-            block.hash.unwrap_or_default()
-        );
+        println!("  {}: {:?}", "Block Hash".dimmed(), block.header.hash);
         println!();
 
         println!("{}", "Block Details:".yellow().bold());
-        println!("  {}: {}", "Timestamp".dimmed(), block.timestamp);
-        println!("  {}: {}", "Gas Limit".dimmed(), block.gas_limit);
-        println!("  {}: {}", "Gas Used".dimmed(), block.gas_used);
+        println!("  {}: {}", "Timestamp".dimmed(), block.header.timestamp);
+        println!("  {}: {}", "Gas Limit".dimmed(), block.header.gas_limit);
+        println!("  {}: {}", "Gas Used".dimmed(), block.header.gas_used);
         println!(
             "  {}: {}",
             "Transactions".dimmed(),
@@ -906,7 +899,7 @@ async fn get_chain_info(chain: &str, endpoint: &str) -> anyhow::Result<()> {
         );
 
         // Determine network name from chain ID
-        let network_name = match chain_id.as_u64() {
+        let network_name = match chain_id {
             1 => "Ethereum Mainnet",
             5 => "Goerli Testnet",
             11155111 => "Sepolia Testnet",
@@ -966,11 +959,11 @@ async fn check_chain_health(endpoint: &str) -> anyhow::Result<()> {
         println!("  {}: Healthy", "Status".green().bold());
     } else {
         // EVM health check
-        use ethers::prelude::*;
+        use alloy::providers::{Provider, ProviderBuilder};
 
         let start = Instant::now();
         let provider =
-            Provider::<Http>::try_from(endpoint).context("Failed to create EVM provider")?;
+            ProviderBuilder::new().connect_http(endpoint.parse().context("Invalid endpoint URL")?);
 
         spinner.set_message("Fetching chain data...");
 
@@ -978,7 +971,7 @@ async fn check_chain_health(endpoint: &str) -> anyhow::Result<()> {
         let block_number = provider.get_block_number().await?;
 
         // Try to get chain ID
-        let chain_id = provider.get_chainid().await?;
+        let chain_id = provider.get_chain_id().await?;
 
         let latency = start.elapsed();
 

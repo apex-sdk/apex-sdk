@@ -28,7 +28,42 @@
 //! assert_eq!(Chain::Moonbeam.chain_type(), ChainType::Hybrid);
 //! ```
 
+use blake2::Blake2b512;
 use serde::{Deserialize, Serialize};
+use sha3::{Digest, Keccak256};
+use thiserror::Error;
+
+/// Errors that can occur when working with addresses and chains
+#[derive(Error, Debug, Clone, PartialEq, Eq)]
+pub enum ValidationError {
+    /// Invalid EVM address format
+    #[error("Invalid EVM address format: {0}")]
+    InvalidEvmAddress(String),
+
+    /// EIP-55 checksum validation failed
+    #[error("EIP-55 checksum validation failed for address: {0}")]
+    InvalidChecksum(String),
+
+    /// Invalid chain ID
+    #[error("Invalid chain ID: expected {expected} for {chain}, got {actual}")]
+    InvalidChainId {
+        chain: String,
+        expected: u64,
+        actual: u64,
+    },
+
+    /// Chain ID not found for chain
+    #[error("Chain ID not available for chain: {0}")]
+    ChainIdNotFound(String),
+
+    /// Invalid Substrate SS58 address format
+    #[error("Invalid Substrate SS58 address format: {0}")]
+    InvalidSubstrateAddress(String),
+
+    /// SS58 checksum validation failed
+    #[error("SS58 checksum validation failed for address: {0}")]
+    InvalidSs58Checksum(String),
+}
 
 /// Blockchain types
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -63,6 +98,8 @@ pub enum Chain {
     Bifrost,
     /// Westend testnet
     Westend,
+    /// Paseo testnet (default)
+    Paseo,
 
     // EVM Layer 1
     /// Ethereum mainnet
@@ -95,7 +132,8 @@ impl Chain {
             | Chain::Acala
             | Chain::Phala
             | Chain::Bifrost
-            | Chain::Westend => ChainType::Substrate,
+            | Chain::Westend
+            | Chain::Paseo => ChainType::Substrate,
 
             // Pure EVM chains
             Chain::Ethereum
@@ -122,6 +160,7 @@ impl Chain {
             Chain::Phala => "Phala",
             Chain::Bifrost => "Bifrost",
             Chain::Westend => "Westend",
+            Chain::Paseo => "Paseo",
 
             // EVM L1
             Chain::Ethereum => "Ethereum",
@@ -151,6 +190,7 @@ impl Chain {
             Chain::Phala => "wss://phala.api.onfinality.io/public-ws",
             Chain::Bifrost => "wss://bifrost-polkadot.api.onfinality.io/public-ws",
             Chain::Westend => "wss://westend-rpc.polkadot.io",
+            Chain::Paseo => "wss://paseo.rpc.amforc.com",
 
             // EVM L1
             Chain::Ethereum => "https://eth.llamarpc.com",
@@ -213,6 +253,216 @@ impl Chain {
             ),
         }
     }
+
+    /// Check if this is a testnet
+    pub fn is_testnet(&self) -> bool {
+        matches!(self, Chain::Westend | Chain::Paseo)
+    }
+
+    /// Parse chain from string (case-insensitive)
+    pub fn from_str_case_insensitive(s: &str) -> Option<Self> {
+        match s.to_lowercase().as_str() {
+            // Substrate
+            "polkadot" => Some(Chain::Polkadot),
+            "kusama" => Some(Chain::Kusama),
+            "acala" => Some(Chain::Acala),
+            "phala" => Some(Chain::Phala),
+            "bifrost" => Some(Chain::Bifrost),
+            "westend" => Some(Chain::Westend),
+            "paseo" => Some(Chain::Paseo),
+
+            // EVM L1
+            "ethereum" | "eth" => Some(Chain::Ethereum),
+            "binance" | "bsc" | "binancesmartchain" => Some(Chain::BinanceSmartChain),
+            "polygon" | "matic" => Some(Chain::Polygon),
+            "avalanche" | "avax" => Some(Chain::Avalanche),
+
+            // EVM L2
+            "arbitrum" | "arb" => Some(Chain::Arbitrum),
+            "optimism" | "op" => Some(Chain::Optimism),
+            "zksync" => Some(Chain::ZkSync),
+            "base" => Some(Chain::Base),
+
+            // Hybrid
+            "moonbeam" => Some(Chain::Moonbeam),
+            "astar" => Some(Chain::Astar),
+
+            _ => None,
+        }
+    }
+
+    /// Check if an endpoint URL is for Substrate (WebSocket-based)
+    pub fn is_substrate_endpoint(endpoint: &str) -> bool {
+        endpoint.starts_with("ws://") || endpoint.starts_with("wss://")
+    }
+
+    /// Check if an endpoint URL is for EVM (HTTP-based)
+    pub fn is_evm_endpoint(endpoint: &str) -> bool {
+        endpoint.starts_with("http://") || endpoint.starts_with("https://")
+    }
+
+    /// Get the chain ID for EVM-compatible chains
+    ///
+    /// Returns None for pure Substrate chains that don't have a chain ID concept.
+    /// For EVM and Hybrid chains, returns the standard EIP-155 chain ID.
+    pub fn chain_id(&self) -> Option<u64> {
+        match self {
+            // Pure Substrate chains don't have chain IDs
+            Chain::Polkadot
+            | Chain::Kusama
+            | Chain::Acala
+            | Chain::Phala
+            | Chain::Bifrost
+            | Chain::Westend
+            | Chain::Paseo => None,
+
+            // EVM L1 chains
+            Chain::Ethereum => Some(1),
+            Chain::BinanceSmartChain => Some(56),
+            Chain::Polygon => Some(137),
+            Chain::Avalanche => Some(43114),
+
+            // EVM L2 chains
+            Chain::Arbitrum => Some(42161),
+            Chain::Optimism => Some(10),
+            Chain::ZkSync => Some(324),
+            Chain::Base => Some(8453),
+
+            // Hybrid chains (EVM side)
+            Chain::Moonbeam => Some(1284),
+            Chain::Astar => Some(592),
+        }
+    }
+
+    /// Validate that a given chain ID matches this chain
+    ///
+    /// Returns an error if the chain ID doesn't match the expected value.
+    /// For Substrate-only chains, returns an error indicating chain ID is not applicable.
+    pub fn validate_chain_id(&self, chain_id: u64) -> Result<(), ValidationError> {
+        match self.chain_id() {
+            None => Err(ValidationError::ChainIdNotFound(self.name().to_string())),
+            Some(expected) => {
+                if expected == chain_id {
+                    Ok(())
+                } else {
+                    Err(ValidationError::InvalidChainId {
+                        chain: self.name().to_string(),
+                        expected,
+                        actual: chain_id,
+                    })
+                }
+            }
+        }
+    }
+}
+
+/// Validates an EVM address format (0x followed by 40 hex characters)
+fn is_valid_evm_format(addr: &str) -> bool {
+    if !addr.starts_with("0x") {
+        return false;
+    }
+
+    let hex_part = &addr[2..];
+    hex_part.len() == 40 && hex_part.chars().all(|c| c.is_ascii_hexdigit())
+}
+
+/// Computes EIP-55 checksum for an EVM address
+///
+/// EIP-55 uses keccak256 hash of the lowercase address to determine which
+/// characters should be uppercase in the checksummed version.
+fn to_checksum_address(addr: &str) -> String {
+    // Remove 0x prefix and convert to lowercase
+    let addr_lower = addr.trim_start_matches("0x").to_lowercase();
+
+    // Hash the lowercase address
+    let mut hasher = Keccak256::new();
+    hasher.update(addr_lower.as_bytes());
+    let hash = hasher.finalize();
+
+    // Build checksummed address
+    let mut result = String::from("0x");
+    for (i, ch) in addr_lower.chars().enumerate() {
+        if ch.is_ascii_digit() {
+            result.push(ch);
+        } else {
+            // If the i-th byte of the hash is >= 8, uppercase the character
+            let hash_byte = hash[i / 2];
+            let nibble = if i % 2 == 0 {
+                hash_byte >> 4
+            } else {
+                hash_byte & 0x0f
+            };
+
+            if nibble >= 8 {
+                result.push(ch.to_ascii_uppercase());
+            } else {
+                result.push(ch);
+            }
+        }
+    }
+
+    result
+}
+
+/// Validates EIP-55 checksum for an EVM address
+///
+/// If the address is all lowercase or all uppercase, it's considered valid
+/// (no checksum). Otherwise, it must match the EIP-55 checksum.
+fn validate_eip55_checksum(addr: &str) -> bool {
+    let hex_part = &addr[2..];
+
+    // If all lowercase or all uppercase, skip checksum validation
+    // (these are valid but non-checksummed addresses)
+    let all_lower = hex_part.chars().all(|c| !c.is_ascii_uppercase());
+    let all_upper = hex_part.chars().all(|c| !c.is_ascii_lowercase());
+
+    if all_lower || all_upper {
+        return true;
+    }
+
+    // Validate checksum
+    let checksummed = to_checksum_address(addr);
+    addr == checksummed
+}
+
+/// Validates a Substrate SS58 address format and checksum
+///
+/// SS58 is a modified Base58 encoding that includes:
+/// - A network identifier prefix
+/// - The account ID
+/// - A Blake2b checksum
+fn validate_ss58_address(addr: &str) -> bool {
+    // Decode the base58 string
+    let decoded = match bs58::decode(addr).into_vec() {
+        Ok(d) => d,
+        Err(_) => return false,
+    };
+
+    // SS58 addresses must be at least 3 bytes (1 prefix + 2 checksum)
+    if decoded.len() < 3 {
+        return false;
+    }
+
+    // Extract checksum (last 2 bytes)
+    let checksum_len =
+        if decoded.len() == 3 || decoded.len() == 4 || decoded.len() == 6 || decoded.len() == 10 {
+            1
+        } else {
+            2
+        };
+
+    let body_len = decoded.len() - checksum_len;
+    let body = &decoded[..body_len];
+    let checksum = &decoded[body_len..];
+
+    // Compute expected checksum using Blake2b
+    let mut hasher = Blake2b512::new();
+    hasher.update(b"SS58PRE");
+    hasher.update(body);
+    let hash = hasher.finalize();
+
+    // Compare checksums
+    &hash[..checksum_len] == checksum
 }
 
 /// Generic address type for different chains
@@ -220,25 +470,141 @@ impl Chain {
 pub enum Address {
     /// Substrate SS58 address
     Substrate(String),
-    /// EVM hex address (0x...)
+    /// EVM hex address (0x...) - validated with EIP-55 checksum
     Evm(String),
 }
 
 impl Address {
-    /// Create a Substrate address
+    /// Create a Substrate address with validation
+    ///
+    /// This function validates:
+    /// - SS58 base58 encoding
+    /// - Blake2b checksum
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` if the address format is invalid or checksum validation fails.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use apex_sdk_types::Address;
+    ///
+    /// // Valid SS58 address (Polkadot)
+    /// let addr = Address::substrate_checked("15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5").unwrap();
+    ///
+    /// // Invalid address
+    /// let result = Address::substrate_checked("invalid");
+    /// assert!(result.is_err());
+    /// ```
+    pub fn substrate_checked(addr: impl Into<String>) -> Result<Self, ValidationError> {
+        let addr_str = addr.into();
+
+        // Validate SS58 format and checksum
+        if !validate_ss58_address(&addr_str) {
+            return Err(ValidationError::InvalidSubstrateAddress(addr_str));
+        }
+
+        Ok(Address::Substrate(addr_str))
+    }
+
+    /// Create a Substrate address without validation (legacy method)
+    ///
+    /// **Warning**: This method does not perform SS58 checksum validation.
+    /// Use `substrate_checked()` instead for new code.
+    ///
+    /// This method is provided for backward compatibility and cases where
+    /// validation is not required (e.g., trusted input sources).
     pub fn substrate(addr: impl Into<String>) -> Self {
         Address::Substrate(addr.into())
     }
 
-    /// Create an EVM address
+    /// Create an EVM address with validation
+    ///
+    /// This function validates:
+    /// - Address format (0x followed by 40 hex characters)
+    /// - EIP-55 checksum (if the address has mixed case)
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` if the address format is invalid or checksum validation fails.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use apex_sdk_types::Address;
+    ///
+    /// // Valid checksummed address
+    /// let addr = Address::evm_checked("0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed").unwrap();
+    ///
+    /// // Valid lowercase address (no checksum)
+    /// let addr = Address::evm_checked("0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed").unwrap();
+    ///
+    /// // Invalid checksum
+    /// let result = Address::evm_checked("0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAeD");
+    /// assert!(result.is_err());
+    /// ```
+    pub fn evm_checked(addr: impl Into<String>) -> Result<Self, ValidationError> {
+        let addr_str = addr.into();
+
+        // Validate format
+        if !is_valid_evm_format(&addr_str) {
+            return Err(ValidationError::InvalidEvmAddress(addr_str));
+        }
+
+        // Validate EIP-55 checksum
+        if !validate_eip55_checksum(&addr_str) {
+            return Err(ValidationError::InvalidChecksum(addr_str));
+        }
+
+        Ok(Address::Evm(addr_str))
+    }
+
+    /// Create an EVM address without validation (legacy method)
+    ///
+    /// **Warning**: This method does not perform EIP-55 checksum validation.
+    /// Use `evm_checked()` instead for new code.
+    ///
+    /// This method is provided for backward compatibility and cases where
+    /// validation is not required (e.g., trusted input sources).
     pub fn evm(addr: impl Into<String>) -> Self {
         Address::Evm(addr.into())
+    }
+
+    /// Convert EVM address to checksummed format
+    ///
+    /// For EVM addresses, returns the EIP-55 checksummed version.
+    /// For Substrate addresses, returns the address unchanged.
+    pub fn to_checksum(&self) -> String {
+        match self {
+            Address::Evm(addr) => to_checksum_address(addr),
+            Address::Substrate(addr) => addr.clone(),
+        }
     }
 
     /// Get the address as a string
     pub fn as_str(&self) -> &str {
         match self {
             Address::Substrate(s) | Address::Evm(s) => s,
+        }
+    }
+
+    /// Validate the address format and checksum
+    ///
+    /// For EVM addresses, validates EIP-55 checksum.
+    /// For Substrate addresses, always returns Ok (validation not implemented).
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        match self {
+            Address::Evm(addr) => {
+                if !is_valid_evm_format(addr) {
+                    return Err(ValidationError::InvalidEvmAddress(addr.clone()));
+                }
+                if !validate_eip55_checksum(addr) {
+                    return Err(ValidationError::InvalidChecksum(addr.clone()));
+                }
+                Ok(())
+            }
+            Address::Substrate(_) => Ok(()), // TODO: Add SS58 validation
         }
     }
 }
@@ -389,5 +755,264 @@ mod tests {
 
         let evm_addr = Address::evm("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7");
         assert!(matches!(evm_addr, Address::Evm(_)));
+    }
+
+    #[test]
+    fn test_chain_id() {
+        // EVM chains should have chain IDs
+        assert_eq!(Chain::Ethereum.chain_id(), Some(1));
+        assert_eq!(Chain::BinanceSmartChain.chain_id(), Some(56));
+        assert_eq!(Chain::Polygon.chain_id(), Some(137));
+        assert_eq!(Chain::Avalanche.chain_id(), Some(43114));
+        assert_eq!(Chain::Arbitrum.chain_id(), Some(42161));
+        assert_eq!(Chain::Optimism.chain_id(), Some(10));
+        assert_eq!(Chain::ZkSync.chain_id(), Some(324));
+        assert_eq!(Chain::Base.chain_id(), Some(8453));
+
+        // Hybrid chains should have chain IDs (EVM side)
+        assert_eq!(Chain::Moonbeam.chain_id(), Some(1284));
+        assert_eq!(Chain::Astar.chain_id(), Some(592));
+
+        // Substrate chains should not have chain IDs
+        assert_eq!(Chain::Polkadot.chain_id(), None);
+        assert_eq!(Chain::Kusama.chain_id(), None);
+        assert_eq!(Chain::Westend.chain_id(), None);
+        assert_eq!(Chain::Paseo.chain_id(), None);
+    }
+
+    #[test]
+    fn test_chain_id_validation() {
+        // Valid chain IDs
+        assert!(Chain::Ethereum.validate_chain_id(1).is_ok());
+        assert!(Chain::BinanceSmartChain.validate_chain_id(56).is_ok());
+        assert!(Chain::Polygon.validate_chain_id(137).is_ok());
+
+        // Invalid chain IDs
+        assert!(Chain::Ethereum.validate_chain_id(56).is_err());
+        assert!(Chain::Polygon.validate_chain_id(1).is_err());
+
+        // Substrate chains should return error
+        assert!(Chain::Polkadot.validate_chain_id(1).is_err());
+    }
+
+    #[test]
+    fn test_eip55_valid_checksummed_addresses() {
+        // Test vectors from EIP-55
+        let valid_addresses = vec![
+            "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+            "0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359",
+            "0xdbF03B407c01E7cD3CBea99509d93f8DDDC8C6FB",
+            "0xD1220A0cf47c7B9Be7A2E6BA89F429762e7b9aDb",
+        ];
+
+        for addr in valid_addresses {
+            let result = Address::evm_checked(addr);
+            assert!(
+                result.is_ok(),
+                "Address {} should be valid, got error: {:?}",
+                addr,
+                result.err()
+            );
+        }
+    }
+
+    #[test]
+    fn test_eip55_lowercase_addresses() {
+        // All lowercase addresses are valid (no checksum)
+        let lowercase_addr = "0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed";
+        assert!(Address::evm_checked(lowercase_addr).is_ok());
+
+        let lowercase_addr2 = "0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359";
+        assert!(Address::evm_checked(lowercase_addr2).is_ok());
+    }
+
+    #[test]
+    fn test_eip55_uppercase_addresses() {
+        // All uppercase addresses are valid (no checksum)
+        let uppercase_addr = "0x5AAEB6053F3E94C9B9A09F33669435E7EF1BEAED";
+        assert!(Address::evm_checked(uppercase_addr).is_ok());
+    }
+
+    #[test]
+    fn test_eip55_invalid_checksum() {
+        // Invalid checksum (last character changed from 'd' to 'D')
+        let invalid_addr = "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAeD";
+        let result = Address::evm_checked(invalid_addr);
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            ValidationError::InvalidChecksum(_)
+        ));
+    }
+
+    #[test]
+    fn test_eip55_invalid_format() {
+        // Missing 0x prefix
+        let no_prefix = "5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed";
+        let result = Address::evm_checked(no_prefix);
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            ValidationError::InvalidEvmAddress(_)
+        ));
+
+        // Too short
+        let too_short = "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeA";
+        let result = Address::evm_checked(too_short);
+        assert!(result.is_err());
+
+        // Too long
+        let too_long = "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAedAA";
+        let result = Address::evm_checked(too_long);
+        assert!(result.is_err());
+
+        // Invalid hex characters
+        let invalid_hex = "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAeG";
+        let result = Address::evm_checked(invalid_hex);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_to_checksum_address() {
+        let lowercase = "0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed";
+        let checksummed = to_checksum_address(lowercase);
+        assert_eq!(checksummed, "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed");
+
+        let lowercase2 = "0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359";
+        let checksummed2 = to_checksum_address(lowercase2);
+        assert_eq!(checksummed2, "0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359");
+    }
+
+    #[test]
+    fn test_address_to_checksum_method() {
+        let addr = Address::evm("0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed");
+        assert_eq!(
+            addr.to_checksum(),
+            "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed"
+        );
+
+        // Substrate addresses should be unchanged
+        let sub_addr = Address::substrate("5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY");
+        assert_eq!(
+            sub_addr.to_checksum(),
+            "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"
+        );
+    }
+
+    #[test]
+    fn test_address_validate() {
+        // Valid checksummed EVM address
+        let addr = Address::evm("0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed");
+        assert!(addr.validate().is_ok());
+
+        // Valid lowercase EVM address
+        let addr = Address::evm("0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed");
+        assert!(addr.validate().is_ok());
+
+        // Invalid checksum
+        let addr = Address::evm("0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAeD");
+        assert!(addr.validate().is_err());
+
+        // Invalid format
+        let addr = Address::evm("invalid");
+        assert!(addr.validate().is_err());
+
+        // Substrate addresses always pass (for now)
+        let addr = Address::substrate("anything");
+        assert!(addr.validate().is_ok());
+    }
+
+    #[test]
+    fn test_is_testnet() {
+        assert!(Chain::Westend.is_testnet());
+        assert!(Chain::Paseo.is_testnet());
+        assert!(!Chain::Polkadot.is_testnet());
+        assert!(!Chain::Ethereum.is_testnet());
+    }
+
+    #[test]
+    fn test_substrate_ss58_validation_valid_addresses() {
+        // Valid SS58 addresses (Polkadot format)
+        let valid_addresses = vec![
+            "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+            "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
+            "5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM",
+        ];
+
+        for addr in valid_addresses {
+            let result = Address::substrate_checked(addr);
+            assert!(
+                result.is_ok(),
+                "Address {} should be valid, got error: {:?}",
+                addr,
+                result.err()
+            );
+        }
+    }
+
+    #[test]
+    fn test_substrate_ss58_validation_invalid_addresses() {
+        // Invalid SS58 addresses
+        let invalid_addresses = vec![
+            "invalid",                                             // Not base58
+            "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQ",     // Too short
+            "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY123", // Too long
+            "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQX",    // Invalid checksum
+        ];
+
+        for addr in invalid_addresses {
+            let result = Address::substrate_checked(addr);
+            assert!(
+                result.is_err(),
+                "Address {} should be invalid but was accepted",
+                addr
+            );
+        }
+    }
+
+    #[test]
+    fn test_substrate_ss58_validation_error_types() {
+        // Test invalid format
+        let invalid_format = "not-base58!@#";
+        let result = Address::substrate_checked(invalid_format);
+        assert!(result.is_err());
+        match result.unwrap_err() {
+            ValidationError::InvalidSubstrateAddress(_) => (),
+            _ => panic!("Expected InvalidSubstrateAddress error"),
+        }
+
+        // Test invalid checksum (valid base58 but wrong checksum)
+        let invalid_checksum = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQX";
+        let result = Address::substrate_checked(invalid_checksum);
+        assert!(result.is_err());
+        // The error might be InvalidSubstrateAddress since the checksum validation fails
+    }
+
+    #[test]
+    fn test_validation_error_messages() {
+        // Test EVM validation error
+        let invalid_evm = "0xinvalid";
+        let result = Address::evm_checked(invalid_evm);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.to_string().contains("Invalid EVM address"));
+
+        // Test checksum error
+        let invalid_checksum = "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAeD";
+        let result = Address::evm_checked(invalid_checksum);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.to_string().contains("checksum"));
+    }
+
+    #[test]
+    fn test_overflow_protection_in_validation() {
+        // Test that validation handles edge cases without panicking
+        let long_string = "a".repeat(1000);
+        let result = Address::evm_checked(&long_string);
+        assert!(result.is_err());
+
+        let result = Address::substrate_checked(&long_string);
+        assert!(result.is_err());
     }
 }

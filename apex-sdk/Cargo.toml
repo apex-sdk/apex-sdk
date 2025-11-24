@@ -1,6 +1,6 @@
 [package]
 name = "apex-sdk"
-version.workspace = true
+version = "0.1.4"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -13,10 +13,10 @@ categories = ["cryptography::cryptocurrencies", "api-bindings"]
 readme = "README.md"
 
 [dependencies]
-apex-sdk-core = { path = "../apex-sdk-core", version = "0.1.3" }
-apex-sdk-substrate = { path = "../apex-sdk-substrate", version = "0.1.3" }
-apex-sdk-evm = { path = "../apex-sdk-evm", version = "0.1.3" }
-apex-sdk-types = { path = "../apex-sdk-types", version = "0.1.3" }
+apex-sdk-core = { path = "../apex-sdk-core", version = "0.1.4" }
+apex-sdk-substrate = { path = "../apex-sdk-substrate", version = "0.1.4" }
+apex-sdk-evm = { path = "../apex-sdk-evm", version = "0.1.4" }
+apex-sdk-types = { path = "../apex-sdk-types", version = "0.1.4" }
 tokio = { workspace = true }
 async-trait = { workspace = true }
 anyhow = { workspace = true }

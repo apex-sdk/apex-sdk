@@ -48,9 +48,10 @@ use apex_sdk_types::{Address, TransactionStatus};
 use async_trait::async_trait;
 use thiserror::Error;
 
-use ethers::providers::{Http, Middleware, Provider, Ws};
-use ethers::types::{Address as EthAddress, TransactionReceipt, H256, U256};
-use std::sync::Arc;
+// Alloy imports
+use alloy::primitives::{Address as EthAddress, B256, U256};
+use alloy::providers::{Provider, ProviderBuilder};
+use alloy::rpc::types::TransactionReceipt;
 
 /// EVM adapter error
 #[derive(Error, Debug)]
@@ -71,90 +72,73 @@ pub enum Error {
     Other(String),
 }
 
-/// Provider type that supports both HTTP and WebSocket connections
+/// Type alias for the complex Alloy provider type with all fillers
+type AlloyHttpProvider = alloy::providers::fillers::FillProvider<
+    alloy::providers::fillers::JoinFill<
+        alloy::providers::Identity,
+        alloy::providers::fillers::JoinFill<
+            alloy::providers::fillers::GasFiller,
+            alloy::providers::fillers::JoinFill<
+                alloy::providers::fillers::BlobGasFiller,
+                alloy::providers::fillers::JoinFill<
+                    alloy::providers::fillers::NonceFiller,
+                    alloy::providers::fillers::ChainIdFiller,
+                >,
+            >,
+        >,
+    >,
+    alloy::providers::RootProvider<alloy::network::Ethereum>,
+    alloy::network::Ethereum,
+>;
+
+/// Provider type that supports HTTP connections
+/// Uses dynamic dispatch to support multiple transport types
 #[derive(Clone)]
-pub enum ProviderType {
-    Http(Arc<Provider<Http>>),
-    Ws(Arc<Provider<Ws>>),
+pub struct ProviderType {
+    inner: AlloyHttpProvider,
 }
 
 impl ProviderType {
-    /// Get the underlying provider as a middleware reference
-    async fn get_block_number(&self) -> Result<U256, Error> {
-        match self {
-            ProviderType::Http(p) => p
-                .get_block_number()
-                .await
-                .map_err(|e| Error::Connection(format!("Failed to get block number: {}", e)))
-                .map(|n| U256::from(n.as_u64())),
-            ProviderType::Ws(p) => p
-                .get_block_number()
-                .await
-                .map_err(|e| Error::Connection(format!("Failed to get block number: {}", e)))
-                .map(|n| U256::from(n.as_u64())),
-        }
+    /// Get the current block number
+    async fn get_block_number(&self) -> Result<u64, Error> {
+        self.inner
+            .get_block_number()
+            .await
+            .map_err(|e| Error::Connection(format!("Failed to get block number: {}", e)))
     }
 
     async fn get_transaction_receipt(
         &self,
-        hash: H256,
+        hash: B256,
     ) -> Result<Option<TransactionReceipt>, Error> {
-        match self {
-            ProviderType::Http(p) => p
-                .get_transaction_receipt(hash)
-                .await
-                .map_err(|e| Error::Transaction(format!("Failed to get receipt: {}", e))),
-            ProviderType::Ws(p) => p
-                .get_transaction_receipt(hash)
-                .await
-                .map_err(|e| Error::Transaction(format!("Failed to get receipt: {}", e))),
-        }
+        self.inner
+            .get_transaction_receipt(hash)
+            .await
+            .map_err(|e| Error::Transaction(format!("Failed to get receipt: {}", e)))
     }
 
     async fn get_transaction(
         &self,
-        hash: H256,
-    ) -> Result<Option<ethers::types::Transaction>, Error> {
-        match self {
-            ProviderType::Http(p) => p
-                .get_transaction(hash)
-                .await
-                .map_err(|e| Error::Transaction(format!("Failed to get transaction: {}", e))),
-            ProviderType::Ws(p) => p
-                .get_transaction(hash)
-                .await
-                .map_err(|e| Error::Transaction(format!("Failed to get transaction: {}", e))),
-        }
+        hash: B256,
+    ) -> Result<Option<alloy::rpc::types::Transaction>, Error> {
+        self.inner
+            .get_transaction_by_hash(hash)
+            .await
+            .map_err(|e| Error::Transaction(format!("Failed to get transaction: {}", e)))
     }
 
-    async fn get_balance(
-        &self,
-        address: EthAddress,
-        block: Option<ethers::types::BlockId>,
-    ) -> Result<U256, Error> {
-        match self {
-            ProviderType::Http(p) => p
-                .get_balance(address, block)
-                .await
-                .map_err(|e| Error::Connection(format!("Failed to get balance: {}", e))),
-            ProviderType::Ws(p) => p
-                .get_balance(address, block)
-                .await
-                .map_err(|e| Error::Connection(format!("Failed to get balance: {}", e))),
-        }
+    async fn get_balance(&self, address: EthAddress) -> Result<U256, Error> {
+        self.inner
+            .get_balance(address)
+            .await
+            .map_err(|e| Error::Connection(format!("Failed to get balance: {}", e)))
     }
 
-    async fn get_chain_id(&self) -> Result<U256, Error> {
-        match self {
-            ProviderType::Http(p) => p
-                .get_chainid()
-                .await
-                .map_err(|e| Error::Connection(format!("Failed to get chain ID: {}", e))),
-            ProviderType::Ws(p) => p
-                .get_chainid()
-                .await
-                .map_err(|e| Error::Connection(format!("Failed to get chain ID: {}", e))),
-        }
+    pub async fn get_chain_id(&self) -> Result<u64, Error> {
+        self.inner
+            .get_chain_id()
+            .await
+            .map_err(|e| Error::Connection(format!("Failed to get chain ID: {}", e)))
     }
 }
 
@@ -173,38 +157,29 @@ impl EvmAdapter {
 }
 
 impl EvmAdapter {
-    /// Get a reference to the provider for transaction execution
+    /// Get a reference to the Alloy provider
     pub fn provider(&self) -> &ProviderType {
         &self.provider
     }
 
-    /// Create a transaction executor with this adapter's provider
+    /// Create a transaction executor for this adapter
     pub fn transaction_executor(&self) -> transaction::TransactionExecutor {
         transaction::TransactionExecutor::new(self.provider.clone())
     }
 }
 
 impl EvmAdapter {
-    /// Connect to an EVM node
+    /// Connect to an EVM node via HTTP
     pub async fn connect(endpoint: &str) -> Result<Self, Error> {
         tracing::info!("Connecting to EVM endpoint: {}", endpoint);
 
-        // Determine connection type based on URL scheme
-        let provider = if endpoint.starts_with("ws://") || endpoint.starts_with("wss://") {
-            // WebSocket connection for real-time updates
-            tracing::debug!("Using WebSocket connection");
-            let ws = Ws::connect(endpoint)
-                .await
-                .map_err(|e| Error::Connection(format!("WebSocket connection failed: {}", e)))?;
-            ProviderType::Ws(Arc::new(Provider::new(ws)))
-        } else {
-            // HTTP connection for basic queries
-            tracing::debug!("Using HTTP connection");
-            let parsed_url = url::Url::parse(endpoint)
-                .map_err(|e| Error::Connection(format!("Invalid URL: {}", e)))?;
-            let http = Http::new(parsed_url);
-            ProviderType::Http(Arc::new(Provider::new(http)))
-        };
+        // HTTP connection
+        tracing::debug!("Using HTTP connection");
+        let parsed_url = endpoint
+            .parse()
+            .map_err(|e| Error::Connection(format!("Invalid URL: {}", e)))?;
+        let inner = ProviderBuilder::new().connect_http(parsed_url);
+        let provider = ProviderType { inner };
 
         // Verify connection by getting chain ID
         let chain_id = provider.get_chain_id().await?;
@@ -231,7 +206,7 @@ impl EvmAdapter {
         }
 
         // Parse transaction hash
-        let hash: H256 = tx_hash
+        let hash: B256 = tx_hash
             .parse()
             .map_err(|e| Error::Transaction(format!("Invalid hash format: {}", e)))?;
 
@@ -242,19 +217,19 @@ impl EvmAdapter {
                 let current_block = self.provider.get_block_number().await?;
 
                 let _confirmations = if let Some(block_number) = receipt.block_number {
-                    current_block.as_u64().saturating_sub(block_number.as_u64()) as u32
+                    current_block.saturating_sub(block_number) as u32
                 } else {
                     0
                 };
 
-                // Check if transaction succeeded (status == 1)
-                if receipt.status == Some(1.into()) {
+                // Check if transaction succeeded (status is bool in Alloy)
+                if receipt.status() {
                     Ok(TransactionStatus::Confirmed {
                         block_hash: receipt
                             .block_hash
                             .map(|h| format!("{:?}", h))
                             .unwrap_or_default(),
-                        block_number: receipt.block_number.map(|n| n.as_u64()),
+                        block_number: receipt.block_number,
                     })
                 } else {
                     Ok(TransactionStatus::Failed {
@@ -286,7 +261,7 @@ impl EvmAdapter {
             .map_err(|e| Error::InvalidAddress(format!("Invalid address format: {}", e)))?;
 
         // Query balance at latest block
-        self.provider.get_balance(addr, None).await
+        self.provider.get_balance(addr).await
     }
 
     /// Get balance of an address in a human-readable format (ETH)

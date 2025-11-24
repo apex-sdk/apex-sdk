@@ -14,6 +14,7 @@ pub struct TransactionBuilder {
     destination_chain: Option<Chain>,
     data: Option<Vec<u8>>,
     gas_limit: Option<u64>,
+    nonce: Option<u64>,
 }
 
 impl TransactionBuilder {
@@ -27,19 +28,50 @@ impl TransactionBuilder {
             destination_chain: None,
             data: None,
             gas_limit: None,
+            nonce: None,
         }
     }
 
     /// Set the sender address (Substrate)
+    ///
+    /// **Security Note**: This method does not validate the address format.
+    /// Use `from_substrate_account_checked()` for validated input, or call `.build_validated()`
+    /// instead of `.build()` to validate all addresses before building the transaction.
     pub fn from_substrate_account(mut self, address: impl Into<String>) -> Self {
         self.from = Some(Address::substrate(address));
         self
     }
 
+    /// Set the sender address (Substrate) with immediate validation
+    ///
+    /// This validates the SS58 format and checksum immediately.
+    /// Returns an error if the address is invalid.
+    pub fn from_substrate_account_checked(mut self, address: impl Into<String>) -> Result<Self> {
+        self.from = Some(
+            Address::substrate_checked(address)
+                .map_err(|e| Error::InvalidAddress(e.to_string()))?,
+        );
+        Ok(self)
+    }
+
     /// Set the sender address (EVM)
+    ///
+    /// **Security Note**: This method does not validate the address format.
+    /// Use `from_evm_address_checked()` for validated input, or call `.build_validated()`
+    /// instead of `.build()` to validate all addresses before building the transaction.
     pub fn from_evm_address(mut self, address: impl Into<String>) -> Self {
         self.from = Some(Address::evm(address));
         self
+    }
+
+    /// Set the sender address (EVM) with immediate validation
+    ///
+    /// This validates the EVM format and EIP-55 checksum immediately.
+    /// Returns an error if the address is invalid.
+    pub fn from_evm_address_checked(mut self, address: impl Into<String>) -> Result<Self> {
+        self.from =
+            Some(Address::evm_checked(address).map_err(|e| Error::InvalidAddress(e.to_string()))?);
+        Ok(self)
     }
 
     /// Set the sender address
@@ -49,15 +81,45 @@ impl TransactionBuilder {
     }
 
     /// Set the recipient address (EVM)
+    ///
+    /// **Security Note**: This method does not validate the address format.
+    /// Use `to_evm_address_checked()` for validated input, or call `.build_validated()`
+    /// instead of `.build()` to validate all addresses before building the transaction.
     pub fn to_evm_address(mut self, address: impl Into<String>) -> Self {
         self.to = Some(Address::evm(address));
         self
     }
 
+    /// Set the recipient address (EVM) with immediate validation
+    ///
+    /// This validates the EVM format and EIP-55 checksum immediately.
+    /// Returns an error if the address is invalid.
+    pub fn to_evm_address_checked(mut self, address: impl Into<String>) -> Result<Self> {
+        self.to =
+            Some(Address::evm_checked(address).map_err(|e| Error::InvalidAddress(e.to_string()))?);
+        Ok(self)
+    }
+
     /// Set the recipient address (Substrate)
+    ///
+    /// **Security Note**: This method does not validate the address format.
+    /// Use `to_substrate_account_checked()` for validated input, or call `.build_validated()`
+    /// instead of `.build()` to validate all addresses before building the transaction.
     pub fn to_substrate_account(mut self, address: impl Into<String>) -> Self {
         self.to = Some(Address::substrate(address));
         self
+    }
+
+    /// Set the recipient address (Substrate) with immediate validation
+    ///
+    /// This validates the SS58 format and checksum immediately.
+    /// Returns an error if the address is invalid.
+    pub fn to_substrate_account_checked(mut self, address: impl Into<String>) -> Result<Self> {
+        self.to = Some(
+            Address::substrate_checked(address)
+                .map_err(|e| Error::InvalidAddress(e.to_string()))?,
+        );
+        Ok(self)
     }
 
     /// Set the recipient address
@@ -87,6 +149,12 @@ impl TransactionBuilder {
     /// Set gas limit
     pub fn with_gas_limit(mut self, limit: u64) -> Self {
         self.gas_limit = Some(limit);
+        self
+    }
+
+    /// Set transaction nonce (for uniqueness and replay protection)
+    pub fn with_nonce(mut self, nonce: u64) -> Self {
+        self.nonce = Some(nonce);
         self
     }
 
@@ -121,6 +189,7 @@ impl TransactionBuilder {
             destination_chain,
             data: self.data,
             gas_limit: self.gas_limit,
+            nonce: self.nonce,
         })
     }
 }
@@ -148,6 +217,9 @@ pub struct Transaction {
     pub data: Option<Vec<u8>>,
     /// Gas limit
     pub gas_limit: Option<u64>,
+    /// Nonce for transaction uniqueness (prevents replay attacks)
+    #[serde(default)]
+    pub nonce: Option<u64>,
 }
 
 impl Transaction {
@@ -157,22 +229,67 @@ impl Transaction {
     }
 
     /// Get transaction hash using Keccak256
+    ///
+    /// This implementation ensures deterministic hashing by:
+    /// 1. Using canonical name representation instead of Debug formatting
+    /// 2. Explicitly marking presence/absence of optional fields
+    /// 3. Including all fields in a fixed order
+    ///
+    /// # Determinism Guarantee
+    ///
+    /// The same transaction parameters will always produce the same hash,
+    /// regardless of the order of construction or serialization format changes.
     pub fn hash(&self) -> String {
         let mut hasher = Keccak256::new();
 
-        // Hash transaction data: from, to, amount, chains, data, gas_limit
-        hasher.update(self.from.as_str().as_bytes());
-        hasher.update(self.to.as_str().as_bytes());
-        hasher.update(self.amount.to_le_bytes());
-        hasher.update(format!("{:?}", self.source_chain).as_bytes());
-        hasher.update(format!("{:?}", self.destination_chain).as_bytes());
+        // Hash transaction data in deterministic order with explicit field markers
 
+        // Field 1: from address
+        hasher.update(b"from:");
+        hasher.update(self.from.as_str().as_bytes());
+
+        // Field 2: to address
+        hasher.update(b"to:");
+        hasher.update(self.to.as_str().as_bytes());
+
+        // Field 3: amount (always present)
+        hasher.update(b"amount:");
+        hasher.update(self.amount.to_le_bytes());
+
+        // Field 4: source chain (use canonical name)
+        hasher.update(b"source_chain:");
+        hasher.update(self.source_chain.name().as_bytes());
+
+        // Field 5: destination chain (use canonical name)
+        hasher.update(b"destination_chain:");
+        hasher.update(self.destination_chain.name().as_bytes());
+
+        // Field 6: data (optional - mark presence)
+        hasher.update(b"data:");
         if let Some(ref data) = self.data {
+            hasher.update(b"some:");
+            hasher.update((data.len() as u64).to_le_bytes());
             hasher.update(data);
+        } else {
+            hasher.update(b"none");
         }
 
+        // Field 7: gas_limit (optional - mark presence)
+        hasher.update(b"gas_limit:");
         if let Some(gas_limit) = self.gas_limit {
+            hasher.update(b"some:");
             hasher.update(gas_limit.to_le_bytes());
+        } else {
+            hasher.update(b"none");
+        }
+
+        // Field 8: nonce (optional - mark presence)
+        hasher.update(b"nonce:");
+        if let Some(nonce) = self.nonce {
+            hasher.update(b"some:");
+            hasher.update(nonce.to_le_bytes());
+        } else {
+            hasher.update(b"none");
         }
 
         let result = hasher.finalize();
@@ -362,6 +479,7 @@ mod tests {
             destination_chain: Chain::Polkadot,
             data: None,
             gas_limit: None,
+            nonce: None,
         };
 
         assert!(tx.is_cross_chain());
@@ -377,6 +495,7 @@ mod tests {
             destination_chain: Chain::Ethereum,
             data: None,
             gas_limit: None,
+            nonce: None,
         };
 
         assert!(!tx.is_cross_chain());
@@ -392,11 +511,97 @@ mod tests {
             destination_chain: Chain::Ethereum,
             data: None,
             gas_limit: None,
+            nonce: None,
         };
 
         let hash = tx.hash();
         assert!(hash.starts_with("0x"));
-        assert!(!hash.is_empty());
+        assert_eq!(hash.len(), 66); // 0x + 64 hex chars
+    }
+
+    #[test]
+    fn test_transaction_hash_determinism() {
+        // Create identical transactions
+        let tx1 = Transaction {
+            from: Address::evm("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7"),
+            to: Address::evm("0x1234567890123456789012345678901234567890"),
+            amount: 1000,
+            source_chain: Chain::Ethereum,
+            destination_chain: Chain::Ethereum,
+            data: Some(vec![1, 2, 3, 4]),
+            gas_limit: Some(21000),
+            nonce: Some(42),
+        };
+
+        let tx2 = Transaction {
+            from: Address::evm("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7"),
+            to: Address::evm("0x1234567890123456789012345678901234567890"),
+            amount: 1000,
+            source_chain: Chain::Ethereum,
+            destination_chain: Chain::Ethereum,
+            data: Some(vec![1, 2, 3, 4]),
+            gas_limit: Some(21000),
+            nonce: Some(42),
+        };
+
+        // Same parameters should produce same hash
+        assert_eq!(tx1.hash(), tx2.hash());
+    }
+
+    #[test]
+    fn test_transaction_hash_changes_with_nonce() {
+        let tx1 = Transaction {
+            from: Address::evm("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7"),
+            to: Address::evm("0x1234567890123456789012345678901234567890"),
+            amount: 1000,
+            source_chain: Chain::Ethereum,
+            destination_chain: Chain::Ethereum,
+            data: None,
+            gas_limit: None,
+            nonce: Some(1),
+        };
+
+        let tx2 = Transaction {
+            from: Address::evm("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7"),
+            to: Address::evm("0x1234567890123456789012345678901234567890"),
+            amount: 1000,
+            source_chain: Chain::Ethereum,
+            destination_chain: Chain::Ethereum,
+            data: None,
+            gas_limit: None,
+            nonce: Some(2),
+        };
+
+        // Different nonce should produce different hash
+        assert_ne!(tx1.hash(), tx2.hash());
+    }
+
+    #[test]
+    fn test_transaction_hash_none_vs_some_data() {
+        let tx_none = Transaction {
+            from: Address::evm("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7"),
+            to: Address::evm("0x1234567890123456789012345678901234567890"),
+            amount: 1000,
+            source_chain: Chain::Ethereum,
+            destination_chain: Chain::Ethereum,
+            data: None,
+            gas_limit: None,
+            nonce: None,
+        };
+
+        let tx_empty = Transaction {
+            from: Address::evm("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7"),
+            to: Address::evm("0x1234567890123456789012345678901234567890"),
+            amount: 1000,
+            source_chain: Chain::Ethereum,
+            destination_chain: Chain::Ethereum,
+            data: Some(vec![]),
+            gas_limit: None,
+            nonce: None,
+        };
+
+        // None and Some(empty) should produce different hashes
+        assert_ne!(tx_none.hash(), tx_empty.hash());
     }
 
     #[test]
@@ -409,12 +614,14 @@ mod tests {
             destination_chain: Chain::Ethereum,
             data: Some(vec![1, 2, 3]),
             gas_limit: Some(21000),
+            nonce: Some(5),
         };
 
         let cloned = tx.clone();
         assert_eq!(tx.amount, cloned.amount);
         assert_eq!(tx.data, cloned.data);
         assert_eq!(tx.gas_limit, cloned.gas_limit);
+        assert_eq!(tx.nonce, cloned.nonce);
     }
 
     #[test]

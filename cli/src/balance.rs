@@ -134,7 +134,8 @@ pub async fn get_substrate_balance(address: &str, endpoint: &str) -> Result<()> 
 
 /// Get account balance for EVM chains
 pub async fn get_evm_balance(address: &str, endpoint: &str) -> Result<()> {
-    use ethers::prelude::*;
+    use alloy::primitives::Address;
+    use alloy::providers::{Provider, ProviderBuilder};
 
     println!("\n{}", "Fetching EVM Balance".cyan().bold());
     println!("{}", "═══════════════════════════════════════".dimmed());
@@ -147,8 +148,9 @@ pub async fn get_evm_balance(address: &str, endpoint: &str) -> Result<()> {
     spinner.set_message("Connecting to chain...");
     spinner.enable_steady_tick(std::time::Duration::from_millis(100));
 
-    // Connect to the provider
-    let provider = Provider::<Http>::try_from(endpoint).context("Failed to create provider")?;
+    // Connect to the provider using Alloy
+    let provider =
+        ProviderBuilder::new().connect_http(endpoint.parse().context("Invalid endpoint URL")?);
 
     spinner.set_message("Fetching balance...");
 
@@ -157,13 +159,13 @@ pub async fn get_evm_balance(address: &str, endpoint: &str) -> Result<()> {
 
     // Get the balance
     let balance = provider
-        .get_balance(addr, None)
+        .get_balance(addr)
         .await
         .context("Failed to fetch balance")?;
 
     // Get the chain ID for better display
     let chain_id = provider
-        .get_chainid()
+        .get_chain_id()
         .await
         .context("Failed to get chain ID")?;
 
@@ -175,9 +177,8 @@ pub async fn get_evm_balance(address: &str, endpoint: &str) -> Result<()> {
     println!("{}: {}", "Chain ID".dimmed(), chain_id);
     println!();
 
-    // Convert balance to ETH
-    let balance_eth =
-        ethers::utils::format_units(balance, "ether").unwrap_or_else(|_| balance.to_string());
+    // Convert balance to ETH (balance is U256)
+    let balance_eth = format_wei_to_eth(balance.to::<u128>());
 
     println!("{}: {} ETH", "Balance".green().bold(), balance_eth);
     println!("{}: {} Wei", "Raw".dimmed(), balance);
@@ -185,7 +186,7 @@ pub async fn get_evm_balance(address: &str, endpoint: &str) -> Result<()> {
     // Show USD value if possible (would need price oracle in production)
     println!("\n{}", "Tip:".yellow());
     println!("Use a block explorer for detailed transaction history:");
-    match chain_id.as_u64() {
+    match chain_id {
         1 => println!("  https://etherscan.io/address/{}", address),
         137 => println!("  https://polygonscan.com/address/{}", address),
         56 => println!("  https://bscscan.com/address/{}", address),
@@ -193,6 +194,24 @@ pub async fn get_evm_balance(address: &str, endpoint: &str) -> Result<()> {
     }
 
     Ok(())
+}
+
+/// Format wei to ETH (helper function to replace ethers::utils::format_units)
+fn format_wei_to_eth(wei: u128) -> String {
+    let eth_divisor = 10_u128.pow(18);
+    let eth_whole = wei / eth_divisor;
+    let remainder = wei % eth_divisor;
+
+    if remainder == 0 {
+        format!("{}", eth_whole)
+    } else {
+        // Format with up to 18 decimal places, trimming trailing zeros
+        let formatted = format!("{}.{:018}", eth_whole, remainder);
+        formatted
+            .trim_end_matches('0')
+            .trim_end_matches('.')
+            .to_string()
+    }
 }
 
 /// Format balance with decimal places
@@ -212,21 +231,11 @@ fn format_balance(balance: u128, divisor: u128) -> String {
 
 /// Auto-detect chain type and get balance
 pub async fn get_balance(address: &str, chain: &str, endpoint: &str) -> Result<()> {
-    // Determine if it's a Substrate or EVM chain based on endpoint or chain name
-    let is_substrate = endpoint.starts_with("ws://")
-        || endpoint.starts_with("wss://")
-        || matches!(
-            chain.to_lowercase().as_str(),
-            "polkadot"
-                | "kusama"
-                | "paseo"
-                | "westend"
-                | "moonbeam"
-                | "astar"
-                | "acala"
-                | "phala"
-                | "bifrost"
-        );
+    // Determine if it's a Substrate or EVM chain using centralized logic
+    let is_substrate = apex_sdk_types::Chain::is_substrate_endpoint(endpoint)
+        || apex_sdk_types::Chain::from_str_case_insensitive(chain)
+            .map(|c| c.chain_type() == apex_sdk_types::ChainType::Substrate)
+            .unwrap_or(false);
 
     if is_substrate {
         get_substrate_balance(address, endpoint).await
@@ -261,6 +270,6 @@ mod tests {
 
         // Valid EVM address (20 bytes = 40 hex chars)
         let valid_evm = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbD";
-        assert!(valid_evm.parse::<ethers::types::Address>().is_ok());
+        assert!(valid_evm.parse::<alloy::primitives::Address>().is_ok());
     }
 }
