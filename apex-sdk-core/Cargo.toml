@@ -1,6 +1,6 @@
 [package]
 name = "apex-sdk-core"
-version.workspace = true
+version = "0.1.4"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -13,13 +13,18 @@ categories = ["cryptography::cryptocurrencies", "api-bindings"]
 readme = "README.md"
 
 [dependencies]
-apex-sdk-types = { path = "../apex-sdk-types", version = "0.1.3" }
+apex-sdk-types = { path = "../apex-sdk-types", version = "0.1.4" }
 async-trait = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+rand = "0.8"
+tokio = { workspace = true, optional = true }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["test-util"] }
+tokio-test = "0.4"
 serde_json = { workspace = true }
 
 [features]
 default = []
-mocks = []
+mocks = ["tokio"]
