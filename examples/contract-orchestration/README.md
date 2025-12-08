@@ -1,5 +1,11 @@
 # Smart Contract Orchestration Example
 
+[![Example](https://img.shields.io/badge/type-example-blue)](../../README.md)
+[![Smart Contracts](https://img.shields.io/badge/smart--contracts-enabled-green)](../../README.md)
+[![Substrate](https://img.shields.io/badge/Substrate-ink!-2E8B57)](https://use.ink/)
+[![EVM](https://img.shields.io/badge/EVM-Solidity-627EEA)](https://soliditylang.org/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../../LICENSE)
+
 This example demonstrates Apex SDK's **unique capability** to orchestrate smart contract calls across both Substrate (ink!) and EVM chains from a single, unified Rust application.
 
 ## What Makes This Unique
@@ -87,7 +93,7 @@ This pattern enables:
 
 ## Learn More
 
-- [Apex SDK Documentation](https://github.com/kherldhussein/apex-sdk)
+- [Apex SDK Documentation](https://github.com/eurybits/apex-sdk)
 - [ink! Smart Contracts](https://use.ink/)
 - [Substrate Development](https://docs.polkadot.com/)
 - [Ethereum Smart Contracts](https://ethereum.org/en/developers/docs/smart-contracts/)

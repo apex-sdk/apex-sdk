@@ -1,11 +1,11 @@
 # Robots.txt for Apex SDK Protocol
-# https://kherldhussein.github.io/apex-sdk/
+# https://eurybits.github.io/apex-sdk/
 
 User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://kherldhussein.github.io/apex-sdk/sitemap.xml
+Sitemap: https://eurybits.github.io/apex-sdk/sitemap.xml
 
 # Crawl-delay for polite crawlers
 Crawl-delay: 1

@@ -322,9 +322,9 @@ cargo test test_transaction_builder
 1. **Explore Examples**: Check out the `examples/` directory for more use cases
 2. **Read the API Docs**: Run `cargo doc --open` to view API documentation
 3. **Join the Community**:
-   - GitHub: [github.com/kherldhussein/apexsdk](https://github.com/kherldhussein/apex-sdk)
-   - Issues: [github.com/kherldhussein/apexsdk/issues](https://github.com/kherldhussein/apex-sdk/issues)
-   - Discussions: [github.com/kherldhussein/apexsdk/discussions](https://github.com/kherldhussein/apex-sdk/discussions)
+   - GitHub: [github.com/eurybits/apex-sdk](https://github.com/eurybits/apex-sdk)
+   - Issues: [github.com/eurybits/apex-sdk/issues](https://github.com/eurybits/apex-sdk/issues)
+   - Discussions: [github.com/eurybits/apex-sdk/discussions](https://github.com/eurybits/apex-sdk/discussions)
 4. **Contribute**: See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 
 ## Production Considerations
@@ -360,9 +360,9 @@ Before deploying to production:
 
 ## Resources
 
-- **Documentation**: [github.com/kherldhussein/apex-sdk/docs](https://github.com/kherldhussein/apex-sdk/docs
+- **Documentation**: [github.com/eurybits/apex-sdk/docs](https://github.com/eurybits/apex-sdk/docs)
 - **API Reference**: Run `cargo doc --open`
 - **Examples**: See the `examples/` directory
-- **GitHub**: [github.com/kherldhussein/apex-sdk](https://github.com/kherldhussein/apex-sdk)
-- **Issues**: Report bugs at [github.com/kherldhussein/apex-sdk/issues](https://github.com/kherldhussein/apex-sdk/issues)
+- **GitHub**: [github.com/eurybits/apex-sdk](https://github.com/eurybits/apex-sdk)
+- **Issues**: Report bugs at [github.com/eurybits/apex-sdk/issues](https://github.com/eurybits/apex-sdk/issues)
 

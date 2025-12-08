@@ -360,5 +360,5 @@ cargo test --features typed
 
 For issues or questions:
 - Open an issue on GitHub
-- Join our Discord: https://discord.gg/apexsdk
+- Join our Discord: https://discord.gg/zCDFsBaZJN
 - Read the docs: https://docs.rs/apex-sdk

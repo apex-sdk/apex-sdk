@@ -2,7 +2,7 @@
 title: Apex SDK Protocol - Unified Rust SDK for Substrate & EVM Blockchain Development
 description: Compile-time safe, unified Rust SDK enabling cross-chain development across Substrate and EVM ecosystems. Build secure blockchain applications with type safety, native performance, and seamless cross-chain communication.
 author: Apex SDK Team
-url: https://kherldhussein.github.io
+url: https://eurybits.github.io
 baseurl: /apex-sdk
 lang: en_US
 
@@ -12,9 +12,9 @@ lang: en_US
 
 show_downloads: false
 github:
-  repository_url: https://github.com/kherldhussein/apex-sdk
-  zip_url: https://github.com/kherldhussein/apex-sdk/archive/refs/heads/main.zip
-  tar_url: https://github.com/kherldhussein/apex-sdk/archive/refs/heads/main.tar.gz
+  repository_url: https://github.com/eurybits/apex-sdk
+  zip_url: https://github.com/eurybits/apex-sdk/archive/refs/heads/main.zip
+  tar_url: https://github.com/eurybits/apex-sdk/archive/refs/heads/main.tar.gz
   repository_name: apex-sdk
 
 # Social media
@@ -27,7 +27,7 @@ logo: /assets/logo.png
 social:
   name: Apex SDK Protocol
   links:
-    - https://github.com/kherldhussein/apex-sdk
+    - https://github.com/eurybits/apex-sdk
     - https://twitter.com/apexsdk
 
 # Markdown settings for .md files

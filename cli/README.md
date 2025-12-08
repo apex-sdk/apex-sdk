@@ -1,5 +1,10 @@
 # Apex SDK CLI
 
+[![Crates.io](https://img.shields.io/crates/v/apex-sdk-cli)](https://crates.io/crates/apex-sdk-cli)
+[![Downloads](https://img.shields.io/crates/d/apex-sdk-cli)](https://crates.io/crates/apex-sdk-cli)
+[![License](https://img.shields.io/crates/l/apex-sdk-cli)](../LICENSE)
+[![Rust](https://img.shields.io/badge/rust-1.85%2B-orange.svg)](https://www.rust-lang.org/)
+
 Command-line interface for Apex SDK - unified Rust SDK for Substrate & EVM blockchain development.
 
 ## Installation

@@ -1,5 +1,11 @@
 # Unified Account Manager Example
 
+[![Example](https://img.shields.io/badge/type-example-blue)](../../README.md)
+[![Cross-Chain](https://img.shields.io/badge/cross--chain-enabled-purple)](../../README.md)
+[![Substrate](https://img.shields.io/badge/Substrate-compatible-2E8B57)](https://substrate.io/)
+[![EVM](https://img.shields.io/badge/EVM-compatible-627EEA)](https://ethereum.org/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../../LICENSE)
+
 This example demonstrates managing accounts, keys, and identities across **both Substrate and EVM ecosystems** using Apex SDK's unified account abstraction.
 
 ## The Multi-Chain Account Challenge

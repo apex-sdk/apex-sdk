@@ -2,7 +2,10 @@
 
 [![Crates.io](https://img.shields.io/crates/v/apex-sdk-substrate)](https://crates.io/crates/apex-sdk-substrate)
 [![Documentation](https://docs.rs/apex-sdk-substrate/badge.svg)](https://docs.rs/apex-sdk-substrate)
+[![Downloads](https://img.shields.io/crates/d/apex-sdk-substrate)](https://crates.io/crates/apex-sdk-substrate)
 [![License](https://img.shields.io/crates/l/apex-sdk-substrate)](LICENSE)
+[![Substrate](https://img.shields.io/badge/Substrate-compatible-2E8B57)](https://substrate.io/)
+[![Rust](https://img.shields.io/badge/rust-1.85%2B-orange.svg)](https://www.rust-lang.org/)
 
 Substrate blockchain adapter for the Apex SDK, enabling seamless interaction with Polkadot, Kusama, and other Substrate-based chains.
 
@@ -504,4 +507,4 @@ Contributions are welcome! Please read [CONTRIBUTING.md](../CONTRIBUTING.md) for
 - [Documentation](https://docs.rs/apex-sdk-substrate)  
 - [Substrate Documentation](https://docs.polkadot.com)
 - [Polkadot Documentation](https://wiki.polkadot.com)
-- [GitHub Issues](https://github.com/kherldhussein/apex-sdk/issues)
+- [GitHub Issues](https://github.com/eurybits/apex-sdk/issues)

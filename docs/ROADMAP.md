@@ -346,7 +346,7 @@
 
 ## Community Priorities
 
-**Vote on features:** [GitHub Discussions](https://github.com/kherldhussein/apexsdk/discussions)
+**Vote on features:** [GitHub Discussions](https://github.com/eurybits/apex-sdk/discussions)
 
 **Top Community Requests:**
 1.  Better error messages ( Completed!)
@@ -436,7 +436,7 @@
 ### Feedback Channels
 - GitHub Issues - Bug reports
 - GitHub Discussions - Feature requests
-- Discord - Real-time chat
+- [Discord](https://discord.gg/zCDFsBaZJN) - Real-time chat
 - Monthly AMAs - Direct Q&A
 
 ## How to Contribute
@@ -448,7 +448,7 @@
 4. Participate in code review
 
 ### Community Priorities
-Vote on [GitHub Discussions](https://github.com/kherldhussein/apexsdk/discussions/categories/roadmap) to help us prioritize!
+Vote on [GitHub Discussions](https://github.com/eurybits/apex-sdk/discussions/categories/roadmap) to help us prioritize!
 
 ### Sponsorship
 Support development through:
@@ -474,6 +474,6 @@ This roadmap is a living document that evolves based on:
 <div align="center">
 
 **Questions about the roadmap?**
-[Open a discussion](https://github.com/kherldhussein/apexsdk/discussions) | [View current progress](https://github.com/kherldhussein/apexsdk/projects)
+[Open a discussion](https://github.com/eurybits/apex-sdk/discussions) | [View current progress](https://github.com/eurybits/apex-sdk/projects)
 
 </div>
