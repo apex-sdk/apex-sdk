@@ -31,9 +31,11 @@
 //!
 //! See `METADATA_GENERATION.md` for detailed instructions.
 
-// Typed metadata modules - uncommented and properly configured
-// Note: polkadot and kusama metadata are not yet generated
-// Uncomment these when metadata is generated using scripts/generate_metadata.sh
+// Typed metadata modules
+// Note: These files are generated locally and not committed to git due to their size (~4MB each)
+// Generate metadata using: ./scripts/generate_metadata.sh <chain-name>
+// Uncomment the modules below after generating the metadata files
+
 // #[cfg(feature = "typed-polkadot")]
 // #[path = "polkadot.rs"]
 // pub mod polkadot;
@@ -42,17 +44,16 @@
 // #[path = "kusama.rs"]
 // pub mod kusama;
 
-#[cfg(feature = "typed-westend")]
-#[path = "westend.rs"]
-pub mod westend;
+// #[cfg(feature = "typed-westend")]
+// #[path = "westend.rs"]
+// pub mod westend;
 
-// Generated metadata from subxt codegen
-#[cfg(feature = "typed")]
-pub mod westend_generated;
+// #[cfg(feature = "typed")]
+// pub mod westend_generated;
 
-// Re-export the most commonly used metadata
-#[cfg(feature = "typed-westend")]
-pub use westend::*;
+// Re-export the most commonly used metadata (when modules are uncommented)
+// #[cfg(feature = "typed-westend")]
+// pub use westend::*;
 
 // Dynamic API fallback when typed metadata is not available
 #[cfg(not(feature = "typed"))]
