@@ -31,18 +31,35 @@
 //!
 //! See `METADATA_GENERATION.md` for detailed instructions.
 
-// Typed metadata modules are currently disabled
-// To enable, generate metadata using scripts/generate_metadata.sh
-// and uncomment the appropriate module below
+// Typed metadata modules - uncommented and properly configured
+#[cfg(feature = "typed-polkadot")]
+#[path = "polkadot.rs"]
+pub mod polkadot;
 
-// #[cfg(feature = "typed-polkadot")]
-// #[path = "polkadot.rs"]
-// pub mod polkadot;
+#[cfg(feature = "typed-kusama")]
+#[path = "kusama.rs"]
+pub mod kusama;
 
-// #[cfg(feature = "typed-kusama")]
-// #[path = "kusama.rs"]
-// pub mod kusama;
+#[cfg(feature = "typed-westend")]
+#[path = "westend.rs"]
+pub mod westend;
 
-// #[cfg(feature = "typed-westend")]
-// #[path = "westend.rs"]
-// pub mod westend;
+// Generated metadata from subxt codegen
+#[cfg(feature = "typed")]
+pub mod westend_generated;
+
+// Re-export the most commonly used metadata
+#[cfg(feature = "typed-westend")]
+pub use westend::*;
+
+// Dynamic API fallback when typed metadata is not available
+#[cfg(not(feature = "typed"))]
+pub mod dynamic {
+    use subxt::dynamic::Value;
+
+    /// Helper to create dynamic runtime calls when typed API is unavailable
+    pub fn create_dynamic_call(pallet: &str, call_name: &str) -> &'static str {
+        // This is a simplified helper - in practice you'd use subxt's dynamic API
+        "dynamic_call_placeholder"
+    }
+}

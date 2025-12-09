@@ -5,7 +5,7 @@
 [![Benchmarks](https://github.com/eurybits/apex-sdk/actions/workflows/benchmarks.yml/badge.svg)](https://github.com/eurybits/apex-sdk/actions/workflows/benchmarks.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Rust](https://img.shields.io/badge/Rust-1.85%2B-orange.svg)](https://www.rust-lang.org/)
-[![Docs](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://eurybits.github.io/apex-sdk/)
+[![Docs](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://apexsdk.dev/)
 [![Crates.io](https://img.shields.io/crates/v/apex-sdk.svg)](https://crates.io/crates/apex-sdk)
 
 > **Build secure, cross-chain blockchain applications with compile-time safety**

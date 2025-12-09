@@ -340,7 +340,175 @@ impl apex_sdk_core::ChainAdapter for EvmAdapter {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use apex_sdk_types::Address;
+    use apex_sdk_core::ChainAdapter;
 
+    #[test]
+    fn test_invalid_url_format() {
+        // Test that invalid URLs are rejected during parsing
+        // This doesn't require async or network
+        let url = url::Url::parse("not-a-valid-url");
+        assert!(url.is_err(), "Expected invalid URL to fail parsing");
+    }
+
+    #[test]
+    fn test_address_validation_invalid() {
+        // Create a mock adapter for testing without network
+        let adapter = create_mock_adapter();
+        
+        // Test invalid addresses
+        let invalid_addr = Address::evm("invalid");
+        assert!(!adapter.validate_address(&invalid_addr));
+
+        let invalid_addr2 = Address::evm("0x123");
+        assert!(!adapter.validate_address(&invalid_addr2));
+
+        let invalid_addr3 = Address::evm("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7G"); // Contains G
+        assert!(!adapter.validate_address(&invalid_addr3));
+
+        let substrate_addr = Address::substrate("5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY");
+        assert!(!adapter.validate_address(&substrate_addr));
+    }
+
+    #[test]
+    fn test_address_validation_valid() {
+        let adapter = create_mock_adapter();
+        
+        let valid_addr = Address::evm("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7");
+        assert!(adapter.validate_address(&valid_addr));
+
+        let valid_addr2 = Address::evm("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"); // vitalik.eth
+        assert!(adapter.validate_address(&valid_addr2));
+
+        let zero_addr = Address::evm("0x0000000000000000000000000000000000000000");
+        assert!(adapter.validate_address(&zero_addr));
+    }
+
+    #[test]
+    fn test_endpoint_getter() {
+        let adapter = create_mock_adapter();
+        assert_eq!(adapter.endpoint(), "https://mock.endpoint");
+    }
+
+    #[test]
+    fn test_chain_adapter_trait_implementation() {
+        let adapter = create_mock_adapter();
+        assert_eq!(adapter.chain_name(), "EVM");
+        
+        let valid_addr = Address::evm("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7");
+        assert!(adapter.validate_address(&valid_addr));
+    }
+
+    #[test]
+    fn test_contract_creation_valid_address() {
+        let adapter = create_mock_adapter();
+        let contract_result = adapter.contract("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7");
+        
+        assert!(contract_result.is_ok());
+        let contract = contract_result.unwrap();
+        assert_eq!(contract.address(), "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7");
+    }
+
+    #[test]
+    fn test_contract_creation_invalid_address() {
+        let adapter = create_mock_adapter();
+        let contract_result = adapter.contract("invalid_address");
+        
+        assert!(contract_result.is_err());
+        if let Err(Error::InvalidAddress(addr)) = contract_result {
+            assert_eq!(addr, "invalid_address");
+        } else {
+            panic!("Expected InvalidAddress error");
+        }
+    }
+
+    #[test]
+    fn test_transaction_executor_creation() {
+        let adapter = create_mock_adapter();
+        let _executor = adapter.transaction_executor();
+        // Just test that we can create the executor without errors
+    }
+
+    #[test]
+    fn test_provider_access() {
+        let adapter = create_mock_adapter();
+        let _provider = adapter.provider();
+        // Test that we can access the provider
+    }
+
+    #[test]
+    fn test_transaction_hash_validation() {
+        let adapter = create_mock_adapter();
+        
+        // Test invalid hash formats
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        
+        // Too short hash
+        let result = rt.block_on(adapter.get_transaction_status("0x123"));
+        assert!(matches!(result, Err(Error::Transaction(_))));
+        
+        // Missing 0x prefix
+        let result = rt.block_on(adapter.get_transaction_status("5c504ed432cb51138bcf09aa5e8a410dd4a1e204ef84bfed1be16dfba1b22060"));
+        assert!(matches!(result, Err(Error::Transaction(_))));
+        
+        // Invalid hex character
+        let result = rt.block_on(adapter.get_transaction_status("0x5c504ed432cb51138bcf09aa5e8a410dd4a1e204ef84bfed1be16dfba1b22060G"));
+        assert!(matches!(result, Err(Error::Transaction(_))));
+    }
+
+    #[test]
+    fn test_get_balance_disconnected() {
+        let adapter = create_disconnected_adapter();
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        
+        let result = rt.block_on(adapter.get_balance("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7"));
+        assert!(matches!(result, Err(Error::Connection(_))));
+    }
+
+    #[test]
+    fn test_get_transaction_status_disconnected() {
+        let adapter = create_disconnected_adapter();
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        
+        let result = rt.block_on(adapter.get_transaction_status("0x5c504ed432cb51138bcf09aa5e8a410dd4a1e204ef84bfed1be16dfba1b22060"));
+        assert!(matches!(result, Err(Error::Connection(_))));
+    }
+
+    #[test]
+    fn test_contract_creation_disconnected() {
+        let adapter = create_disconnected_adapter();
+        let result = adapter.contract("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7");
+        assert!(matches!(result, Err(Error::Connection(_))));
+    }
+
+    #[test]
+    fn test_error_display_messages() {
+        let connection_err = Error::Connection("Test connection error".to_string());
+        assert_eq!(connection_err.to_string(), "Connection error: Test connection error");
+
+        let transaction_err = Error::Transaction("Test transaction error".to_string());
+        assert_eq!(transaction_err.to_string(), "Transaction error: Test transaction error");
+
+        let contract_err = Error::Contract("Test contract error".to_string());
+        assert_eq!(contract_err.to_string(), "Contract error: Test contract error");
+
+        let address_err = Error::InvalidAddress("Test invalid address".to_string());
+        assert_eq!(address_err.to_string(), "Invalid address: Test invalid address");
+
+        let other_err = Error::Other("Test other error".to_string());
+        assert_eq!(other_err.to_string(), "Other error: Test other error");
+    }
+
+    #[test]
+    fn test_balance_address_parsing_error() {
+        let adapter = create_mock_adapter();
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        
+        let result = rt.block_on(adapter.get_balance("invalid_address"));
+        assert!(matches!(result, Err(Error::InvalidAddress(_))));
+    }
+
+    // Integration tests (require network connection)
     #[tokio::test]
     #[ignore] // Requires network connection
     async fn test_evm_adapter_connect() {
@@ -350,7 +518,7 @@ mod tests {
 
     #[tokio::test]
     #[ignore] // Requires network connection
-    async fn test_address_validation() {
+    async fn test_address_validation_with_network() {
         let adapter = EvmAdapter::connect("https://eth.llamarpc.com")
             .await
             .unwrap();
@@ -360,14 +528,11 @@ mod tests {
 
         let invalid_addr = Address::evm("invalid");
         assert!(!adapter.validate_address(&invalid_addr));
-
-        let invalid_addr2 = Address::evm("0x123");
-        assert!(!adapter.validate_address(&invalid_addr2));
     }
 
     #[tokio::test]
-    #[ignore] // Requires network connection
-    async fn test_transaction_status() {
+    #[ignore] // Requires network connection  
+    async fn test_transaction_status_with_network() {
         let adapter = EvmAdapter::connect("https://eth.llamarpc.com")
             .await
             .unwrap();
@@ -379,16 +544,66 @@ mod tests {
             )
             .await;
         assert!(result.is_ok());
-
-        let invalid_result = adapter.get_transaction_status("invalid").await;
-        assert!(invalid_result.is_err());
     }
 
-    #[test]
-    fn test_invalid_url_format() {
-        // Test that invalid URLs are rejected during parsing
-        // This doesn't require async or network
-        let url = url::Url::parse("not-a-valid-url");
-        assert!(url.is_err(), "Expected invalid URL to fail parsing");
+    #[tokio::test]
+    #[ignore] // Requires network connection
+    async fn test_get_balance_with_network() {
+        let adapter = EvmAdapter::connect("https://eth.llamarpc.com")
+            .await
+            .unwrap();
+
+        // Test balance query for a known address
+        let result = adapter.get_balance("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7").await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    #[ignore] // Requires network connection
+    async fn test_get_balance_eth_format_with_network() {
+        let adapter = EvmAdapter::connect("https://eth.llamarpc.com")
+            .await
+            .unwrap();
+
+        let result = adapter.get_balance_eth("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7").await;
+        assert!(result.is_ok());
+        
+        let eth_balance = result.unwrap();
+        assert!(eth_balance.contains("."));  // Should have decimal point
+    }
+
+    #[tokio::test]
+    #[ignore] // Requires network connection
+    async fn test_invalid_endpoint_connection() {
+        let result = EvmAdapter::connect("https://invalid.endpoint.that.does.not.exist").await;
+        assert!(result.is_err());
+    }
+
+    // Helper functions for creating test adapters
+    fn create_mock_adapter() -> EvmAdapter {
+        // Create a mock adapter for testing without network
+        let provider = create_mock_provider();
+        EvmAdapter {
+            endpoint: "https://mock.endpoint".to_string(),
+            provider,
+            connected: true,
+        }
+    }
+
+    fn create_disconnected_adapter() -> EvmAdapter {
+        let provider = create_mock_provider();
+        EvmAdapter {
+            endpoint: "https://mock.endpoint".to_string(),
+            provider,
+            connected: false,
+        }
+    }
+
+    fn create_mock_provider() -> ProviderType {
+        // For unit testing, we create a minimal provider that won't make network calls
+        // This is a simplified version that will panic if actually used for network operations
+        // but allows us to test the adapter logic
+        let inner = ProviderBuilder::new().connect_http("http://localhost:8545".parse().unwrap());
+        ProviderType { inner }
     }
 }

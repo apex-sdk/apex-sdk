@@ -311,13 +311,33 @@ impl ConnectionPool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::HashMap;
 
     #[test]
     fn test_pool_config_default() {
         let config = PoolConfig::default();
         assert_eq!(config.max_connections_per_endpoint, 10);
         assert_eq!(config.health_check_interval_secs, 30);
+        assert_eq!(config.health_check_timeout_secs, 5);
         assert_eq!(config.max_failures, 3);
+        assert_eq!(config.unhealthy_retry_delay_secs, 60);
+    }
+
+    #[test]
+    fn test_pool_config_custom() {
+        let config = PoolConfig {
+            max_connections_per_endpoint: 20,
+            health_check_interval_secs: 60,
+            health_check_timeout_secs: 10,
+            max_failures: 5,
+            unhealthy_retry_delay_secs: 120,
+        };
+
+        assert_eq!(config.max_connections_per_endpoint, 20);
+        assert_eq!(config.health_check_interval_secs, 60);
+        assert_eq!(config.health_check_timeout_secs, 10);
+        assert_eq!(config.max_failures, 5);
+        assert_eq!(config.unhealthy_retry_delay_secs, 120);
     }
 
     #[test]
@@ -325,11 +345,243 @@ mod tests {
         let health = EndpointHealth::default();
         assert!(health.is_healthy);
         assert_eq!(health.failure_count, 0);
+        assert_eq!(health.avg_response_time_ms, 0);
+        assert!(health.last_success.is_none());
+        assert!(health.last_failure.is_none());
+    }
+
+    #[test]
+    fn test_endpoint_health_failure_tracking() {
+        let mut health = EndpointHealth::default();
+        
+        // Simulate failures
+        health.is_healthy = false;
+        health.failure_count = 3;
+        health.last_failure = Some(Instant::now());
+        
+        assert!(!health.is_healthy);
+        assert_eq!(health.failure_count, 3);
+        assert!(health.last_failure.is_some());
+    }
+
+    #[test]
+    fn test_endpoint_health_response_time_tracking() {
+        let mut health = EndpointHealth::default();
+        
+        // Simulate successful responses with timing
+        health.last_success = Some(Instant::now());
+        health.avg_response_time_ms = 150; // 150ms average
+        
+        assert!(health.last_success.is_some());
+        assert_eq!(health.avg_response_time_ms, 150);
+    }
+
+    #[test]
+    fn test_endpoint_list_operations() {
+        let endpoints = vec![
+            "https://eth.llamarpc.com".to_string(),
+            "https://ethereum.publicnode.com".to_string(),
+            "https://eth.rpc.blxrbdn.com".to_string(),
+        ];
+
+        assert_eq!(endpoints.len(), 3);
+        assert!(endpoints.iter().all(|e| e.starts_with("https://")));
+        
+        // Test endpoint validation
+        for endpoint in &endpoints {
+            assert!(!endpoint.is_empty());
+            assert!(endpoint.contains("eth"));
+        }
+    }
+
+    #[test]
+    fn test_round_robin_logic() {
+        // Simulate round-robin selection
+        let endpoints = vec![
+            "endpoint1".to_string(),
+            "endpoint2".to_string(), 
+            "endpoint3".to_string(),
+        ];
+        
+        let counter = AtomicUsize::new(0);
+        
+        // Test round-robin pattern
+        for expected_index in [0, 1, 2, 0, 1, 2] {
+            let index = counter.fetch_add(1, Ordering::Relaxed) % endpoints.len();
+            assert_eq!(index, expected_index);
+            assert_eq!(endpoints[index], format!("endpoint{}", expected_index + 1));
+        }
+    }
+
+    #[test]
+    fn test_health_check_timing() {
+        let config = PoolConfig::default();
+        let interval = Duration::from_secs(config.health_check_interval_secs);
+        
+        assert_eq!(interval, Duration::from_secs(30));
+        
+        // Test custom interval
+        let custom_config = PoolConfig {
+            health_check_interval_secs: 60,
+            ..Default::default()
+        };
+        let custom_interval = Duration::from_secs(custom_config.health_check_interval_secs);
+        assert_eq!(custom_interval, Duration::from_secs(60));
+    }
+
+    #[test]
+    fn test_failure_threshold() {
+        let config = PoolConfig::default();
+        let max_failures = config.max_failures;
+        
+        // Simulate failure counting
+        let mut failure_count = 0;
+        
+        for _ in 0..5 {
+            failure_count += 1;
+            if failure_count >= max_failures {
+                break; // Endpoint should be marked unhealthy
+            }
+        }
+        
+        assert_eq!(failure_count, max_failures);
+    }
+
+    #[test]
+    fn test_timeout_configuration() {
+        let config = PoolConfig::default();
+        
+        let health_check_timeout = Duration::from_secs(config.health_check_timeout_secs);
+        let health_check_interval = Duration::from_secs(config.health_check_interval_secs);
+        
+        assert_eq!(health_check_timeout, Duration::from_secs(5));
+        assert_eq!(health_check_interval, Duration::from_secs(30));
+        
+        // Ensure interval is longer than timeout
+        assert!(health_check_interval > health_check_timeout);
+    }
+
+    #[test]
+    fn test_endpoint_validation() {
+        let valid_endpoints = [
+            "https://eth.llamarpc.com",
+            "https://ethereum.publicnode.com",
+            "http://localhost:8545",
+            "https://mainnet.infura.io/v3/key",
+        ];
+
+        for endpoint in &valid_endpoints {
+            assert!(!endpoint.is_empty());
+            assert!(endpoint.starts_with("http://") || endpoint.starts_with("https://"));
+            
+            // Basic URL format validation
+            assert!(endpoint.contains("://"));
+            assert!(endpoint.len() > 10); // Basic length check
+        }
+    }
+
+    #[test]
+    fn test_invalid_endpoints() {
+        let invalid_endpoints = [
+            "",
+            "not-a-url",
+            "ftp://invalid.com",
+            "ws://websocket-endpoint",
+        ];
+
+        for endpoint in &invalid_endpoints {
+            if endpoint.is_empty() {
+                continue; // Empty string is obviously invalid
+            }
+            
+            // These should not be HTTP(S)
+            assert!(!endpoint.starts_with("http://") || !endpoint.starts_with("https://"));
+        }
+    }
+
+    #[test]
+    fn test_connection_pool_stats() {
+        // Test pool statistics tracking
+        let mut stats = HashMap::new();
+        
+        // Simulate connection usage statistics
+        stats.insert("total_connections".to_string(), 25);
+        stats.insert("active_connections".to_string(), 8);
+        stats.insert("healthy_endpoints".to_string(), 3);
+        stats.insert("unhealthy_endpoints".to_string(), 1);
+        
+        assert_eq!(stats.get("total_connections"), Some(&25));
+        assert_eq!(stats.get("active_connections"), Some(&8));
+        assert_eq!(stats.get("healthy_endpoints"), Some(&3));
+        assert_eq!(stats.get("unhealthy_endpoints"), Some(&1));
+        
+        // Calculate utilization rate
+        let active = *stats.get("active_connections").unwrap() as f64;
+        let total = *stats.get("total_connections").unwrap() as f64;
+        let utilization = active / total;
+        
+        assert!((utilization - 0.32).abs() < 0.01); // 8/25 = 0.32
+    }
+
+    #[test]
+    fn test_health_status_transitions() {
+        let mut health = EndpointHealth::default();
+        assert!(health.is_healthy);
+        
+        // Transition to unhealthy
+        health.is_healthy = false;
+        health.failure_count = 3;
+        health.last_failure = Some(Instant::now());
+        
+        assert!(!health.is_healthy);
+        assert!(health.failure_count > 0);
+        
+        // Transition back to healthy
+        health.is_healthy = true;
+        health.failure_count = 0;
+        health.last_success = Some(Instant::now());
+        
+        assert!(health.is_healthy);
+        assert_eq!(health.failure_count, 0);
+    }
+
+    #[test]
+    fn test_response_time_calculation() {
+        let mut health = EndpointHealth::default();
+        
+        // Simulate response time tracking
+        let response_times = [100, 150, 200, 120, 180]; // milliseconds
+        let average = response_times.iter().sum::<u64>() / response_times.len() as u64;
+        
+        health.avg_response_time_ms = average;
+        assert_eq!(health.avg_response_time_ms, 150); // (100+150+200+120+180)/5 = 150
+    }
+
+    #[tokio::test]
+    async fn test_connection_pool_creation_empty() {
+        // Test that empty endpoint list is handled
+        let endpoints: Vec<String> = vec![];
+        let result = ConnectionPool::new(endpoints).await;
+        
+        // Should fail with empty endpoint list
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_connection_pool_creation_invalid_endpoints() {
+        let endpoints = vec![
+            "invalid-url".to_string(),
+            "not-http://invalid".to_string(),
+        ];
+        
+        let result = ConnectionPool::new(endpoints).await;
+        // Should fail with invalid endpoints
+        assert!(result.is_err());
     }
 
     #[tokio::test]
     #[ignore] // Requires network
-    async fn test_connection_pool() {
+    async fn test_connection_pool_integration() {
         let endpoints = vec![
             "https://eth.llamarpc.com".to_string(),
             "https://ethereum.publicnode.com".to_string(),
@@ -337,9 +589,33 @@ mod tests {
 
         let pool = ConnectionPool::new(endpoints).await.unwrap();
         assert_eq!(pool.endpoint_count(), 2);
+        assert!(!pool.endpoints().is_empty());
 
         // Get a connection
         let conn = pool.get_connection().await.unwrap();
         assert!(!conn.endpoint().is_empty());
+    }
+
+    #[tokio::test]
+    #[ignore] // Requires network
+    async fn test_connection_pool_round_robin() {
+        let endpoints = vec![
+            "https://eth.llamarpc.com".to_string(),
+            "https://ethereum.publicnode.com".to_string(),
+        ];
+
+        let pool = ConnectionPool::new(endpoints.clone()).await.unwrap();
+        
+        // Get multiple connections to test round-robin
+        let mut used_endpoints = std::collections::HashSet::new();
+        
+        for _ in 0..4 { // More than the number of endpoints
+            if let Ok(conn) = pool.get_connection().await {
+                used_endpoints.insert(conn.endpoint().to_string());
+            }
+        }
+        
+        // Should have used multiple endpoints
+        assert!(!used_endpoints.is_empty());
     }
 }

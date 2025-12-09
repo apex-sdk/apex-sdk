@@ -23,9 +23,9 @@ rust-version = "1.85"
 readme = "README.md"
 license = "Apache-2.0"
 repository = "https://github.com/eurybits/apex-sdk"
-homepage = "https://eurybits.github.io/apex-sdk/"
+homepage = "https://apexsdk.dev/"
 keywords = ["blockchain", "substrate", "evm", "cross-chain", "web3"]
-documentation = "https://eurybits.github.io/apex-sdk/"
+documentation = "https://apexsdk.dev/"
 categories = ["cryptography::cryptocurrencies", "api-bindings", "development-tools"]
 
 [workspace.dependencies]

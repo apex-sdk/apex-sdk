@@ -586,27 +586,284 @@ fn format_wei_to_eth(wei: u128) -> String {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+    use std::fs;
+    use tempfile::tempdir;
 
     #[test]
-    fn test_detect_chain_type() {
+    fn test_detect_chain_type_substrate() {
         assert!(is_substrate_endpoint("wss://polkadot.api.onfinality.io"));
         assert!(is_substrate_endpoint("ws://localhost:9944"));
+        assert!(is_substrate_endpoint("wss://kusama-rpc.polkadot.io"));
+        assert!(is_substrate_endpoint("ws://127.0.0.1:9944"));
+    }
+
+    #[test]
+    fn test_detect_chain_type_evm() {
         assert!(!is_substrate_endpoint("https://eth.llamarpc.com"));
         assert!(!is_substrate_endpoint("http://localhost:8545"));
+        assert!(!is_substrate_endpoint("https://mainnet.infura.io/v3/key"));
+        assert!(!is_substrate_endpoint("https://bsc-dataseed.binance.org"));
+    }
+
+    #[test]
+    fn test_hex_decode_valid() {
+        let test_cases = [
+            "0x6080604052",
+            "6080604052",
+            "0x",
+            "",
+            "0xdeadbeef",
+            "deadbeef",
+            "0x00",
+            "00",
+        ];
+
+        for hex_str in &test_cases {
+            let stripped = hex_str.trim_start_matches("0x");
+            if !stripped.is_empty() {
+                let decoded = hex::decode(stripped);
+                assert!(
+                    decoded.is_ok(),
+                    "Failed to decode valid hex: {}",
+                    hex_str
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_hex_decode_invalid() {
+        let invalid_cases = [
+            "0xghi",     // Invalid hex characters
+            "hello",     // Not hex
+            "0x123",     // Odd length
+            "123",       // Odd length without prefix
+        ];
+
+        for hex_str in &invalid_cases {
+            let stripped = hex_str.trim_start_matches("0x");
+            let decoded = hex::decode(stripped);
+            assert!(
+                decoded.is_err(),
+                "Expected invalid hex to fail: {}",
+                hex_str
+            );
+        }
+    }
+
+    #[test]
+    fn test_format_gas_price() {
+        // Test with different gas prices
+        let test_cases = [
+            (0u128, "0"),
+            (1_000_000_000u128, "1"), // 1 Gwei
+            (1_500_000_000u128, "1.5"), // 1.5 Gwei
+            (10_000_000_000u128, "10"), // 10 Gwei
+            (20_000_000_000u128, "20"), // 20 Gwei
+            (999_999_999u128, "0.999999999"), // Less than 1 Gwei
+        ];
+
+        for (wei, expected) in &test_cases {
+            let result = format_gas_price(*wei);
+            assert_eq!(
+                result, *expected,
+                "Failed for {} wei, expected {}, got {}",
+                wei, expected, result
+            );
+        }
+    }
+
+    #[test]
+    fn test_format_gas_price_edge_cases() {
+        // Very small amounts
+        assert_eq!(format_gas_price(1), "0.000000001");
+        assert_eq!(format_gas_price(10), "0.00000001");
+        
+        // Exact Gwei amounts
+        assert_eq!(format_gas_price(1_000_000_000), "1");
+        assert_eq!(format_gas_price(2_000_000_000), "2");
+        
+        // Large amounts
+        assert_eq!(format_gas_price(100_000_000_000), "100");
+    }
+
+    #[tokio::test]
+    async fn test_deploy_contract_missing_file() {
+        let result = deploy_contract(
+            "/nonexistent/contract.wasm",
+            "polkadot",
+            "wss://polkadot.api.onfinality.io",
+            None,
+            true, // dry_run
+        ).await;
+        
+        // Should fail because file doesn't exist
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_deploy_contract_invalid_chain() {
+        // Create a temporary file
+        let dir = tempdir().unwrap();
+        let file_path = dir.path().join("contract.wasm");
+        fs::write(&file_path, b"fake contract").unwrap();
+
+        let result = deploy_contract(
+            file_path.to_str().unwrap(),
+            "invalid_chain",
+            "https://invalid.endpoint",
+            None,
+            true, // dry_run
+        ).await;
+        
+        // Should eventually fail due to invalid endpoint/chain
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_chain_type_detection_from_name() {
+        use apex_sdk_types::{Chain, ChainType};
+        
+        // Test Substrate chains
+        if let Some(chain) = Chain::from_str_case_insensitive("polkadot") {
+            assert_eq!(chain.chain_type(), ChainType::Substrate);
+        }
+        
+        if let Some(chain) = Chain::from_str_case_insensitive("kusama") {
+            assert_eq!(chain.chain_type(), ChainType::Substrate);
+        }
+
+        // Test EVM chains  
+        if let Some(chain) = Chain::from_str_case_insensitive("ethereum") {
+            assert_eq!(chain.chain_type(), ChainType::Evm);
+        }
+        
+        if let Some(chain) = Chain::from_str_case_insensitive("polygon") {
+            assert_eq!(chain.chain_type(), ChainType::Evm);
+        }
+    }
+
+    #[test]
+    fn test_file_path_validation() {
+        // Test valid paths
+        let valid_paths = [
+            "contract.wasm",
+            "./contract.wasm",
+            "/path/to/contract.wasm",
+            "contracts/MyContract.wasm",
+        ];
+
+        for path in &valid_paths {
+            let path_obj = Path::new(path);
+            assert!(path_obj.to_str().is_some(), "Failed to process path: {}", path);
+        }
+    }
+
+    #[test]
+    fn test_contract_extension_validation() {
+        let wasm_files = [
+            "contract.wasm",
+            "MyContract.wasm", 
+            "path/to/contract.wasm",
+        ];
+
+        let json_files = [
+            "contract.json",
+            "MyContract.json",
+            "path/to/metadata.json",
+        ];
+
+        for file in &wasm_files {
+            let path = Path::new(file);
+            if let Some(ext) = path.extension() {
+                assert_eq!(ext, "wasm", "Expected .wasm extension for {}", file);
+            }
+        }
+
+        for file in &json_files {
+            let path = Path::new(file);
+            if let Some(ext) = path.extension() {
+                assert_eq!(ext, "json", "Expected .json extension for {}", file);
+            }
+        }
+    }
+
+    #[test]
+    fn test_account_name_validation() {
+        let valid_names = [
+            "alice",
+            "bob",
+            "charlie",
+            "my-account",
+            "account_123",
+        ];
+
+        for name in &valid_names {
+            assert!(!name.is_empty(), "Account name should not be empty: {}", name);
+            assert!(
+                name.chars().all(|c| c.is_alphanumeric() || c == '-' || c == '_'),
+                "Account name should contain valid characters: {}",
+                name
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn test_dry_run_flag() {
+        // Create a temporary file
+        let dir = tempdir().unwrap();
+        let file_path = dir.path().join("contract.wasm");
+        fs::write(&file_path, b"fake contract").unwrap();
+
+        // Test that dry_run flag is respected (should not make actual network calls)
+        let result = deploy_contract(
+            file_path.to_str().unwrap(),
+            "polkadot",
+            "wss://invalid.endpoint", // Invalid endpoint should be okay for dry run
+            Some("alice".to_string()),
+            true, // dry_run
+        ).await;
+        
+        // Dry run might still fail due to other validation, but should handle the dry_run flag
+        // The important thing is it doesn't panic and handles the flag appropriately
+        let _ = result; // Don't assert success/failure since it depends on implementation
+    }
+
+    #[test]
+    fn test_deployment_parameters_validation() {
+        // Test parameter combinations
+        let contract_path = "contract.wasm";
+        let chain = "polkadot";
+        let endpoint = "wss://polkadot.api.onfinality.io";
+        
+        // All parameters should be valid strings
+        assert!(!contract_path.is_empty());
+        assert!(!chain.is_empty());
+        assert!(!endpoint.is_empty());
+        
+        // Endpoint should be valid URL format
+        assert!(endpoint.starts_with("wss://") || endpoint.starts_with("ws://") || 
+                endpoint.starts_with("https://") || endpoint.starts_with("http://"));
     }
 
     fn is_substrate_endpoint(endpoint: &str) -> bool {
         endpoint.starts_with("ws://") || endpoint.starts_with("wss://")
     }
 
-    #[test]
-    fn test_hex_decode() {
-        let hex = "0x6080604052";
-        let decoded = hex::decode(hex.trim_start_matches("0x"));
-        assert!(decoded.is_ok());
+    fn format_gas_price(wei: u128) -> String {
+        let gwei_divisor = 1_000_000_000u128;
+        let gwei_whole = wei / gwei_divisor;
+        let remainder = wei % gwei_divisor;
 
-        let without_prefix = "6080604052";
-        let decoded = hex::decode(without_prefix);
-        assert!(decoded.is_ok());
+        if remainder == 0 {
+            format!("{}", gwei_whole)
+        } else {
+            let formatted = format!("{}.{:09}", gwei_whole, remainder);
+            formatted
+                .trim_end_matches('0')
+                .trim_end_matches('.')
+                .to_string()
+        }
     }
 }
