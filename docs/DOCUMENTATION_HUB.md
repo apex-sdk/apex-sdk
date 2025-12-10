@@ -68,6 +68,7 @@ Find documentation specific to your needs:
 - [Membership](#dao-membership) - Handle cross-chain memberships
 
 ### Infrastructure
+- [Domain Structure](DOMAINS.md) - Official domains and subdomains
 - [Oracle Services](#oracle) - Build price oracles
 - [Event Indexing](#indexing) - Index blockchain events
 - [RPC Services](#rpc) - Set up RPC infrastructure

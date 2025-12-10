@@ -11,6 +11,13 @@ Welcome to Apex SDK! Build cross-chain applications with confidence using Rust's
 
 ## Quick Navigation
 
+### Quick Access Links
+- [start.apexsdk.dev](https://start.apexsdk.dev) - Quick Start
+- [api.apexsdk.dev](https://api.apexsdk.dev) - API Reference
+- [cli.apexsdk.dev](https://cli.apexsdk.dev) - CLI Guide
+
+See [DOMAINS.md](DOMAINS.md) for all available shortcuts.
+
 ### For New Users
 - [**Quick Start**](QUICK_START.md) - 5-minute setup guide
 - [**Documentation Hub**](DOCUMENTATION_HUB.md) - Complete resource center

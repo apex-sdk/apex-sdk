@@ -112,6 +112,18 @@ cargo install --path ./cli
 | [**Roadmap**](./docs/ROADMAP.md)         | Development roadmap & priorities |
 | [**Security**](./docs/SECURITY.md)       | Security policies & reporting    |
 
+### Domain Shortcuts
+
+Quick access via dedicated subdomains:
+
+- 🚀 [start.apexsdk.dev](https://start.apexsdk.dev) - Quick Start
+- 📚 [api.apexsdk.dev](https://api.apexsdk.dev) - API Reference
+- ⌨️ [cli.apexsdk.dev](https://cli.apexsdk.dev) - CLI Guide
+- 🎮 [play.apexsdk.dev](https://play.apexsdk.dev) - Interactive Viewer
+- 📖 [docs.apexsdk.dev](https://docs.apexsdk.dev) - Full Documentation
+
+See [DOMAINS.md](./docs/DOMAINS.md) for complete domain structure.
+
 ### Examples
 
 Check out the [`examples/`](./examples) directory for complete working examples:

@@ -7,23 +7,25 @@ https://www.apexsdk.dev/* https://apexsdk.dev/:splat 301!
 # Redirect old GitHub Pages URLs
 https://eurybits.github.io/apex-sdk/* https://apexsdk.dev/:splat 301!
 
-# Subdomain routing (add these after you configure DNS)
-https://start.apexsdk.dev/* https://apexsdk.dev/QUICK_START.md 301!
-https://api.apexsdk.dev/* https://apexsdk.dev/API.md 301!
-https://cli.apexsdk.dev/* https://apexsdk.dev/CLI_GUIDE.md 301!
+# Subdomain routing - render markdown files with viewer
+https://start.apexsdk.dev/* https://apexsdk.dev/viewer.html?doc=QUICK_START.md 301!
+https://api.apexsdk.dev/* https://apexsdk.dev/viewer.html?doc=API.md 301!
+https://cli.apexsdk.dev/* https://apexsdk.dev/viewer.html?doc=CLI_GUIDE.md 301!
+https://blog.apexsdk.dev/* https://apexsdk.dev/viewer.html?doc=ROADMAP.md 301!
+https://play.apexsdk.dev/* https://apexsdk.dev/viewer.html 301!
 https://docs.apexsdk.dev/* https://apexsdk.dev/:splat 200
 
-# Clean URLs (remove .html/.md extensions - optional)
-/quick-start /QUICK_START.md 200
-/quickstart /QUICK_START.md 200
-/api /API.md 200
-/cli-guide /CLI_GUIDE.md 200
-/cli /CLI_GUIDE.md 200
-/contributing /CONTRIBUTING.md 200
-/security /SECURITY.md 200
-/testnets /TESTNETS.md 200
-/roadmap /ROADMAP.md 200
-/architecture /SYSTEM_ARCHITECTURE.md 200
+# Clean URLs - render markdown files with viewer
+/quick-start /viewer.html?doc=QUICK_START.md 200
+/quickstart /viewer.html?doc=QUICK_START.md 200
+/api /viewer.html?doc=API.md 200
+/cli-guide /viewer.html?doc=CLI_GUIDE.md 200
+/cli /viewer.html?doc=CLI_GUIDE.md 200
+/contributing /viewer.html?doc=CONTRIBUTING.md 200
+/security /viewer.html?doc=SECURITY.md 200
+/testnets /viewer.html?doc=TESTNETS.md 200
+/roadmap /viewer.html?doc=ROADMAP.md 200
+/architecture /viewer.html?doc=SYSTEM_ARCHITECTURE.md 200
 
 # Fallback for 404
 /* /index.html 404
