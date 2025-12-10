@@ -1,0 +1,38 @@
+# Cloudflare Pages _headers file
+# https://developers.cloudflare.com/pages/configuration/headers/
+
+/:
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  Content-Security-Policy: |
+    default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.github.com https://cloudflareinsights.com
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/*.html:
+  Cache-Control: public, max-age=1800, must-revalidate
+  Link: <https://fonts.googleapis.com>; rel=preconnect, <https://fonts.gstatic.com>; rel=preconnect; crossorigin
+
+/*.css:
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.js:
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.png:
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.jpg:
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.svg:
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.woff2:
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*:
+  Cache-Control: public, max-age=31536000, immutable

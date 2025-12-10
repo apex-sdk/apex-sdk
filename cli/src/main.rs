@@ -429,7 +429,7 @@ fn create_readme(path: &Path, name: &str, template: &str) -> anyhow::Result<()> 
     let readme = format!(
         r#"# {}
 
-> {} built with [Apex SDK](https://github.com/kherldhussein/apex-sdk)
+> {} built with [Apex SDK](https://github.com/eurybits/apex-sdk)
 
 ## Overview
 
@@ -476,7 +476,7 @@ cargo run --example quickstart
 
 ## 📖 Documentation
 
-- [Apex SDK Documentation](https://github.com/kherldhussein/apex-sdk)
+- [Apex SDK Documentation](https://github.com/eurybits/apex-sdk)
 - [API Reference](https://docs.rs/apex-sdk)
 - [Examples](./examples/)
 
@@ -497,7 +497,7 @@ This project is licensed under MIT OR Apache-2.0
 
 ## 🙏 Acknowledgments
 
-Built with [Apex SDK](https://github.com/kherldhussein/apex-sdk) - Unified Rust SDK for Substrate & EVM chains.
+Built with [Apex SDK](https://github.com/eurybits/apex-sdk) - Unified Rust SDK for Substrate & EVM chains.
 "#,
         name,
         match template {
@@ -695,7 +695,7 @@ Useful Commands:
 
 📚 Resources:
 
-   • Apex SDK Docs:    https://github.com/kherldhussein/apex-sdk
+   • Apex SDK Docs:    https://github.com/eurybits/apex-sdk
    • API Reference:    https://docs.rs/apex-sdk
    • CLI Guide:        apex --help
 

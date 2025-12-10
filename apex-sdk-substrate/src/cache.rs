@@ -490,7 +490,7 @@ mod tests {
 
     #[test]
     fn test_cache_expiration() {
-        let config = CacheConfig::new().with_storage_ttl(Duration::from_millis(10));
+        let config = CacheConfig::new().with_storage_ttl(Duration::from_millis(100));
 
         let cache = Cache::with_config(config);
 
@@ -500,7 +500,7 @@ mod tests {
         assert_eq!(cache.get_storage("key1"), Some(vec![1, 2, 3]));
 
         // Wait for expiration
-        std::thread::sleep(Duration::from_millis(20));
+        std::thread::sleep(Duration::from_millis(150));
 
         // Should be expired
         assert_eq!(cache.get_storage("key1"), None);

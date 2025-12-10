@@ -1,0 +1,35 @@
+{
+  "name": "Apex SDK Protocol",
+  "short_name": "Apex SDK",
+  "description": "Unified Rust SDK for Substrate & EVM blockchain development",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/assets/apex_logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["developer-tools", "blockchain", "documentation"],
+  "shortcuts": [
+    {
+      "name": "Quick Start",
+      "short_name": "Start",
+      "description": "Get started with Apex SDK in 5 minutes",
+      "url": "/QUICK_START.md",
+      "icons": [{ "src": "/assets/apex_logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "API Reference",
+      "short_name": "API",
+      "description": "Complete API documentation",
+      "url": "/API.md",
+      "icons": [{ "src": "/assets/apex_logo.png", "sizes": "96x96" }]
+    }
+  ]
+}

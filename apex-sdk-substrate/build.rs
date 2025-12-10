@@ -38,5 +38,14 @@ fn main() {
 
     fs::write(&metadata_path, placeholder).expect("Failed to write placeholder metadata");
 
-    println!("cargo:warning=Using dynamic API. See build.rs for instructions on generating typed metadata.");
+    // Only show warning if typed metadata is not available
+    #[cfg(not(feature = "typed"))]
+    println!("cargo:warning=Using dynamic API. Enable 'typed' feature and generate metadata for better performance. See build.rs for instructions.");
+
+    // Enable typed metadata when feature is active
+    #[cfg(feature = "typed")]
+    {
+        println!("cargo:rustc-cfg=typed_metadata");
+        println!("Using typed metadata for improved performance and compile-time safety.");
+    }
 }

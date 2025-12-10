@@ -2,7 +2,11 @@
 
 [![Crates.io](https://img.shields.io/crates/v/apex-sdk-evm)](https://crates.io/crates/apex-sdk-evm)
 [![Documentation](https://docs.rs/apex-sdk-evm/badge.svg)](https://docs.rs/apex-sdk-evm)
+[![Downloads](https://img.shields.io/crates/d/apex-sdk-evm)](https://crates.io/crates/apex-sdk-evm)
 [![License](https://img.shields.io/crates/l/apex-sdk-evm)](LICENSE)
+[![EVM](https://img.shields.io/badge/EVM-compatible-627EEA)](https://ethereum.org/)
+[![Alloy](https://img.shields.io/badge/Alloy-powered-blue)](https://alloy.rs/)
+[![Rust](https://img.shields.io/badge/rust-1.85%2B-orange.svg)](https://www.rust-lang.org/)
 
 EVM blockchain adapter for the Apex SDK, providing seamless interaction with Ethereum and EVM-compatible chains.
 
@@ -382,5 +386,5 @@ Contributions are welcome! Please read [CONTRIBUTING.md](../CONTRIBUTING.md) for
 ## Support
 
 - [Documentation](https://docs.rs/apex-sdk-evm)
-- [GitHub Issues](https://github.com/kherldhussein/apex-sdk/issues)
+- [GitHub Issues](https://github.com/eurybits/apex-sdk/issues)
 - [Examples](../examples)

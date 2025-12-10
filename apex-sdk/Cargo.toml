@@ -1,39 +1,57 @@
 [package]
 name = "apex-sdk"
-version = "0.1.4"
+version.workspace = true
 edition.workspace = true
+description.workspace = true
+authors.workspace = true
 rust-version.workspace = true
+readme.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
+keywords.workspace = true
 documentation.workspace = true
-description = "Unified Rust SDK for Substrate & EVM blockchain development"
-keywords = ["blockchain", "substrate", "ethereum", "cross-chain", "web3"]
-categories = ["cryptography::cryptocurrencies", "api-bindings"]
-readme = "README.md"
+categories.workspace = true
 
 [dependencies]
-apex-sdk-core = { path = "../apex-sdk-core", version = "0.1.4" }
-apex-sdk-substrate = { path = "../apex-sdk-substrate", version = "0.1.4" }
-apex-sdk-evm = { path = "../apex-sdk-evm", version = "0.1.4" }
-apex-sdk-types = { path = "../apex-sdk-types", version = "0.1.4" }
-tokio = { workspace = true }
-async-trait = { workspace = true }
-anyhow = { workspace = true }
-thiserror = { workspace = true }
-tracing = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
-hex = { workspace = true }
-rand = { workspace = true }
-sha3 = { workspace = true }
+# Async runtime
+tokio.workspace = true
+async-trait.workspace = true
+futures = "0.3"
+
+# Serialization
+serde.workspace = true
+serde_json.workspace = true
+
+# Error handling
+anyhow.workspace = true
+thiserror.workspace = true
+
+# Utilities
+tracing.workspace = true
+url.workspace = true
+sha3.workspace = true
+
+# Internal workspace dependencies
+apex-sdk-core.workspace = true
+apex-sdk-substrate = { workspace = true, optional = true }
+apex-sdk-evm = { workspace = true, optional = true }
+apex-sdk-types.workspace = true
 
 [dev-dependencies]
-tokio = { workspace = true, features = ["test-util"] }
-tracing-subscriber = { workspace = true }
-proptest = { workspace = true }
-mockall = { workspace = true }
-criterion = { workspace = true }
+# Testing
+tokio-test = "0.4"
+proptest.workspace = true
+mockall.workspace = true
+
+# Benchmarking
+criterion.workspace = true
+
+[features]
+default = ["substrate", "evm"]
+substrate = ["apex-sdk-substrate"]
+evm = ["apex-sdk-evm"]
+mocks = ["apex-sdk-core/mocks"]
 
 [[bench]]
 name = "transaction_benchmarks"

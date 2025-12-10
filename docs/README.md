@@ -1,5 +1,10 @@
 # Apex SDK Protocol Documentation
 
+[![Docs](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://apexsdk.dev/)
+[![Discord](https://img.shields.io/discord/1234567890?label=discord)](https://discord.gg/zCDFsBaZJN)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../LICENSE)
+[![GitHub Stars](https://img.shields.io/github/stars/eurybits/apex-sdk?style=social)](https://github.com/eurybits/apex-sdk)
+
 Welcome to Apex SDK! Build cross-chain applications with confidence using Rust's type safety and performance.
 
 > **New here?** Start with the [**Quick Start Guide**](QUICK_START.md) to build your first cross-chain app in 5 minutes!
@@ -110,10 +115,10 @@ Each example includes:
 
 ## Community
 
-- **GitHub**: [kherldhussein/apex-sdk](https://github.com/kherldhussein/apex-sdk)
-- **Issues**: [Report bugs](https://github.com/kherldhussein/apex-sdk/issues)
-- **Discussions**: [Join the conversation](https://github.com/kherldhussein/apex-sdk/discussions)
+- **GitHub**: [eurybits/apex-sdk](https://github.com/eurybits/apex-sdk)
+- **Issues**: [Report bugs](https://github.com/eurybits/apex-sdk/issues)
+- **Discussions**: [Join the conversation](https://github.com/eurybits/apex-sdk/discussions)
 
 ## License
 
-[Apache 2.0](https://github.com/kherldhussein/apex-sdk/blob/main/LICENSE)
+[Apache 2.0](https://github.com/eurybits/apex-sdk/blob/main/LICENSE)

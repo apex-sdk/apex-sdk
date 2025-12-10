@@ -9,6 +9,22 @@ The Apex SDK Substrate adapter supports two modes of operation:
 
 This guide explains how to generate and use typed metadata for enhanced type safety and performance.
 
+## ⚠️ Important: Generated Files Not in Git
+
+**Generated metadata files are NOT committed to the repository** for the following reasons:
+
+- **Large file sizes**: Each generated `.rs` file is ~4MB, which would bloat the repository
+- **Chain-specific**: Files are specific to a runtime version and network
+- **Frequently updated**: Chain runtime upgrades require regeneration
+- **Developer-specific**: Different developers may target different chains or runtime versions
+
+The generated files are in `.gitignore` and must be generated locally when needed:
+```bash
+./scripts/generate_metadata.sh <chain-name>
+```
+
+To use typed metadata features in CI/CD, you'll need to generate them as part of your build process.
+
 ## Why Use Typed Metadata?
 
 ### Benefits
@@ -360,5 +376,5 @@ cargo test --features typed
 
 For issues or questions:
 - Open an issue on GitHub
-- Join our Discord: https://discord.gg/apexsdk
+- Join our Discord: https://discord.gg/zCDFsBaZJN
 - Read the docs: https://docs.rs/apex-sdk

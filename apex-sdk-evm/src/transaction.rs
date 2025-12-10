@@ -485,6 +485,27 @@ mod tests {
     fn test_gas_config_default() {
         let config = GasConfig::default();
         assert_eq!(config.gas_limit_multiplier, 1.2);
+        assert!(config.max_priority_fee_per_gas.is_none());
+        assert!(config.max_fee_per_gas.is_none());
+        assert!(config.gas_price.is_none());
+    }
+
+    #[test]
+    fn test_gas_config_custom() {
+        let config = GasConfig {
+            gas_limit_multiplier: 1.5,
+            max_priority_fee_per_gas: Some(U256::from(2_000_000_000u64)), // 2 Gwei
+            max_fee_per_gas: Some(U256::from(20_000_000_000u64)),         // 20 Gwei
+            gas_price: Some(U256::from(15_000_000_000u64)),               // 15 Gwei
+        };
+
+        assert_eq!(config.gas_limit_multiplier, 1.5);
+        assert_eq!(
+            config.max_priority_fee_per_gas,
+            Some(U256::from(2_000_000_000u64))
+        );
+        assert_eq!(config.max_fee_per_gas, Some(U256::from(20_000_000_000u64)));
+        assert_eq!(config.gas_price, Some(U256::from(15_000_000_000u64)));
     }
 
     #[test]
@@ -492,30 +513,243 @@ mod tests {
         let config = RetryConfig::default();
         assert_eq!(config.max_retries, 3);
         assert_eq!(config.initial_backoff_ms, 1000);
+        assert_eq!(config.max_backoff_ms, 30000);
+        assert_eq!(config.backoff_multiplier, 2.0);
         assert!(config.use_jitter);
     }
 
     #[test]
+    fn test_retry_config_custom() {
+        let config = RetryConfig {
+            max_retries: 5,
+            initial_backoff_ms: 500,
+            max_backoff_ms: 30000,
+            backoff_multiplier: 1.5,
+            use_jitter: false,
+        };
+
+        assert_eq!(config.max_retries, 5);
+        assert_eq!(config.initial_backoff_ms, 500);
+        assert_eq!(config.max_backoff_ms, 30000);
+        assert_eq!(config.backoff_multiplier, 1.5);
+        assert!(!config.use_jitter);
+    }
+
+    #[test]
     fn test_format_gwei() {
-        let wei = U256::from(1_000_000_000u64);
+        // Test exact Gwei amounts
+        let wei = U256::from(1_000_000_000u64); // 1 Gwei
         assert_eq!(format_gwei(wei), "1");
 
-        let wei = U256::from(2_500_000_000u64);
+        let wei = U256::from(2_500_000_000u64); // 2.5 Gwei
         assert_eq!(format_gwei(wei), "2.5");
 
-        let wei = U256::from(2_540_000_000u64);
+        let wei = U256::from(2_540_000_000u64); // 2.54 Gwei
         assert_eq!(format_gwei(wei), "2.54");
+
+        // Test zero
+        let wei = U256::ZERO;
+        assert_eq!(format_gwei(wei), "0");
+
+        // Test large amounts
+        let wei = U256::from(100_000_000_000u64); // 100 Gwei
+        assert_eq!(format_gwei(wei), "100");
+
+        // Test fractional amounts
+        let wei = U256::from(1_500_000_000u64); // 1.5 Gwei
+        assert_eq!(format_gwei(wei), "1.5");
     }
 
     #[test]
     fn test_format_eth() {
-        let wei = U256::from(10_u64.pow(18));
+        // Test exact ETH amounts
+        let wei = U256::from(10_u64.pow(18)); // 1 ETH
         assert_eq!(format_eth(wei), "1");
 
-        let wei = U256::from(5 * 10_u64.pow(17));
+        let wei = U256::from(5 * 10_u64.pow(17)); // 0.5 ETH
         assert_eq!(format_eth(wei), "0.5");
 
-        let wei = U256::from(123 * 10_u64.pow(16));
+        let wei = U256::from(123 * 10_u64.pow(16)); // 1.23 ETH
         assert_eq!(format_eth(wei), "1.23");
+
+        // Test zero
+        let wei = U256::ZERO;
+        assert_eq!(format_eth(wei), "0");
+
+        // Test small amounts
+        let wei = U256::from(1u64); // 1 Wei
+        assert_eq!(format_eth(wei), "0.000000000000000001");
+
+        // Test large amounts
+        let wei = U256::from(1000) * U256::from(10_u64.pow(18)); // 1000 ETH
+        assert_eq!(format_eth(wei), "1000");
+    }
+
+    #[test]
+    fn test_format_gwei_edge_cases() {
+        // Test trailing zeros are handled correctly
+        let wei = U256::from(1_100_000_000u64); // 1.1 Gwei exactly
+        let result = format_gwei(wei);
+        assert_eq!(result, "1.1");
+        assert!(!result.ends_with('0')); // No trailing zeros
+
+        // Test very small fractions
+        let wei = U256::from(1_000_000_001u64); // 1.000000001 Gwei
+        let result = format_gwei(wei);
+        assert!(result.starts_with("1."));
+        assert!(result.len() > 2); // Should have fractional part
+    }
+
+    #[test]
+    fn test_format_eth_edge_cases() {
+        // Test trailing zeros are handled correctly
+        let wei = U256::from(11 * 10_u64.pow(17)); // 1.1 ETH exactly
+        let result = format_eth(wei);
+        assert_eq!(result, "1.1");
+        assert!(!result.ends_with('0')); // No trailing zeros
+
+        // Test maximum precision
+        let wei = U256::from(10_u64.pow(18)) + U256::from(1); // 1.000000000000000001 ETH
+        let result = format_eth(wei);
+        assert!(result.starts_with("1."));
+        assert!(result.len() > 2); // Should have fractional part
+    }
+
+    #[test]
+    fn test_gas_limit_multiplier_calculation() {
+        let config = GasConfig::default();
+        let base_gas = 21000u64;
+
+        // Test gas limit multiplication
+        let multiplied = (base_gas as f64 * config.gas_limit_multiplier) as u64;
+        assert_eq!(multiplied, 25200); // 21000 * 1.2 = 25200
+
+        // Test custom multiplier
+        let custom_config = GasConfig {
+            gas_limit_multiplier: 1.5,
+            ..Default::default()
+        };
+        let multiplied = (base_gas as f64 * custom_config.gas_limit_multiplier) as u64;
+        assert_eq!(multiplied, 31500); // 21000 * 1.5 = 31500
+    }
+
+    #[test]
+    fn test_retry_backoff_calculation() {
+        let config = RetryConfig::default();
+
+        // Test exponential backoff calculation
+        for attempt in 0..config.max_retries {
+            let backoff =
+                config.initial_backoff_ms as f64 * config.backoff_multiplier.powi(attempt as i32);
+            let capped_backoff = backoff.min(config.max_backoff_ms as f64) as u64;
+
+            assert!(capped_backoff >= config.initial_backoff_ms);
+            assert!(capped_backoff <= config.max_backoff_ms);
+        }
+    }
+
+    #[test]
+    fn test_transaction_executor_creation() {
+        // Test that we can create a transaction executor with mock provider
+        let provider = create_mock_provider();
+        let executor = TransactionExecutor::new(provider);
+
+        // Test default configurations
+        assert_eq!(executor.gas_config.gas_limit_multiplier, 1.2);
+        assert_eq!(executor.retry_config.max_retries, 3);
+    }
+
+    #[test]
+    fn test_transaction_executor_with_custom_config() {
+        let provider = create_mock_provider();
+        let gas_config = GasConfig {
+            gas_limit_multiplier: 1.5,
+            max_priority_fee_per_gas: Some(U256::from(2_000_000_000u64)),
+            ..Default::default()
+        };
+        let retry_config = RetryConfig {
+            max_retries: 5,
+            ..Default::default()
+        };
+
+        let executor = TransactionExecutor::new(provider)
+            .with_gas_config(gas_config.clone())
+            .with_retry_config(retry_config.clone());
+
+        assert_eq!(executor.gas_config.gas_limit_multiplier, 1.5);
+        assert_eq!(
+            executor.gas_config.max_priority_fee_per_gas,
+            Some(U256::from(2_000_000_000u64))
+        );
+        assert_eq!(executor.retry_config.max_retries, 5);
+    }
+
+    #[test]
+    fn test_transaction_request_building() {
+        // Test building a basic transaction request
+        let to = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbD"
+            .parse::<EthAddress>()
+            .unwrap();
+        let value = U256::from(10_u64.pow(18)); // 1 ETH
+
+        let tx_request = TransactionRequest::default().with_to(to).with_value(value);
+
+        assert!(tx_request.to.is_some()); // Check that to field is set
+        assert_eq!(tx_request.value, Some(value));
+    }
+
+    #[test]
+    fn test_address_parsing() {
+        // Test valid addresses
+        let valid_addresses = [
+            "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbD",
+            "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+            "0x0000000000000000000000000000000000000000",
+        ];
+
+        for addr_str in &valid_addresses {
+            let addr = addr_str.parse::<EthAddress>();
+            assert!(addr.is_ok(), "Failed to parse valid address: {}", addr_str);
+        }
+
+        // Test invalid addresses
+        let invalid_addresses = [
+            "invalid", "0x123", // Too short
+        ];
+
+        for addr_str in &invalid_addresses {
+            let addr = addr_str.parse::<EthAddress>();
+            assert!(
+                addr.is_err(),
+                "Expected invalid address to fail: {}",
+                addr_str
+            );
+        }
+    }
+
+    #[test]
+    fn test_value_parsing() {
+        // Test different value formats
+        let values = [
+            U256::ZERO,
+            U256::from(1u64),
+            U256::from(10_u64.pow(18)),                     // 1 ETH
+            U256::from(42u64) * U256::from(10_u64.pow(18)), // 42 ETH
+        ];
+
+        for value in &values {
+            assert!(*value >= U256::ZERO);
+
+            // Test conversion to/from string representation
+            let formatted = format_eth(*value);
+            assert!(!formatted.is_empty());
+        }
+    }
+
+    fn create_mock_provider() -> ProviderType {
+        // Create a mock provider for testing
+        use alloy::providers::ProviderBuilder;
+        let inner = ProviderBuilder::new().connect_http("http://localhost:8545".parse().unwrap());
+        ProviderType { inner }
     }
 }

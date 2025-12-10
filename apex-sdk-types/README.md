@@ -2,7 +2,9 @@
 
 [![Crates.io](https://img.shields.io/crates/v/apex-sdk-types)](https://crates.io/crates/apex-sdk-types)
 [![Documentation](https://docs.rs/apex-sdk-types/badge.svg)](https://docs.rs/apex-sdk-types)
+[![Downloads](https://img.shields.io/crates/d/apex-sdk-types)](https://crates.io/crates/apex-sdk-types)
 [![License](https://img.shields.io/crates/l/apex-sdk-types)](LICENSE)
+[![Rust](https://img.shields.io/badge/rust-1.85%2B-orange.svg)](https://www.rust-lang.org/)
 
 Common types and data structures for the Apex SDK ecosystem.
 

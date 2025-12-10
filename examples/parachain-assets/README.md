@@ -1,5 +1,11 @@
 # Parachain Asset Hub Integration Example
 
+[![Example](https://img.shields.io/badge/type-example-blue)](../../README.md)
+[![Polkadot](https://img.shields.io/badge/Polkadot-Asset%20Hub-E6007A)](https://polkadot.network/)
+[![XCM](https://img.shields.io/badge/XCM-enabled-FF6B6B)](https://wiki.polkadot.network/docs/learn-xcm)
+[![Assets](https://img.shields.io/badge/assets-management-4ECDC4)](../../README.md)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../../LICENSE)
+
 This example demonstrates how Apex SDK enables seamless interaction with **Polkadot's Asset Hub parachain** alongside Ethereum, showcasing true cross-ecosystem asset management from a single Rust application.
 
 ## What is Asset Hub?
@@ -122,4 +128,4 @@ This pattern enables:
 - [Asset Hub Documentation](https://wiki.polkadot.com/docs/learn-assets)
 - [Polkadot Parachains](https://polkadot.network/parachains/)
 - [XCM Cross-Chain Messaging](https://wiki.polkadot.com/docs/learn-xcm)
-- [Apex SDK Documentation](https://github.com/kherldhussein/apex-sdk)
+- [Apex SDK Documentation](https://github.com/eurybits/apex-sdk)

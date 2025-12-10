@@ -1,0 +1,24 @@
+# Build artifacts
+/target/
+**/*.rs.bk
+*.pdb
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated metadata files (large, regenerated locally)
+apex-sdk-substrate/src/metadata/*_generated.rs
+apex-sdk-substrate/src/metadata/polkadot.rs
+apex-sdk-substrate/src/metadata/kusama.rs
+apex-sdk-substrate/src/metadata/westend.rs
+
+# Keep stub files and mod.rs
+!apex-sdk-substrate/src/metadata/mod.rs

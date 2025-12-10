@@ -21,7 +21,7 @@ The Apex SDK CLI is a powerful command-line tool for building, testing, and depl
 ### From Source
 
 ```bash
-git clone https://github.com/kherldhussein/apex-sdk.git
+git clone https://github.com/eurybits/apex-sdk.git
 cd apex-sdk/cli
 cargo install --path .
 ```
@@ -605,7 +605,7 @@ jobs:
 
 ## Resources
 
-- [Apex SDK Documentation](https://github.com/kherldhussein/apex-sdk)
+- [Apex SDK Documentation](https://github.com/eurybits/apex-sdk)
 - [API Reference](../API.md)
 - [Examples](../examples/)
 - [Contributing Guide](../CONTRIBUTING.md)
@@ -613,8 +613,8 @@ jobs:
 
 ## Support
 
-- GitHub Issues: https://github.com/kherldhussein/apex-sdk/issues
-- Discord: [Join our community]
+- GitHub Issues: https://github.com/eurybits/apex-sdk/issues
+- Discord: [Join our community](https://discord.gg/zCDFsBaZJN)
 - Email: support@apexsdk.io
 
 ## License

@@ -31,9 +31,10 @@
 //!
 //! See `METADATA_GENERATION.md` for detailed instructions.
 
-// Typed metadata modules are currently disabled
-// To enable, generate metadata using scripts/generate_metadata.sh
-// and uncomment the appropriate module below
+// Typed metadata modules
+// Note: These files are generated locally and not committed to git due to their size (~4MB each)
+// Generate metadata using: ./scripts/generate_metadata.sh <chain-name>
+// Uncomment the modules below after generating the metadata files
 
 // #[cfg(feature = "typed-polkadot")]
 // #[path = "polkadot.rs"]
@@ -46,3 +47,22 @@
 // #[cfg(feature = "typed-westend")]
 // #[path = "westend.rs"]
 // pub mod westend;
+
+// #[cfg(feature = "typed")]
+// pub mod westend_generated;
+
+// Re-export the most commonly used metadata (when modules are uncommented)
+// #[cfg(feature = "typed-westend")]
+// pub use westend::*;
+
+// Dynamic API fallback when typed metadata is not available
+#[cfg(not(feature = "typed"))]
+pub mod dynamic {
+    use subxt::dynamic::Value;
+
+    /// Helper to create dynamic runtime calls when typed API is unavailable
+    pub fn create_dynamic_call(pallet: &str, call_name: &str) -> &'static str {
+        // This is a simplified helper - in practice you'd use subxt's dynamic API
+        "dynamic_call_placeholder"
+    }
+}

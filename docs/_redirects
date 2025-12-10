@@ -1,0 +1,29 @@
+# Cloudflare Pages _redirects file
+# https://developers.cloudflare.com/pages/configuration/redirects/
+
+# Redirect www to apex (if you set up www subdomain)
+https://www.apexsdk.dev/* https://apexsdk.dev/:splat 301!
+
+# Redirect old GitHub Pages URLs
+https://eurybits.github.io/apex-sdk/* https://apexsdk.dev/:splat 301!
+
+# Subdomain routing (add these after you configure DNS)
+https://start.apexsdk.dev/* https://apexsdk.dev/QUICK_START.md 301!
+https://api.apexsdk.dev/* https://apexsdk.dev/API.md 301!
+https://cli.apexsdk.dev/* https://apexsdk.dev/CLI_GUIDE.md 301!
+https://docs.apexsdk.dev/* https://apexsdk.dev/:splat 200
+
+# Clean URLs (remove .html/.md extensions - optional)
+/quick-start /QUICK_START.md 200
+/quickstart /QUICK_START.md 200
+/api /API.md 200
+/cli-guide /CLI_GUIDE.md 200
+/cli /CLI_GUIDE.md 200
+/contributing /CONTRIBUTING.md 200
+/security /SECURITY.md 200
+/testnets /TESTNETS.md 200
+/roadmap /ROADMAP.md 200
+/architecture /SYSTEM_ARCHITECTURE.md 200
+
+# Fallback for 404
+/* /index.html 404

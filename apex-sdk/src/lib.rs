@@ -51,12 +51,19 @@ pub use performance::{
 pub use sdk::ApexSDK;
 pub use transaction::{Transaction, TransactionBuilder, TransactionResult};
 
-/// Common imports for convenience
+/// Prelude module for common imports
 pub mod prelude {
-    pub use crate::builder::ApexSDKBuilder;
-    pub use crate::error::{Error, Result};
-    pub use crate::error_recovery::{with_retry, CircuitBreaker, RetryConfig};
-    pub use crate::sdk::ApexSDK;
-    pub use crate::transaction::{Transaction, TransactionBuilder, TransactionResult};
-    pub use apex_sdk_types::{Address, Chain, ChainType, TransactionStatus};
+    pub use crate::{
+        builder::ApexSDKBuilder,
+        error::{Error, Result},
+        sdk::ApexSDK,
+        transaction::{Transaction, TransactionBuilder, TransactionResult},
+        types::{Address, Chain, ChainType},
+    };
+
+    #[cfg(feature = "substrate")]
+    pub use crate::substrate::{SubstrateAdapter, Wallet as SubstrateWallet};
+
+    #[cfg(feature = "evm")]
+    pub use crate::evm::{wallet::Wallet as EvmWallet, EvmAdapter};
 }

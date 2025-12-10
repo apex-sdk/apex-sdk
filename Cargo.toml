@@ -22,10 +22,10 @@ authors = ["Khalid Hussein <kherld.hussein@gmail.com>"]
 rust-version = "1.85"
 readme = "README.md"
 license = "Apache-2.0"
-repository = "https://github.com/kherldhussein/apex-sdk"
-homepage = "https://kherldhussein.github.io/apex-sdk/"
+repository = "https://github.com/eurybits/apex-sdk"
+homepage = "https://apexsdk.dev/"
 keywords = ["blockchain", "substrate", "evm", "cross-chain", "web3"]
-documentation = "https://kherldhussein.github.io/apex-sdk/"
+documentation = "https://apexsdk.dev/"
 categories = ["cryptography::cryptocurrencies", "api-bindings", "development-tools"]
 
 [workspace.dependencies]

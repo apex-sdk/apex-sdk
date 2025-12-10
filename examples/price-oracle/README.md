@@ -1,5 +1,11 @@
 # Cross-Chain Price Oracle Example
 
+[![Example](https://img.shields.io/badge/type-example-blue)](../../README.md)
+[![Oracle](https://img.shields.io/badge/oracle-decentralized-orange)](../../README.md)
+[![Cross-Chain](https://img.shields.io/badge/cross--chain-enabled-purple)](../../README.md)
+[![DeFi](https://img.shields.io/badge/DeFi-compatible-gold)](../../README.md)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../../LICENSE)
+
 This example demonstrates building a **decentralized price oracle** that aggregates price data from multiple blockchains using Apex SDK's unified interface.
 
 ## Why This is Groundbreaking
@@ -178,4 +184,4 @@ This architecture enables:
 - [Chainlink Price Feeds](https://docs.chain.link/data-feeds)
 - [Acurast Oracle](https://docs.acurast.com/)
 - [Oracle Manipulation Attacks](https://blog.chain.link/flash-loan-attacks/)
-- [Apex SDK Documentation](https://github.com/kherldhussein/apex-sdk)
+- [Apex SDK Documentation](https://github.com/eurybits/apex-sdk)

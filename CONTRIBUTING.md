@@ -121,4 +121,8 @@ Apache 2.0
 
 ## Questions?
 
-Open an issue!
+Need help or have questions? Here are the best ways to reach us:
+
+- **Discord**: [Join our community](https://discord.gg/zCDFsBaZJN) for real-time help and discussion
+- **GitHub Issues**: [Open an issue](https://github.com/eurybits/apex-sdk/issues) for bug reports and feature requests
+- **GitHub Discussions**: [Start a discussion](https://github.com/eurybits/apex-sdk/discussions) for general questions and ideas

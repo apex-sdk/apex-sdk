@@ -465,6 +465,34 @@ fn validate_ss58_address(addr: &str) -> bool {
     &hash[..checksum_len] == checksum
 }
 
+/// Validates SS58 format with specific network ID
+fn validate_ss58_for_network(addr: &str, expected_ss58_format: u16) -> bool {
+    if !validate_ss58_address(addr) {
+        return false;
+    }
+
+    // Decode and extract network identifier
+    let decoded = match bs58::decode(addr).into_vec() {
+        Ok(d) => d,
+        Err(_) => return false,
+    };
+
+    if decoded.is_empty() {
+        return false;
+    }
+
+    // Extract SS58 format from first byte(s)
+    let network_id = if decoded[0] & 0b01000000 == 0 {
+        // Simple format: 6-bit network ID
+        u16::from(decoded[0] & 0b00111111)
+    } else {
+        // Reserved/extended format: not implemented for now
+        return expected_ss58_format >= 64;
+    };
+
+    network_id == expected_ss58_format
+}
+
 /// Generic address type for different chains
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Address {
@@ -571,6 +599,45 @@ impl Address {
         Address::Evm(addr.into())
     }
 
+    /// Create a Substrate address with network-specific validation
+    ///
+    /// This function validates SS58 format and ensures the address
+    /// belongs to the specified network.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` if the address format is invalid or doesn't match the expected network.
+    pub fn substrate_for_chain(
+        addr: impl Into<String>,
+        chain: &Chain,
+    ) -> Result<Self, ValidationError> {
+        let addr_str = addr.into();
+
+        let expected_ss58_format = match chain {
+            Chain::Polkadot => 0,
+            Chain::Kusama => 2,
+            Chain::Westend => 42,
+            Chain::Paseo => 42, // Same as Westend
+            Chain::Moonbeam => 1284,
+            Chain::Astar => 5,
+            Chain::Acala => 10,
+            Chain::Phala => 30,
+            Chain::Bifrost => 6,
+            _ => return Err(ValidationError::ChainIdNotFound(chain.name().to_string())),
+        };
+
+        if !validate_ss58_for_network(&addr_str, expected_ss58_format) {
+            return Err(ValidationError::InvalidSs58Checksum(format!(
+                "Address {} is not valid for network {} (expected SS58 format {})",
+                addr_str,
+                chain.name(),
+                expected_ss58_format
+            )));
+        }
+
+        Ok(Address::Substrate(addr_str))
+    }
+
     /// Convert EVM address to checksummed format
     ///
     /// For EVM addresses, returns the EIP-55 checksummed version.
@@ -604,7 +671,12 @@ impl Address {
                 }
                 Ok(())
             }
-            Address::Substrate(_) => Ok(()), // TODO: Add SS58 validation
+            Address::Substrate(addr) => {
+                if !validate_ss58_address(addr) {
+                    return Err(ValidationError::InvalidSubstrateAddress(addr.clone()));
+                }
+                Ok(())
+            }
         }
     }
 }
@@ -917,9 +989,13 @@ mod tests {
         let addr = Address::evm("invalid");
         assert!(addr.validate().is_err());
 
-        // Substrate addresses always pass (for now)
-        let addr = Address::substrate("anything");
+        // Valid Substrate address
+        let addr = Address::substrate("15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5");
         assert!(addr.validate().is_ok());
+
+        // Invalid Substrate address
+        let addr = Address::substrate("invalid");
+        assert!(addr.validate().is_err());
     }
 
     #[test]

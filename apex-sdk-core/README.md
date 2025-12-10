@@ -2,7 +2,9 @@
 
 [![Crates.io](https://img.shields.io/crates/v/apex-sdk-core)](https://crates.io/crates/apex-sdk-core)
 [![Documentation](https://docs.rs/apex-sdk-core/badge.svg)](https://docs.rs/apex-sdk-core)
+[![Downloads](https://img.shields.io/crates/d/apex-sdk-core)](https://crates.io/crates/apex-sdk-core)
 [![License](https://img.shields.io/crates/l/apex-sdk-core)](LICENSE)
+[![Rust](https://img.shields.io/badge/rust-1.85%2B-orange.svg)](https://www.rust-lang.org/)
 
 Core traits and functionality for the Apex SDK blockchain development framework.
 

@@ -43,8 +43,8 @@ Security updates will be released as patch versions and announced via:
 
 - GitHub Security Advisories
 - Release notes
-- Our Discord server (#security channel)
-- Twitter (@apexsdk)
+- Our Discord server: https://discord.gg/zCDFsBaZJN (#security channel)
+- X/Twitter (@eurybits)
 
 ## Supported Versions
 
@@ -77,6 +77,6 @@ Apex SDK implements several security measures:
 
 ## Contact
 
-- **Security Email**: kherld@duck.com
-- **Security Advisories**: https://github.com/kherldhussein/apex-sdk/security/advisories
+- **Security Email**: info@eurybits.com
+- **Security Advisories**: https://github.com/eurybits/apex-sdk/security/advisories
 

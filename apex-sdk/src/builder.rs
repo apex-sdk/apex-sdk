@@ -1,98 +1,55 @@
-//! Apex SDK builder for configuration
-//!
-//! This module provides a builder pattern for configuring and creating
-//! ApexSDK instances with support for Substrate and EVM blockchain adapters.
-//!
-//! # Examples
-//!
-//! ```rust,no_run
-//! use apex_sdk::prelude::*;
-//!
-//! #[tokio::main]
-//! async fn main() -> Result<()> {
-//!     // Configure SDK with both Substrate and EVM support
-//!     let sdk = ApexSDK::builder()
-//!         .with_substrate_endpoint("wss://polkadot.api.onfinality.io/public-ws")
-//!         .with_evm_endpoint("https://mainnet.infura.io/v3/YOUR_KEY")
-//!         .with_timeout(30)
-//!         .build()
-//!         .await?;
-//!
-//!     Ok(())
-//! }
-//! ```
+//! Builder pattern implementation for creating Apex SDK instances.
 
-use crate::error::{Error, Result};
-use crate::sdk::ApexSDK;
+use crate::{
+    error::{Error, Result},
+    sdk::ApexSDK,
+};
+use std::time::Duration;
 
-/// Builder for constructing an ApexSDK instance with customizable configuration.
+#[cfg(feature = "substrate")]
+use apex_sdk_substrate::SubstrateAdapter;
+
+#[cfg(feature = "evm")]
+use apex_sdk_evm::EvmAdapter;
+
+/// Builder for creating an ApexSDK instance with configuration.
 ///
-/// The builder pattern allows you to configure the SDK with one or both blockchain
-/// adapters (Substrate and EVM) before initialization. At least one adapter must
-/// be configured for the SDK to function.
-///
-/// # Examples
-///
-/// ## Configure with Substrate only
-///
-/// ```rust,no_run
-/// use apex_sdk::prelude::*;
-///
-/// # #[tokio::main]
-/// # async fn main() -> Result<()> {
-/// let sdk = ApexSDK::builder()
-///     .with_substrate_endpoint("wss://polkadot.api.onfinality.io/public-ws")
-///     .build()
-///     .await?;
-/// # Ok(())
-/// # }
-/// ```
-///
-/// ## Configure with EVM only
+/// # Example
 ///
 /// ```rust,no_run
 /// use apex_sdk::prelude::*;
+/// use std::time::Duration;
 ///
-/// # #[tokio::main]
-/// # async fn main() -> Result<()> {
-/// let sdk = ApexSDK::builder()
-///     .with_evm_endpoint("https://mainnet.infura.io/v3/YOUR_KEY")
-///     .build()
-///     .await?;
-/// # Ok(())
-/// # }
+/// #[tokio::main]
+/// async fn main() -> anyhow::Result<()> {
+///     let sdk = ApexSDKBuilder::new()
+///         .with_substrate_endpoint("wss://polkadot.api.onfinality.io/public-ws")
+///         .with_evm_endpoint("https://mainnet.infura.io/v3/YOUR_KEY")
+///         .with_timeout(Duration::from_secs(60))
+///         .build()
+///         .await?;
+///     
+///     Ok(())
+/// }
 /// ```
-///
-/// ## Configure with both adapters
-///
-/// ```rust,no_run
-/// use apex_sdk::prelude::*;
-///
-/// # #[tokio::main]
-/// # async fn main() -> Result<()> {
-/// let sdk = ApexSDK::builder()
-///     .with_substrate_endpoint("wss://polkadot.api.onfinality.io/public-ws")
-///     .with_evm_endpoint("https://mainnet.infura.io/v3/YOUR_KEY")
-///     .with_timeout(60)
-///     .build()
-///     .await?;
-/// # Ok(())
-/// # }
-/// ```
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct ApexSDKBuilder {
+    #[cfg(feature = "substrate")]
     substrate_endpoint: Option<String>,
+
+    #[cfg(feature = "evm")]
     evm_endpoint: Option<String>,
-    timeout_seconds: Option<u64>,
+
+    timeout: Option<Duration>,
 }
 
 impl ApexSDKBuilder {
-    /// Create a new builder instance.
+    /// Create a new SDK builder.
     ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
-    /// use apex_sdk::builder::ApexSDKBuilder;
+    /// use apex_sdk::ApexSDKBuilder;
     ///
     /// let builder = ApexSDKBuilder::new();
     /// ```
@@ -100,82 +57,55 @@ impl ApexSDKBuilder {
         Self::default()
     }
 
-    /// Set the Substrate endpoint URL.
+    /// Configure the Substrate WebSocket endpoint.
     ///
-    /// This endpoint will be used to connect to Substrate-based blockchains
-    /// like Polkadot and Kusama. The URL should be a WebSocket endpoint
-    /// (typically starting with `wss://` or `ws://`).
-    ///
-    /// # Arguments
-    ///
-    /// * `url` - The WebSocket URL of the Substrate endpoint
-    ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
-    /// use apex_sdk::builder::ApexSDKBuilder;
+    /// use apex_sdk::ApexSDKBuilder;
     ///
     /// let builder = ApexSDKBuilder::new()
     ///     .with_substrate_endpoint("wss://polkadot.api.onfinality.io/public-ws");
     /// ```
-    pub fn with_substrate_endpoint(mut self, url: impl Into<String>) -> Self {
-        self.substrate_endpoint = Some(url.into());
+    #[cfg(feature = "substrate")]
+    pub fn with_substrate_endpoint(mut self, endpoint: impl Into<String>) -> Self {
+        self.substrate_endpoint = Some(endpoint.into());
         self
     }
 
-    /// Set the EVM endpoint URL.
+    /// Configure the EVM HTTP/WebSocket endpoint.
     ///
-    /// This endpoint will be used to connect to EVM-compatible blockchains
-    /// like Ethereum, Polygon, BSC, and Avalanche. The URL should be an
-    /// HTTP or HTTPS endpoint.
-    ///
-    /// # Arguments
-    ///
-    /// * `url` - The HTTP(S) URL of the EVM endpoint
-    ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
-    /// use apex_sdk::builder::ApexSDKBuilder;
+    /// use apex_sdk::ApexSDKBuilder;
     ///
     /// let builder = ApexSDKBuilder::new()
     ///     .with_evm_endpoint("https://mainnet.infura.io/v3/YOUR_KEY");
     /// ```
-    pub fn with_evm_endpoint(mut self, url: impl Into<String>) -> Self {
-        self.evm_endpoint = Some(url.into());
+    #[cfg(feature = "evm")]
+    pub fn with_evm_endpoint(mut self, endpoint: impl Into<String>) -> Self {
+        self.evm_endpoint = Some(endpoint.into());
         self
     }
 
-    /// Set the connection timeout in seconds.
+    /// Set the timeout for operations.
     ///
-    /// This timeout applies to the initial connection attempts to the
-    /// configured blockchain endpoints. If not set, a default timeout
-    /// will be used.
-    ///
-    /// # Arguments
-    ///
-    /// * `seconds` - Timeout duration in seconds
-    ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust
-    /// use apex_sdk::builder::ApexSDKBuilder;
+    /// use apex_sdk::ApexSDKBuilder;
+    /// use std::time::Duration;
     ///
     /// let builder = ApexSDKBuilder::new()
-    ///     .with_evm_endpoint("https://mainnet.infura.io/v3/YOUR_KEY")
-    ///     .with_timeout(30);
+    ///     .with_timeout(Duration::from_secs(60));
     /// ```
-    pub fn with_timeout(mut self, seconds: u64) -> Self {
-        self.timeout_seconds = Some(seconds);
+    pub fn with_timeout(mut self, timeout: Duration) -> Self {
+        self.timeout = Some(timeout);
         self
     }
 
     /// Build the ApexSDK instance.
-    ///
-    /// This method consumes the builder and attempts to create an ApexSDK
-    /// instance by connecting to the configured endpoints. At least one
-    /// adapter (Substrate or EVM) must be configured, or this will return
-    /// an error.
     ///
     /// # Errors
     ///
@@ -183,53 +113,80 @@ impl ApexSDKBuilder {
     /// - No adapters are configured
     /// - Connection to any configured endpoint fails
     ///
-    /// # Examples
+    /// # Example
     ///
     /// ```rust,no_run
-    /// use apex_sdk::prelude::*;
+    /// use apex_sdk::ApexSDKBuilder;
     ///
-    /// # #[tokio::main]
-    /// # async fn main() -> Result<()> {
-    /// let sdk = ApexSDK::builder()
-    ///     .with_evm_endpoint("https://mainnet.infura.io/v3/YOUR_KEY")
-    ///     .build()
-    ///     .await?;
-    ///
-    /// // Use the SDK...
-    /// # Ok(())
-    /// # }
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///     let sdk = ApexSDKBuilder::new()
+    ///         .with_substrate_endpoint("wss://polkadot.api.onfinality.io/public-ws")
+    ///         .build()
+    ///         .await?;
+    ///     Ok(())
+    /// }
     /// ```
     pub async fn build(self) -> Result<ApexSDK> {
+        let timeout = self.timeout.unwrap_or(Duration::from_secs(30));
+
+        #[cfg(feature = "substrate")]
         let substrate_adapter = if let Some(endpoint) = self.substrate_endpoint {
             Some(
-                apex_sdk_substrate::SubstrateAdapter::connect(&endpoint)
+                SubstrateAdapter::connect(&endpoint)
                     .await
-                    .map_err(Error::Substrate)?,
+                    .map_err(|e| Error::Connection(e.to_string()))?,
             )
         } else {
             None
         };
 
+        #[cfg(feature = "evm")]
         let evm_adapter = if let Some(endpoint) = self.evm_endpoint {
             Some(
-                apex_sdk_evm::EvmAdapter::connect(&endpoint)
+                EvmAdapter::connect(&endpoint)
                     .await
-                    .map_err(Error::Evm)?,
+                    .map_err(|e| Error::Connection(e.to_string()))?,
             )
         } else {
             None
         };
 
-        if substrate_adapter.is_none() && evm_adapter.is_none() {
-            return Err(Error::config(
-                "At least one adapter (Substrate or EVM) must be configured",
-            ));
+        // Ensure at least one adapter is configured
+        #[cfg(all(feature = "substrate", feature = "evm"))]
+        {
+            if substrate_adapter.is_none() && evm_adapter.is_none() {
+                return Err(Error::Config(
+                    "At least one blockchain adapter must be configured".to_string(),
+                ));
+            }
         }
 
-        Ok(ApexSDK {
+        #[cfg(all(feature = "substrate", not(feature = "evm")))]
+        {
+            if substrate_adapter.is_none() {
+                return Err(Error::Config(
+                    "Substrate adapter must be configured when EVM feature is disabled".to_string(),
+                ));
+            }
+        }
+
+        #[cfg(all(not(feature = "substrate"), feature = "evm"))]
+        {
+            if evm_adapter.is_none() {
+                return Err(Error::Config(
+                    "EVM adapter must be configured when Substrate feature is disabled".to_string(),
+                ));
+            }
+        }
+
+        ApexSDK::new(
+            #[cfg(feature = "substrate")]
             substrate_adapter,
+            #[cfg(feature = "evm")]
             evm_adapter,
-        })
+            timeout,
+        )
     }
 }
 
@@ -237,72 +194,64 @@ impl ApexSDKBuilder {
 mod tests {
     use super::*;
 
-    #[tokio::test]
-    async fn test_builder_new_creates_default_builder() {
+    #[test]
+    fn test_builder_new_creates_default_builder() {
         let builder = ApexSDKBuilder::new();
+        assert!(builder.timeout.is_none());
+
+        #[cfg(feature = "substrate")]
         assert!(builder.substrate_endpoint.is_none());
+
+        #[cfg(feature = "evm")]
         assert!(builder.evm_endpoint.is_none());
-        assert!(builder.timeout_seconds.is_none());
     }
 
-    #[tokio::test]
-    async fn test_builder_with_substrate_endpoint() {
-        let builder = ApexSDKBuilder::new().with_substrate_endpoint("wss://test.substrate.io");
-        assert_eq!(
-            builder.substrate_endpoint,
-            Some("wss://test.substrate.io".to_string())
-        );
+    #[test]
+    fn test_builder_default_trait() {
+        let builder = ApexSDKBuilder::default();
+        assert!(builder.timeout.is_none());
     }
 
-    #[tokio::test]
-    async fn test_builder_with_evm_endpoint() {
-        let builder = ApexSDKBuilder::new().with_evm_endpoint("https://test.ethereum.io");
-        assert_eq!(
-            builder.evm_endpoint,
-            Some("https://test.ethereum.io".to_string())
-        );
+    #[test]
+    fn test_builder_chaining() {
+        let builder = ApexSDKBuilder::new().with_timeout(Duration::from_secs(60));
+
+        assert_eq!(builder.timeout, Some(Duration::from_secs(60)));
     }
 
-    #[tokio::test]
-    async fn test_builder_with_timeout() {
-        let builder = ApexSDKBuilder::new().with_timeout(60);
-        assert_eq!(builder.timeout_seconds, Some(60));
+    #[cfg(feature = "substrate")]
+    #[test]
+    fn test_builder_with_substrate_endpoint() {
+        let endpoint = "wss://polkadot.api.onfinality.io/public-ws";
+        let builder = ApexSDKBuilder::new().with_substrate_endpoint(endpoint);
+
+        assert_eq!(builder.substrate_endpoint, Some(endpoint.to_string()));
     }
 
-    #[tokio::test]
-    async fn test_builder_chaining() {
-        let builder = ApexSDKBuilder::new()
-            .with_substrate_endpoint("wss://test.substrate.io")
-            .with_evm_endpoint("https://test.ethereum.io")
-            .with_timeout(120);
+    #[cfg(feature = "evm")]
+    #[test]
+    fn test_builder_with_evm_endpoint() {
+        let endpoint = "https://mainnet.infura.io/v3/YOUR_KEY";
+        let builder = ApexSDKBuilder::new().with_evm_endpoint(endpoint);
 
-        assert_eq!(
-            builder.substrate_endpoint,
-            Some("wss://test.substrate.io".to_string())
-        );
-        assert_eq!(
-            builder.evm_endpoint,
-            Some("https://test.ethereum.io".to_string())
-        );
-        assert_eq!(builder.timeout_seconds, Some(120));
+        assert_eq!(builder.evm_endpoint, Some(endpoint.to_string()));
+    }
+
+    #[test]
+    fn test_builder_with_timeout() {
+        let timeout = Duration::from_secs(45);
+        let builder = ApexSDKBuilder::new().with_timeout(timeout);
+
+        assert_eq!(builder.timeout, Some(timeout));
     }
 
     #[tokio::test]
     async fn test_builder_requires_at_least_one_adapter() {
         let result = ApexSDKBuilder::new().build().await;
-        assert!(result.is_err());
-        match result {
-            Err(Error::Config(msg, _)) => {
-                assert!(msg.contains("At least one adapter"));
-            }
-            _ => panic!("Expected Config error"),
-        }
-    }
 
-    #[tokio::test]
-    async fn test_builder_default_trait() {
-        let builder = ApexSDKBuilder::default();
-        assert!(builder.substrate_endpoint.is_none());
-        assert!(builder.evm_endpoint.is_none());
+        assert!(result.is_err());
+        if let Err(Error::Config(msg)) = result {
+            assert!(msg.contains("adapter"));
+        }
     }
 }

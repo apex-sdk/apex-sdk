@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "apex-sdk-docs",
+  "version": "1.0.0",
+  "description": "Apex SDK Documentation",
+  "scripts": {
+    "build": "mkdir -p dist && cp -r docs/* dist/",
+    "deploy": "npm run build"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}

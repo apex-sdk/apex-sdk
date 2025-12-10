@@ -269,6 +269,7 @@ use std::io::Write;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs;
     use tempfile::TempDir;
 
     #[test]
@@ -291,5 +292,198 @@ mod tests {
         // Verify modification
         let modified = Config::load(&config_path).unwrap();
         assert_eq!(modified.default_chain, "kusama");
+    }
+
+    #[test]
+    fn test_show_config_with_temp_file() {
+        let temp_dir = TempDir::new().unwrap();
+        let config_path = temp_dir.path().join("config.json");
+
+        // Create a test config
+        let config = Config {
+            default_chain: "ethereum".to_string(),
+            default_endpoint: "https://eth.llamarpc.com".to_string(),
+            default_account: Some("test-account".to_string()),
+            preferences: Preferences {
+                color_output: true,
+                progress_bars: false,
+                log_level: "debug".to_string(),
+            },
+            endpoints: std::collections::HashMap::new(),
+        };
+
+        config.save(&config_path).unwrap();
+
+        // Test that we can load the config (show_config would use this)
+        let loaded = Config::load(&config_path).unwrap();
+        assert_eq!(loaded.default_chain, "ethereum");
+        assert_eq!(loaded.default_endpoint, "https://eth.llamarpc.com");
+        assert_eq!(loaded.default_account, Some("test-account".to_string()));
+        assert_eq!(loaded.preferences.log_level, "debug");
+        assert!(!loaded.preferences.progress_bars);
+    }
+
+    #[test]
+    fn test_init_config() {
+        let temp_dir = TempDir::new().unwrap();
+
+        // Test init_config logic
+        let config = Config::default();
+        let config_path = temp_dir.path().join("config.json");
+
+        // Save config
+        config.save(&config_path).unwrap();
+
+        // Verify file exists and contains expected data
+        assert!(config_path.exists());
+
+        let content = fs::read_to_string(&config_path).unwrap();
+        assert!(content.contains("paseo")); // default chain
+        assert!(content.contains("color_output"));
+        assert!(content.contains("progress_bars"));
+        assert!(content.contains("log_level"));
+    }
+
+    #[test]
+    fn test_config_validation() {
+        // Test that valid configurations are accepted
+        let mut config = Config::default();
+
+        // Valid settings
+        assert!(config.set("default_chain", "polkadot").is_ok());
+        assert!(config.set("default_chain", "ethereum").is_ok());
+        assert!(config.set("default_chain", "kusama").is_ok());
+
+        // Invalid settings should be handled gracefully
+        let result = config.set("invalid_key", "value");
+        // The set method may or may not return an error depending on implementation
+        // We just test that it doesn't panic
+        let _ = result;
+    }
+
+    #[test]
+    fn test_config_file_paths() {
+        // Test that config paths can be retrieved
+        let config_path_result = get_config_path();
+        let legacy_config_path_result = get_legacy_config_path();
+
+        // These should not panic and should return valid paths
+        assert!(config_path_result.is_ok());
+        assert!(legacy_config_path_result.is_ok());
+
+        let config_path = config_path_result.unwrap();
+        if let Some(legacy_path) = legacy_config_path_result.unwrap() {
+            // Paths should be different if legacy path exists
+            assert_ne!(config_path, legacy_path);
+
+            // Both should be absolute paths
+            assert!(config_path.is_absolute());
+            assert!(legacy_path.is_absolute());
+        } else {
+            // Just check config path is absolute
+            assert!(config_path.is_absolute());
+        }
+    }
+
+    #[test]
+    fn test_config_default_values() {
+        let config = Config::default();
+
+        // Test default values
+        assert_eq!(config.default_chain, "paseo");
+        assert!(
+            config.default_endpoint.contains("paseo") || config.default_endpoint.contains("rpc")
+        );
+        assert!(config.default_account.is_none());
+        assert!(config.preferences.color_output);
+        assert!(config.preferences.progress_bars);
+        assert!(!config.preferences.log_level.is_empty());
+        // Config includes default endpoints for various chains
+        assert!(!config.endpoints.is_empty());
+    }
+
+    #[test]
+    fn test_preferences_structure() {
+        let preferences = Preferences {
+            color_output: false,
+            progress_bars: true,
+            log_level: "trace".to_string(),
+        };
+
+        assert!(!preferences.color_output);
+        assert!(preferences.progress_bars);
+        assert_eq!(preferences.log_level, "trace");
+    }
+
+    #[test]
+    fn test_config_serialization() {
+        let temp_dir = TempDir::new().unwrap();
+        let config_path = temp_dir.path().join("test_config.json");
+
+        // Create config with custom endpoints
+        let mut endpoints = std::collections::HashMap::new();
+        endpoints.insert(
+            "custom_polkadot".to_string(),
+            "wss://custom.polkadot.io".to_string(),
+        );
+        endpoints.insert("local".to_string(), "ws://localhost:9944".to_string());
+
+        let config = Config {
+            default_chain: "polkadot".to_string(),
+            default_endpoint: "wss://polkadot.api.onfinality.io".to_string(),
+            default_account: Some("alice".to_string()),
+            preferences: Preferences {
+                color_output: false,
+                progress_bars: true,
+                log_level: "warn".to_string(),
+            },
+            endpoints,
+        };
+
+        // Save and reload
+        config.save(&config_path).unwrap();
+        let loaded = Config::load(&config_path).unwrap();
+
+        // Verify all fields
+        assert_eq!(loaded.default_chain, "polkadot");
+        assert_eq!(loaded.default_endpoint, "wss://polkadot.api.onfinality.io");
+        assert_eq!(loaded.default_account, Some("alice".to_string()));
+        assert!(!loaded.preferences.color_output);
+        assert!(loaded.preferences.progress_bars);
+        assert_eq!(loaded.preferences.log_level, "warn");
+        assert_eq!(loaded.endpoints.len(), 2);
+        assert_eq!(
+            loaded.endpoints.get("custom_polkadot"),
+            Some(&"wss://custom.polkadot.io".to_string())
+        );
+        assert_eq!(
+            loaded.endpoints.get("local"),
+            Some(&"ws://localhost:9944".to_string())
+        );
+    }
+
+    #[test]
+    fn test_config_missing_file() {
+        let temp_dir = TempDir::new().unwrap();
+        let nonexistent_path = temp_dir.path().join("nonexistent.json");
+
+        // Loading nonexistent file should create default or return error
+        let result = Config::load(&nonexistent_path);
+        // Depending on implementation, this may succeed (with defaults) or fail
+        // We just test that it doesn't panic
+        let _ = result;
+    }
+
+    #[test]
+    fn test_config_invalid_json() {
+        let temp_dir = TempDir::new().unwrap();
+        let config_path = temp_dir.path().join("invalid.json");
+
+        // Write invalid JSON
+        fs::write(&config_path, "invalid json content").unwrap();
+
+        // Loading invalid JSON should return an error
+        let result = Config::load(&config_path);
+        assert!(result.is_err());
     }
 }

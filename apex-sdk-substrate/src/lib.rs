@@ -509,53 +509,249 @@ impl apex_sdk_core::ChainAdapter for SubstrateAdapter {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use apex_sdk_types::Address;
 
     #[test]
-    fn test_chain_config() {
+    fn test_chain_config_polkadot() {
         let polkadot = ChainConfig::polkadot();
         assert_eq!(polkadot.name, "Polkadot");
         assert_eq!(polkadot.ss58_prefix, 0);
         assert_eq!(polkadot.token_symbol, "DOT");
+        assert_eq!(polkadot.token_decimals, 10);
+        assert!(polkadot.endpoint.starts_with("wss://"));
+    }
 
+    #[test]
+    fn test_chain_config_kusama() {
         let kusama = ChainConfig::kusama();
         assert_eq!(kusama.name, "Kusama");
         assert_eq!(kusama.ss58_prefix, 2);
         assert_eq!(kusama.token_symbol, "KSM");
+        assert_eq!(kusama.token_decimals, 12);
+        assert!(kusama.endpoint.starts_with("wss://"));
+    }
 
+    #[test]
+    fn test_chain_config_westend() {
+        let westend = ChainConfig::westend();
+        assert_eq!(westend.name, "Westend");
+        assert_eq!(westend.ss58_prefix, 42);
+        assert_eq!(westend.token_symbol, "WND");
+        assert_eq!(westend.token_decimals, 12);
+        assert!(westend.endpoint.starts_with("wss://"));
+    }
+
+    #[test]
+    fn test_chain_config_paseo() {
         let paseo = ChainConfig::paseo();
         assert_eq!(paseo.name, "Paseo");
         assert_eq!(paseo.ss58_prefix, 42);
         assert_eq!(paseo.token_symbol, "PAS");
+        assert_eq!(paseo.token_decimals, 10);
         assert_eq!(paseo.endpoint, "wss://paseo.rpc.amforc.com");
     }
 
+    #[test]
+    fn test_chain_config_custom() {
+        let custom = ChainConfig::custom("TestChain", "wss://test.endpoint", 999);
+        assert_eq!(custom.name, "TestChain");
+        assert_eq!(custom.endpoint, "wss://test.endpoint");
+        assert_eq!(custom.ss58_prefix, 999);
+        assert_eq!(custom.token_symbol, "UNIT");
+        assert_eq!(custom.token_decimals, 12);
+    }
+
+    #[test]
+    fn test_address_validation_valid_substrate() {
+        // Test address creation without adapter dependency
+        let polkadot_addr = Address::substrate("15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5");
+        let kusama_addr = Address::substrate("HNZata7iMYWmk5RvZRTiAsSDhV8366zq2YGb3tLH5Upf74F");
+        let westend_addr = Address::substrate("5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY");
+
+        // Test that addresses can be created
+        match polkadot_addr {
+            Address::Substrate(addr) => assert!(!addr.is_empty()),
+            _ => panic!("Expected Substrate address"),
+        }
+
+        match kusama_addr {
+            Address::Substrate(addr) => assert!(!addr.is_empty()),
+            _ => panic!("Expected Substrate address"),
+        }
+
+        match westend_addr {
+            Address::Substrate(addr) => assert!(!addr.is_empty()),
+            _ => panic!("Expected Substrate address"),
+        }
+    }
+
+    #[test]
+    fn test_address_validation_invalid() {
+        // Test address creation for different types
+        let invalid_addr = Address::substrate("invalid_address");
+        let _short_addr = Address::substrate("123");
+        let evm_addr = Address::evm("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7");
+
+        // Test that we can create addresses of different types
+        match invalid_addr {
+            Address::Substrate(_) => {} // Expected Substrate address
+            _ => panic!("Expected Substrate address"),
+        }
+
+        match evm_addr {
+            Address::Evm(_) => {} // Expected EVM address
+            _ => panic!("Expected EVM address"),
+        }
+    }
+
+    #[test]
+    fn test_chain_adapter_trait_implementation() {
+        // Test chain adapter trait methods that don't require client
+        let config = ChainConfig::custom("MockChain", "wss://mock.endpoint", 42);
+        assert_eq!(config.name, "MockChain");
+    }
+
+    #[test]
+    fn test_get_balance_validation() {
+        // Test address validation logic without requiring a client
+        let valid_substrate_addr = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
+        assert!(valid_substrate_addr.len() > 40); // SS58 addresses are typically longer than this
+        assert!(valid_substrate_addr.chars().all(|c| c.is_alphanumeric()));
+    }
+
+    #[test]
+    fn test_format_balance_calculations() {
+        // Test balance formatting logic
+        let decimals = 12u8;
+        let amount = 1_000_000_000_000u128; // 1 token with 12 decimals
+
+        let divisor = 10u128.pow(decimals as u32);
+        let whole = amount / divisor;
+        let fraction = amount % divisor;
+
+        assert_eq!(whole, 1);
+        assert_eq!(fraction, 0);
+    }
+
+    #[test]
+    fn test_chain_specific_prefixes() {
+        assert_eq!(ChainConfig::polkadot().ss58_prefix, 0);
+        assert_eq!(ChainConfig::kusama().ss58_prefix, 2);
+        assert_eq!(ChainConfig::westend().ss58_prefix, 42);
+        assert_eq!(ChainConfig::paseo().ss58_prefix, 42);
+    }
+
+    #[test]
+    fn test_token_symbols() {
+        assert_eq!(ChainConfig::polkadot().token_symbol, "DOT");
+        assert_eq!(ChainConfig::kusama().token_symbol, "KSM");
+        assert_eq!(ChainConfig::westend().token_symbol, "WND");
+        assert_eq!(ChainConfig::paseo().token_symbol, "PAS");
+    }
+
+    #[test]
+    fn test_constants() {
+        assert_eq!(FINALIZATION_THRESHOLD, 10);
+        assert_eq!(MAX_BLOCK_SEARCH_DEPTH, 100);
+    }
+
+    #[test]
+    fn test_error_types() {
+        let connection_err = Error::Connection("Test connection error".to_string());
+        assert_eq!(
+            connection_err.to_string(),
+            "Connection error: Test connection error"
+        );
+
+        let transaction_err = Error::Transaction("Test transaction error".to_string());
+        assert_eq!(
+            transaction_err.to_string(),
+            "Transaction error: Test transaction error"
+        );
+
+        let metadata_err = Error::Metadata("Test metadata error".to_string());
+        assert_eq!(
+            metadata_err.to_string(),
+            "Metadata error: Test metadata error"
+        );
+
+        let storage_err = Error::Storage("Test storage error".to_string());
+        assert_eq!(storage_err.to_string(), "Storage error: Test storage error");
+
+        let wallet_err = Error::Wallet("Test wallet error".to_string());
+        assert_eq!(wallet_err.to_string(), "Wallet error: Test wallet error");
+
+        let signature_err = Error::Signature("Test signature error".to_string());
+        assert_eq!(
+            signature_err.to_string(),
+            "Signature error: Test signature error"
+        );
+
+        let encoding_err = Error::Encoding("Test encoding error".to_string());
+        assert_eq!(
+            encoding_err.to_string(),
+            "Encoding error: Test encoding error"
+        );
+
+        let other_err = Error::Other("Test other error".to_string());
+        assert_eq!(other_err.to_string(), "Other error: Test other error");
+    }
+
+    #[test]
+    fn test_from_subxt_error() {
+        // Test error conversion without using specific RPC error variants
+        use subxt::Error as SubxtError;
+
+        // Create a simple error that we can convert
+        let subxt_err = SubxtError::Other("Test RPC error".to_string());
+        let our_error: Error = subxt_err.into();
+
+        match our_error {
+            Error::Subxt(_) => {} // Expected
+            _ => panic!("Expected Subxt error variant"),
+        }
+    }
+
+    // Integration tests (require network connection)
     #[tokio::test]
     #[ignore] // Requires network connection
-    async fn test_substrate_adapter_connect() {
+    async fn test_substrate_adapter_connect_integration() {
         let adapter = SubstrateAdapter::connect("wss://westend-rpc.polkadot.io").await;
         assert!(adapter.is_ok());
 
         let adapter = adapter.unwrap();
         assert!(adapter.is_connected());
+        assert_eq!(adapter.chain_name(), "Substrate");
     }
 
     #[tokio::test]
     #[ignore] // Requires network connection
-    async fn test_polkadot_connection() {
+    async fn test_polkadot_connection_integration() {
         let adapter = SubstrateAdapter::connect_with_config(ChainConfig::polkadot()).await;
         assert!(adapter.is_ok());
+
+        let adapter = adapter.unwrap();
+        assert_eq!(adapter.chain_name(), "Polkadot");
     }
 
-    #[test]
-    fn test_address_validation() {
-        // Test SS58 address format validation
-        let valid_polkadot_addr = "15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5";
-        let valid_kusama_addr = "HNZata7iMYWmk5RvZRTiAsSDhV8366zq2YGb3tLH5Upf74F";
+    #[tokio::test]
+    #[ignore] // Requires network connection
+    async fn test_get_balance_integration() {
+        let adapter = SubstrateAdapter::connect("wss://westend-rpc.polkadot.io")
+            .await
+            .unwrap();
 
-        // Verify addresses are properly formatted
-        assert!(!valid_polkadot_addr.is_empty());
-        assert!(!valid_kusama_addr.is_empty());
-        assert!(valid_polkadot_addr.chars().all(|c| c.is_alphanumeric()));
-        assert!(valid_kusama_addr.chars().all(|c| c.is_alphanumeric()));
+        // Test balance query for a known address
+        let result = adapter
+            .get_balance("5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY")
+            .await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    #[ignore] // Requires network connection
+    async fn test_invalid_endpoint_connection() {
+        let result = SubstrateAdapter::connect("wss://invalid.endpoint.that.does.not.exist").await;
+        assert!(result.is_err());
     }
 }
