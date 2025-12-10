@@ -1,6 +1,6 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1764608972354,
-  "repoUrl": "https://github.com/kherldhussein/apex-sdk",
+  "lastUpdate": 1765360488186,
+  "repoUrl": "https://github.com/eurybits/apex-sdk",
   "entries": {
     "Benchmark": [
       {
@@ -250,6 +250,120 @@ window.BENCHMARK_DATA = {
           {
             "name": "transaction_amounts/1000000000000",
             "value": 63,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "kherld.hussein@gmail.com",
+            "name": "kh3rld",
+            "username": "kh3rld"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7248cfdf52bc70bd03c01e5f34996bf65de7d55b",
+          "message": "fix: ss58 (#44)\n\n* docs: update broken links\n\n* fix(benches): update file existence check before moving output.txt\n\n* docs: update README\n\n* fix(git): update .gitignore to include additional metadata files and profraw files\n\n* docs: update README and documentation links to reflect repository migration from kherldhussein to eurybits\n\n- Updated all instances of repository links in README files across apex-sdk-substrate, apex-sdk-types, cli, and examples to point to the new GitHub repository.\n- Added new badges for downloads, Substrate compatibility, and Rust version in README files.\n- Updated Discord links to the new community server.\n- Revised documentation files to ensure all links and references are consistent with the new repository.\n- Added a new example for Polkadot ecosystem showcasing multi-chain capabilities.\n\n* chore: update repository links and enhance community support in documentation\n\n* perf: optimize images for web deployment\n\n* perf: optimize images for web deployment\n\n* docs: update documentation and configuration for apexsdk.dev migration\n\n* feat: comprehensive test coverage improvements and repository migration\n\n- Add extensive unit tests for SDK core functionality\n- Implement comprehensive EVM adapter tests\n- Add Substrate adapter test coverage\n- Implement CLI command tests (balance, deploy, config)\n- Add connection pool and transaction processing tests\n- Update all repository references from kherldhussein to eurybits organization\n- Fix compilation errors and improve code quality\n- Target: Increase test coverage from 31.43% to 40%+\n\n* feat: add build script and package.json for documentation deployment\n\n* fix: ci\n\n* fix(cli): ignore network test\n\n* fix(test): commented out the module declarations for polkadot and kusama metadata until they are actually generated\n\n* chore(test): create integration test CI workflow\n\n* chore(test): create helper script\n\n* fix: resolve all CI failures and add integration test infrastructure\n\n  - Fix test failures (9 tests)\n  - Fix clippy warnings (5 warnings)\n  - Comment out ungenerated metadata modules\n  - Add gitignore for large generated files\n  - Add integration test CI workflow\n  - Add testing documentation\n  - Fix Cloudflare Pages build configuration\n\n* fix(cloudflare): add dist/ t0 .gitignore to keep generated files out of version control\n\n* doc: update readme",
+          "timestamp": "2025-12-10T04:46:06-05:00",
+          "tree_id": "a9bc4cdf0a5dafe2eff30c51f9df509c1931d830",
+          "url": "https://github.com/eurybits/apex-sdk/commit/7248cfdf52bc70bd03c01e5f34996bf65de7d55b"
+        },
+        "date": 1765360487908,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "transaction_creation/create_substrate_transfer",
+            "value": 53,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "transaction_creation/create_evm_transfer",
+            "value": 54,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/substrate_validation/0",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/substrate_validation/1",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/substrate_validation/2",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/evm_validation/0",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/evm_validation/1",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/evm_validation/2",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "sdk_initialization/create_substrate_sdk",
+            "value": 15,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "sdk_initialization/create_evm_sdk",
+            "value": 14,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "sdk_initialization/create_multi_chain_sdk",
+            "value": 31,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "transaction_signing/substrate_sign_simulation",
+            "value": 160864,
+            "range": "± 291",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "transaction_signing/evm_sign_simulation",
+            "value": 140797,
+            "range": "± 351",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "amount_operations/amount_creation",
+            "value": 0,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "amount_operations/amount_arithmetic",
+            "value": 0,
             "range": "± 0",
             "unit": "ns/iter"
           }
