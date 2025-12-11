@@ -1246,6 +1246,22 @@ println!(<span class="code-string">"Transaction hash: {}"</span>, result.hash())
     </footer>
 
     <script>
+        // Subdomain Redirect Logic
+        (function() {
+            const hostname = window.location.hostname;
+            const redirectMap = {
+                'start.apexsdk.dev': '/quick-start',
+                'api.apexsdk.dev': '/api',
+                'cli.apexsdk.dev': '/cli',
+                'blog.apexsdk.dev': '/roadmap',
+                'play.apexsdk.dev': '/viewer.html'
+            };
+
+            if (redirectMap[hostname]) {
+                window.location.href = 'https://apexsdk.dev' + redirectMap[hostname];
+            }
+        })();
+
         // Theme Toggle
         function toggleTheme() {
             const html = document.documentElement;
