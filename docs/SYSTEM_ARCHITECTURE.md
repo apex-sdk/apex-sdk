@@ -1,10 +1,10 @@
 # Apex SDK System Architecture Document
 
 **Version:** 1.0
-**Date:** November 19, 2025
+**Date:** December 12, 2025
 **Status:** Living Document
 **Authors:** Khalid Hussein
-**Classification:** Internal / Partner Use
+**Classification:** Public
 
 ## Table of Contents
 
@@ -3153,18 +3153,18 @@ For major version upgrades:
 
 | Date | Decision | Rationale | Alternatives Considered |
 |------|----------|-----------|------------------------|
-| 2024-01 | Use Rust | Memory safety, performance | Go, TypeScript |
-| 2024-02 | Tokio runtime | Maturity, ecosystem | async-std |
-| 2024-03 | Library-first | Flexibility | Hosted service |
-| 2024-04 | subxt for Substrate | Official support | substrate-api-client |
-| 2024-05 | ethers for EVM | Maturity | web3, alloy |
-| 2024-06 | In-memory cache | Simplicity | Redis, RocksDB |
+| 2025-10 | Use Rust | Memory safety, performance | Go, TypeScript |
+| 2025-10 | Tokio runtime | Maturity, ecosystem | async-std |
+| 2025-10 | Library-first | Flexibility | Hosted service |
+| 2025-11 | subxt for Substrate | Official support | substrate-api-client |
+| 2025-11 | ethers for EVM | Maturity | web3, alloy |
+| 2025-11 | In-memory cache | Simplicity | Redis, RocksDB |
 
 ### 17.4 Revision History
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
-| 1.0 | 2025-11-19 | System Architecture Team | Initial version |
+| 1.0 | 2025-12-12 | System Architecture Team | Initial version |
 
 ---
 
