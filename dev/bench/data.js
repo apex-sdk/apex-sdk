@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1765519374907,
+  "lastUpdate": 1765783746542,
   "repoUrl": "https://github.com/eurybits/apex-sdk",
   "entries": {
     "Benchmark": [
@@ -923,6 +923,120 @@ window.BENCHMARK_DATA = {
             "name": "transaction_signing/evm_sign_simulation",
             "value": 141032,
             "range": "± 808",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "amount_operations/amount_creation",
+            "value": 0,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "amount_operations/amount_arithmetic",
+            "value": 0,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "kherld.hussein@gmail.com",
+            "name": "kh3rld",
+            "username": "kh3rld"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "dfc36d748f07fc61dc2c40fd0298458f7b8957b2",
+          "message": "docs: overhaul and newsletter (#50)\n\n* chore(docs): update logos and add new ones\n\n* docs(README): update links\n\n* docs(viewer): improve UI/UX\n\n* docs(viewer): improve UI/UX\n\n* docs(js): update module initialization and add new modules for advanced visualization, metrics, workflow simulator, and personalization\n\n* docs(css): update main stylesheet with new design elements and animations\n\n* docs(search): update search manifest with new categories and paths\n\n* docs(subscribe): update API endpoint and add new subscription handling logic",
+          "timestamp": "2025-12-15T02:22:41-05:00",
+          "tree_id": "996d9d7120a08e3de5310e1a3a78b9a8937bb753",
+          "url": "https://github.com/eurybits/apex-sdk/commit/dfc36d748f07fc61dc2c40fd0298458f7b8957b2"
+        },
+        "date": 1765783745913,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "transaction_creation/create_substrate_transfer",
+            "value": 53,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "transaction_creation/create_evm_transfer",
+            "value": 53,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/substrate_validation/0",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/substrate_validation/1",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/substrate_validation/2",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/evm_validation/0",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/evm_validation/1",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/evm_validation/2",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "sdk_initialization/create_substrate_sdk",
+            "value": 14,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "sdk_initialization/create_evm_sdk",
+            "value": 14,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "sdk_initialization/create_multi_chain_sdk",
+            "value": 29,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "transaction_signing/substrate_sign_simulation",
+            "value": 160975,
+            "range": "± 464",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "transaction_signing/evm_sign_simulation",
+            "value": 141000,
+            "range": "± 392",
             "unit": "ns/iter"
           },
           {
