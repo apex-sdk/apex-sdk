@@ -32,6 +32,12 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Inject Web3Forms API key
+        run: |
+          sed -i "s/__WEB3FORMS_ACCESS_KEY__/${{ secrets.WEB3FORMS_ACCESS_KEY }}/g" docs/js/subscribe.js
+        env:
+          WEB3FORMS_ACCESS_KEY: ${{ secrets.WEB3FORMS_ACCESS_KEY }}
+
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:

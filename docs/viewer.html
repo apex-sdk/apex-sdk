@@ -962,6 +962,17 @@
             sidebar.classList.toggle('show');
         });
 
+        // Utility: Load external script dynamically
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = () => resolve();
+                script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+                document.head.appendChild(script);
+            });
+        }
+
         // Load document with lazy loading (hardened with diagnostics and fallbacks)
         async function loadDoc(filename) {
             try {
@@ -969,7 +980,8 @@
                 if (contentEl) contentEl.innerHTML = '<p>Loading documentation...</p>';
 
                 // Ensure we have a sane relative path
-                const docPath = filename.startsWith('http') ? filename : filename.replace(/^\/*/, '');
+                // Since viewer.html is in docs/ and markdown files are also in docs/, use relative path
+                const docPath = filename.startsWith('http') ? filename : `./${filename.replace(/^\/*/, '')}`;
 
                 // Ensure marked is present; try primary CDN then fallback
                 async function ensureMarked() {
