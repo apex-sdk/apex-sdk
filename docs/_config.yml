@@ -46,9 +46,10 @@ exclude:
   - vendor
   - README.md
 
-# Include HTML files
+# Include HTML files and special files
 include:
   - index.html
+  - _redirects
 
 # Plugins
 plugins:

@@ -4,6 +4,9 @@
 # Redirect www to apex (if you set up www subdomain)
 https://www.apexsdk.dev/* https://apexsdk.dev/:splat 301!
 
+# Redirect index.html to root for canonical URL
+/index.html / 301!
+
 # Redirect old GitHub Pages URLs
 https://eurybits.github.io/apex-sdk/* https://apexsdk.dev/:splat 301!
 

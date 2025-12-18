@@ -3,16 +3,23 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 
-  <!-- Homepage -->
+  <!-- Homepage - All variants point to canonical URL -->
   <url>
     <loc>https://apexsdk.dev/</loc>
-    <lastmod>2025-12-09</lastmod>
+    <lastmod>2025-12-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <image:image>
       <image:loc>https://apexsdk.dev/assets/apex_logo.png</image:loc>
       <image:title>Apex SDK Protocol Logo</image:title>
     </image:image>
+  </url>
+
+  <url>
+    <loc>https://apexsdk.dev/index.html</loc>
+    <lastmod>2025-12-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
   </url>
 
   <!-- Documentation Pages -->

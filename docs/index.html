@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Apex SDK Protocol - Unified Rust SDK for Substrate & EVM Blockchain Development</title>
     <meta name="description" content="Apex SDK Protocol is a compile-time safe, unified Rust SDK enabling cross-chain development across Substrate and EVM ecosystems. Build secure blockchain applications with type safety, native performance, and seamless cross-chain communication.">
     <meta name="keywords" content="Apex SDK Protocol, Apex SDK blockchain, Apex SDK Rust, Apex SDK Substrate, Apex SDK EVM, Apex SDK cross-chain, Rust blockchain SDK, Substrate SDK, EVM SDK, cross-chain development, Polkadot SDK, Ethereum SDK, blockchain development, Web3 Rust, Kusama SDK, smart contract SDK, DeFi development, blockchain integration, compile-time safety, type-safe blockchain, multi-chain SDK, Rust Web3, Substrate framework, EVM compatibility, cross-chain protocol">
@@ -102,18 +102,9 @@
     <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link rel="preconnect" href="https://unpkg.com">
-    
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- External Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://unpkg.com/lottie-web@5.12.2/build/player/lottie.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+
+    <!-- Fonts - Optimized loading -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Favicons -->
     <link rel="icon" type="image/png" href="/assets/apex_logo.png">
@@ -124,14 +115,7 @@
 </head>
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
-    
-    <!-- Particle Canvas -->
-    <canvas id="particle-canvas"></canvas>
-    
-    <!-- Gradient Orbs -->
-    <div class="gradient-orb orb-1"></div>
-    <div class="gradient-orb orb-2"></div>
-    
+
     <!-- Navigation -->
     <nav id="navbar">
         <div class="nav-container">
@@ -141,7 +125,6 @@
             </a>
             <ul class="nav-links">
                 <li><a href="#features">Features</a></li>
-                <li><a href="#code">Code</a></li>
                 <li><a href="#chains">Chains</a></li>
                 <li><a href="#architecture">Architecture</a></li>
                 <li><a href="viewer.html">Documentation</a></li>
@@ -152,9 +135,15 @@
                     </a>
                 </li>
                 <li>
+                    <a href="https://x.com/apexsdk" target="_blank" rel="noopener" aria-label="X (Twitter)" style="display:inline-flex;align-items:center;gap:.4rem;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        <span>X</span>
+                    </a>
+                </li>
+                <li>
                     <a href="https://discord.gg/zCDFsBaZJN" target="_blank" rel="noopener" class="btn-discord" aria-label="Discord" style="display:inline-flex;align-items:center;gap:.4rem;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.369A19.791 19.791 0 0 0 16.558 3c-.2.36-.43.85-.589 1.232a18.27 18.27 0 0 0-4-.003A12.3 12.3 0 0 0 11.379 3 19.736 19.736 0 0 0 7.62 4.369C3.693 9.478 2.89 14.46 3.247 19.385a19.9 19.9 0 0 0 4.963 1.615c.401-.553.758-1.138 1.065-1.748-.583-.22-1.14-.494-1.665-.816.14-.101.277-.206.41-.313 3.212 1.499 6.695 1.499 9.862 0 .134.107.271.212.41.313-.525.322-1.082.596-1.665.816.307.61.664 1.195 1.065 1.748a19.9 19.9 0 0 0 4.963-1.615c.406-5.52-.692-10.463-3.963-15.016zM9.7 15.408c-.965 0-1.753-.89-1.753-1.98 0-1.09.778-1.98 1.753-1.98.984 0 1.772.89 1.753 1.98 0 1.09-.769 1.98-1.753 1.98zm4.6 0c-.965 0-1.753-.89-1.753-1.98 0-1.09.778-1.98 1.753-1.98.984 0 1.772.89 1.753 1.98 0 1.09-.769 1.98-1.753 1.98z"/></svg>
-                        <span>Join Discord</span>
+                        <span>Discord</span>
                     </a>
                 </li>
             </ul>
@@ -243,31 +232,6 @@
         </div>
     </section>
     
-    <!-- Interactive Code Editor Section -->
-    <section id="code" class="code-section">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-badge">Interactive Demo</div>
-                <h2 class="section-title">Start Building in Minutes</h2>
-                <p class="section-description">
-                    Try the Apex SDK in your browser. Edit the code and see how easy cross-chain development can be.
-                </p>
-            </div>
-            <div class="code-editor-container">
-                <div class="code-editor-header">
-                    <div class="code-dots">
-                        <div class="code-dot"></div>
-                        <div class="code-dot"></div>
-                        <div class="code-dot"></div>
-                    </div>
-                    <button class="btn btn-secondary" onclick="runCode()" style="padding: 0.5rem 1.5rem; font-size: 0.875rem;">Run Code</button>
-                </div>
-                <div id="code-editor"></div>
-            </div>
-        </div>
-    </section>
-    
-    
     <!-- Supported Chains Section -->
     <section id="chains" class="chains-section">
         <div class="container">
@@ -340,6 +304,11 @@
                             <span>GitHub</span>
                         </a>
                         <span aria-hidden="true" style="opacity:.35;">•</span>
+                        <a href="https://x.com/apexsdk" target="_blank" rel="noopener" aria-label="X (Twitter)" style="display:inline-flex;align-items:center;gap:.4rem;text-decoration:none;color:var(--text-primary);">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                            <span>X</span>
+                        </a>
+                        <span aria-hidden="true" style="opacity:.35;">•</span>
                         <a href="https://discord.gg/zCDFsBaZJN" target="_blank" rel="noopener" aria-label="Discord" style="display:inline-flex;align-items:center;gap:.4rem;text-decoration:none;color:var(--text-primary);">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.369A19.791 19.791 0 0 0 16.558 3c-.2.36-.43.85-.589 1.232a18.27 18.27 0 0 0-4-.003A12.3 12.3 0 0 0 11.379 3 19.736 19.736 0 0 0 7.62 4.369C3.693 9.478 2.89 14.46 3.247 19.385a19.9 19.9 0 0 0 4.963 1.615c.401-.553.758-1.138 1.065-1.748-.583-.22-1.14-.494-1.665-.816.14-.101.277-.206.41-.313 3.212 1.499 6.695 1.499 9.862 0 .134.107.271.212.41.313-.525.322-1.082.596-1.665.816.307.61.664 1.195 1.065 1.748a19.9 19.9 0 0 0 4.963-1.615c.406-5.52-.692-10.463-3.963-15.016zM9.7 15.408c-.965 0-1.753-.89-1.753-1.98 0-1.09.778-1.98 1.753-1.98.984 0 1.772.89 1.753 1.98 0 1.09-.769 1.98-1.753 1.98zm4.6 0c-.965 0-1.753-.89-1.753-1.98 0-1.09.778-1.98 1.753-1.98.984 0 1.772.89 1.753 1.98 0 1.09-.769 1.98-1.753 1.98z"/></svg>
                             <span>Discord</span>
@@ -377,106 +346,11 @@
         </div>
     </footer>
     
-    <!-- External JavaScript Modules -->
-    <script src="js/config.js"></script>
+    <!-- JavaScript -->
     <script src="js/chains-data.js"></script>
-    <script src="js/seo.js"></script>
-    <script src="js/particles.js"></script>
-    <script src="js/personalization.js"></script>
-    <script src="js/main.js"></script>
     <script src="js/subscribe.js" defer></script>
-    
+
     <script>
-        // Initialize GSAP ScrollTrigger
-        gsap.registerPlugin(ScrollTrigger);
-        
-        // Monaco Editor
-        function initCodeEditor() {
-            if (typeof require === 'undefined') {
-                // Fallback if Monaco fails to load
-                const editorDiv = document.getElementById('code-editor');
-                if (editorDiv) {
-                    editorDiv.innerHTML = `
-                        <div style="padding: 2rem; background: #1e293b; color: #e2e8f0; font-family: var(--font-mono); font-size: 14px; line-height: 1.6; overflow-x: auto;">
-<pre><code><span style="color: #c792ea;">use</span> apex_sdk::prelude::*;
-
-<span style="color: #546e7a;">// Initialize SDK with unified configuration</span>
-<span style="color: #c792ea;">let</span> sdk = ApexSDK::builder()
-    .with_substrate_endpoint(<span style="color: #c3e88d;">"wss://paseo.rpc.amforc.com"</span>)
-    .with_evm_endpoint(<span style="color: #c3e88d;">"https://eth-mainnet.g.alchemy.com/v2/YOUR_KEY"</span>)
-    .build()
-    .<span style="color: #c792ea;">await</span>?;
-
-<span style="color: #546e7a;">// Create a cross-chain transaction</span>
-<span style="color: #c792ea;">let</span> tx = sdk
-    .transaction()
-    .from_substrate_account(<span style="color: #c3e88d;">"Alice"</span>)
-    .to_evm_address(<span style="color: #c3e88d;">"0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7"</span>)
-    .amount(<span style="color: #ffcb6b;">1000_u128</span>)
-    .with_nonce(<span style="color: #ffcb6b;">1</span>)
-    .build()?;
-
-<span style="color: #546e7a;">// Execute with automatic routing</span>
-<span style="color: #c792ea;">let</span> result = sdk.execute(tx).<span style="color: #c792ea;">await</span>?;
-println!(<span style="color: #c3e88d;">"Transaction hash: {}"</span>, result.hash());</code></pre>
-                        </div>
-                    `;
-                }
-                return;
-            }
-            
-            require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
-            require(['vs/editor/editor.main'], function () {
-                const editor = monaco.editor.create(document.getElementById('code-editor'), {
-                    value: `use apex_sdk::prelude::*;
-
-#[tokio::main]
-async fn main() -> Result<()> {
-    // Initialize SDK with unified configuration
-    let sdk = ApexSDK::builder()
-        .with_substrate_endpoint("wss://paseo.rpc.amforc.com")
-        .with_evm_endpoint("https://eth-mainnet.g.alchemy.com/v2/YOUR_KEY")
-        .build()
-        .await?;
-
-    // Create a cross-chain transaction
-    let tx = sdk
-        .transaction()
-        .from_substrate_account("Alice")
-        .to_evm_address("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7")
-        .amount(1000_u128)
-        .with_nonce(1)
-        .build()?;
-
-    // Execute with automatic routing
-    let result = sdk.execute(tx).await?;
-    println!("Transaction hash: {}", result.hash());
-    
-    Ok(())
-}`,
-                    language: 'rust',
-                    theme: 'vs-dark',
-                    automaticLayout: true,
-                    minimap: { enabled: false },
-                    fontSize: 14,
-                    lineNumbers: 'on',
-                    roundedSelection: false,
-                    scrollBeyondLastLine: false,
-                });
-                
-                window.editor = editor;
-            });
-        }
-        
-        function runCode() {
-            if (window.editor) {
-                const code = window.editor.getValue();
-                alert('Code execution would happen here. In production, this would connect to a sandbox environment.');
-            } else {
-                alert('Edit the code above and click Run to execute. In production, this would connect to a live sandbox environment.');
-            }
-        }
-        
         // Architecture Layer Details with Modal
         function showLayerDetails(layer) {
             const details = {
@@ -543,44 +417,19 @@ async fn main() -> Result<()> {
             });
         }
         
-        // Scroll Animations with GSAP
-        function initScrollAnimations() {
-            gsap.utils.toArray('.feature-card, .metric-card, .arch-layer').forEach((el, i) => {
-                gsap.from(el, {
-                    scrollTrigger: {
-                        trigger: el,
-                        start: 'top 80%',
-                        toggleActions: 'play none none reverse'
-                    },
-                    opacity: 0,
-                    y: 50,
-                    duration: 0.8,
-                    delay: i * 0.1
-                });
-            });
-            
-            // Parallax effect for hero
-            gsap.to('.hero-content', {
-                scrollTrigger: {
-                    trigger: '.hero',
-                    start: 'top top',
-                    end: 'bottom top',
-                    scrub: true
-                },
-                y: 100,
-                opacity: 0
-            });
-        }
-        
-        // Navbar scroll effect
+        // Navbar scroll effect - Lightweight
+        let scrollTimeout;
         window.addEventListener('scroll', () => {
-            const nav = document.getElementById('navbar');
-            if (window.scrollY > 50) {
-                nav.classList.add('scrolled');
-            } else {
-                nav.classList.remove('scrolled');
-            }
-        });
+            if (scrollTimeout) clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                const nav = document.getElementById('navbar');
+                if (window.scrollY > 50) {
+                    nav.classList.add('scrolled');
+                } else {
+                    nav.classList.remove('scrolled');
+                }
+            }, 10);
+        }, { passive: true });
         
         // Theme Toggle
         function initThemeToggle() {
@@ -628,46 +477,43 @@ async fn main() -> Result<()> {
             const filtered = activeFilter === 'all' ? allChains : allChains.filter(c => c.category === activeFilter);
 
             grid.innerHTML = filtered.map(chain => `
-                <a class="chain-card" href="${chain.website || '#'}" target="_blank" rel="noopener" 
-                   style="display:flex;align-items:center;gap:1rem;padding:1rem;border:1px solid var(--border-color);border-radius:16px;background:var(--bg-card);box-shadow:var(--shadow-sm);text-decoration:none;">
-                    <div class="chain-logo" style="width:48px;height:48px;flex:0 0 48px;border-radius:12px;background:${chain.color || 'var(--bg-secondary)'}20;display:flex;align-items:center;justify-content:center;">
-                        <img src="${chain.logo || ''}" alt="${chain.name} logo" loading="lazy" width="40" height="40" onerror="this.style.display='none'"/>
+                <a class="chain-card" href="${chain.website || '#'}" target="_blank" rel="noopener">
+                    <div class="chain-logo">
+                        <img src="${chain.logo || ''}" alt="${chain.name} logo" loading="lazy" onerror="this.style.display='none'"/>
                     </div>
-                    <div class="chain-meta" style="display:flex;flex-direction:column;gap:.25rem;">
-                        <div class="chain-name" style="font-weight:700;color:var(--text-primary);">${chain.name}</div>
-                        <div class="chain-type" style="font-size:.9rem;color:var(--text-tertiary);">${chain.category} • ${chain.type || ''}</div>
+                    <div class="chain-meta">
+                        <div class="chain-name">${chain.name}</div>
+                        <div class="chain-type">${chain.category} • ${chain.type || ''}</div>
                     </div>
-                    <div style="margin-left:auto;display:flex;align-items:center;gap:.5rem;">
-                        <span class="status-badge" style="font-size:.75rem;padding:.25rem .5rem;border-radius:999px;border:1px solid var(--border-color);color:var(--text-secondary);">${chain.status || 'stable'}</span>
-                    </div>
+                    <span class="status-badge">${chain.status || 'stable'}</span>
                 </a>
             `).join('');
-
-            // Animate in
-            if (typeof gsap !== 'undefined') {
-                gsap.from('.chain-card', {opacity:0, y:12, duration:.5, stagger:.06, ease:'power2.out'});
-            }
 
             // Wire filters
             document.querySelectorAll('.chains-filters .chip').forEach(btn => {
                 btn.onclick = () => {
-                    document.querySelectorAll('.chains-filters .chip').forEach(b=>{b.classList.remove('active');b.setAttribute('aria-pressed','false');b.style.background='var(--bg-secondary)';});
+                    document.querySelectorAll('.chains-filters .chip').forEach(b => {
+                        b.classList.remove('active');
+                        b.setAttribute('aria-pressed', 'false');
+                    });
                     btn.classList.add('active');
-                    btn.setAttribute('aria-pressed','true');
-                    btn.style.background = 'var(--bg-tertiary)';
+                    btn.setAttribute('aria-pressed', 'true');
                     renderSupportedChains(btn.dataset.filter);
                 };
             });
         }
-        
-        // Initialize everything when DOM is ready
-        document.addEventListener('DOMContentLoaded', () => {
-            initCodeEditor();
-            initScrollAnimations();
+
+        // Initialize - Optimized
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+
+        function init() {
             initThemeToggle();
             renderSupportedChains('all');
-            // Search is intentionally available only in the documentation viewer
-        });
+        }
     </script>
 </body>
 </html>
