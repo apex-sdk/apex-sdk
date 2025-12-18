@@ -44,6 +44,17 @@ jobs:
           source: ./docs
           destination: ./_site
 
+      - name: Verify and re-inject API key in built site
+        run: |
+          if [ -f ./_site/js/subscribe.js ]; then
+            sed -i "s/__WEB3FORMS_ACCESS_KEY__/${{ secrets.WEB3FORMS_ACCESS_KEY }}/g" ./_site/js/subscribe.js
+            echo "API key injected into built subscribe.js"
+          else
+            echo "Warning: subscribe.js not found in _site"
+          fi
+        env:
+          WEB3FORMS_ACCESS_KEY: ${{ secrets.WEB3FORMS_ACCESS_KEY }}
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
 
