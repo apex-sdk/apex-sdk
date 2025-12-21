@@ -1,0 +1,29 @@
+{
+  "papers": [
+    {
+      "id": "unified-foundation-multichain-2026",
+      "title": "A Unified Foundation for Multi-Chain Applications",
+      "authors": ["Khalid Hussein <khalid@apexsdk.dev>"],
+      "date": "2026-01-10",
+      "abstract": "Our inaugural white paper introducing Apex SDK's foundational approach to multi-chain application development. This comprehensive paper presents our vision for a unified development framework that bridges the gap between different blockchain ecosystems, enabling developers to build robust, secure, and interoperable applications across multiple chains.",
+      "keywords": ["multi-chain", "unified framework", "blockchain development", "interoperability", "Rust SDK"],
+      "category": "Foundational",
+      "status": "upcoming",
+      "pages": null,
+      "file": null,
+      "doi": null,
+      "citation": "Apex SDK Team. (2026). A Unified Foundation for Multi-Chain Applications. Apex SDK White Paper.",
+      "downloads": 0,
+      "tentative_release": "2026-01-10"
+    }
+  ],
+  "categories": [
+    "Foundational",
+    "Technical Architecture",
+    "Type Systems",
+    "Cross-Chain Technology",
+    "Security",
+    "Performance Analysis",
+    "Smart Contracts"
+  ]
+}

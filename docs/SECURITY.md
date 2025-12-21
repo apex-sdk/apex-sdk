@@ -8,7 +8,7 @@ The Apex SDK team takes security vulnerabilities seriously. We appreciate your e
 
 **DO NOT** report security vulnerabilities through public GitHub issues.
 
-Instead, please report them via email to **kherld@duck.com**.
+Instead, please report them via email to **security@apexsdk.dev**.
 
 You should receive a response within 48 hours. If for some reason you do not, please follow up via email to ensure we received your original message.
 
@@ -44,7 +44,7 @@ Security updates will be released as patch versions and announced via:
 - GitHub Security Advisories
 - Release notes
 - Our Discord server: https://discord.gg/zCDFsBaZJN (#security channel)
-- Twitter (@eurybits)
+- X/Twitter (@apexsdk)
 
 ## Supported Versions
 
@@ -77,6 +77,6 @@ Apex SDK implements several security measures:
 
 ## Contact
 
-- **Security Email**: info@eurybits.com
-- **Security Advisories**: https://github.com/eurybits/apex-sdk/security/advisories
+- **Security Email**: security@apexsdk.dev
+- **Security Advisories**: https://github.com/carbobit/apex-sdk/security/advisories
 

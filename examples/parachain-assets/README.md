@@ -128,4 +128,4 @@ This pattern enables:
 - [Asset Hub Documentation](https://wiki.polkadot.com/docs/learn-assets)
 - [Polkadot Parachains](https://polkadot.network/parachains/)
 - [XCM Cross-Chain Messaging](https://wiki.polkadot.com/docs/learn-xcm)
-- [Apex SDK Documentation](https://github.com/eurybits/apex-sdk)
+- [Apex SDK Documentation](https://github.com/carbobit/apex-sdk)

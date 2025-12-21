@@ -346,7 +346,7 @@
 
 ## Community Priorities
 
-**Vote on features:** [GitHub Discussions](https://github.com/eurybits/apex-sdk/discussions)
+**Vote on features:** [GitHub Discussions](https://github.com/carbobit/apex-sdk/discussions)
 
 **Top Community Requests:**
 1.  Better error messages ( Completed!)
@@ -448,7 +448,7 @@
 4. Participate in code review
 
 ### Community Priorities
-Vote on [GitHub Discussions](https://github.com/eurybits/apex-sdk/discussions/categories/roadmap) to help us prioritize!
+Vote on [GitHub Discussions](https://github.com/carbobit/apex-sdk/discussions/categories/roadmap) to help us prioritize!
 
 ### Sponsorship
 Support development through:
@@ -474,6 +474,6 @@ This roadmap is a living document that evolves based on:
 <div align="center">
 
 **Questions about the roadmap?**
-[Open a discussion](https://github.com/eurybits/apex-sdk/discussions) | [View current progress](https://github.com/eurybits/apex-sdk/projects)
+[Open a discussion](https://github.com/carbobit/apex-sdk/discussions) | [View current progress](https://github.com/carbobit/apex-sdk/projects)
 
 </div>

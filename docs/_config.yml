@@ -12,9 +12,9 @@ timezone: UTC
 
 show_downloads: false
 github:
-  repository_url: https://github.com/eurybits/apex-sdk
-  zip_url: https://github.com/eurybits/apex-sdk/archive/refs/heads/main.zip
-  tar_url: https://github.com/eurybits/apex-sdk/archive/refs/heads/main.tar.gz
+  repository_url: https://github.com/carbobit/apex-sdk
+  zip_url: https://github.com/carbobit/apex-sdk/archive/refs/heads/main.zip
+  tar_url: https://github.com/carbobit/apex-sdk/archive/refs/heads/main.tar.gz
   repository_name: apex-sdk
 
 # Social media
@@ -27,7 +27,7 @@ logo: /assets/logo.png
 social:
   name: Apex SDK Protocol
   links:
-    - https://github.com/eurybits/apex-sdk
+    - https://github.com/carbobit/apex-sdk
     - https://twitter.com/apexsdk
 
 # Markdown settings for .md files
@@ -46,9 +46,10 @@ exclude:
   - vendor
   - README.md
 
-# Include HTML files
+# Include HTML files and special files
 include:
   - index.html
+  - _redirects
 
 # Plugins
 plugins:

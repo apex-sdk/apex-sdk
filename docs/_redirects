@@ -4,8 +4,11 @@
 # Redirect www to apex (if you set up www subdomain)
 https://www.apexsdk.dev/* https://apexsdk.dev/:splat 301!
 
+# Redirect index.html to root for canonical URL
+/index.html / 301!
+
 # Redirect old GitHub Pages URLs
-https://eurybits.github.io/apex-sdk/* https://apexsdk.dev/:splat 301!
+https://carbobit.github.io/apex-sdk/* https://apexsdk.dev/:splat 301!
 
 # Subdomain routing - render markdown files with viewer
 https://start.apexsdk.dev/* https://apexsdk.dev/viewer.html?doc=QUICK_START.md 301!
@@ -13,6 +16,7 @@ https://api.apexsdk.dev/* https://apexsdk.dev/viewer.html?doc=API.md 301!
 https://cli.apexsdk.dev/* https://apexsdk.dev/viewer.html?doc=CLI_GUIDE.md 301!
 https://blog.apexsdk.dev/* https://apexsdk.dev/viewer.html?doc=ROADMAP.md 301!
 https://play.apexsdk.dev/* https://apexsdk.dev/viewer.html 301!
+https://research.apexsdk.dev/* https://apexsdk.dev/research/:splat 200
 https://docs.apexsdk.dev/* https://apexsdk.dev/:splat 200
 
 # Clean URLs - render markdown files with viewer
@@ -25,6 +29,11 @@ https://docs.apexsdk.dev/* https://apexsdk.dev/:splat 200
 /security /viewer.html?doc=SECURITY.md 200
 /testnets /viewer.html?doc=TESTNETS.md 200
 /roadmap /viewer.html?doc=ROADMAP.md 200
+/papers /research/index.html 200
+/research-papers /research/index.html 200
+/whitepaper /research/index.html 200
+/white-paper /research/index.html 200
+/publications /research/index.html 200
 /architecture /viewer.html?doc=SYSTEM_ARCHITECTURE.md 200
 
 # Fallback for 404

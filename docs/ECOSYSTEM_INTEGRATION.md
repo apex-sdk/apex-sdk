@@ -696,7 +696,7 @@ impl CrossChainDeFiApp {
 ## Support
 
 For integration support:
-- **Email:** kherld.hussein@mail.com <!--integrations@apexsdk.io -->
+- **Email:** partnerships@apexsdk.dev
 - **Discord:** [Apex SDK Community](https://discord.gg/zCDFsBaZJN)
 - **Docs:** https://docs.rs/apex-sdk
 

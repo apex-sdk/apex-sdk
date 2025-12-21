@@ -413,8 +413,8 @@ for request in requests {
 
 ## Security Contacts
 
-- **Email:** kherld@duck.com
-- **PGP Key:** [Available on keybase.io]
+- **Email:** security@apexsdk.dev
+- **PGP Key:** [Available on request]
 - **Response Time:** 48 hours
 - **Disclosure Policy:** Responsible disclosure
 

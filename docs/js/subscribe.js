@@ -1,12 +1,12 @@
-/* Newsletter subscription via Cloudflare Pages Function proxy */
+/* Newsletter subscription via Web3Forms */
 (function(){
-  const ENDPOINT = '/api/subscribe';
+  const ENDPOINT = 'https://api.web3forms.com/submit';
+  const ACCESS_KEY = '__WEB3FORMS_ACCESS_KEY__';
 
   function $(sel, root=document){ return root.querySelector(sel); }
 
   function init(form){
     if (!form) return;
-    // No provider secrets in a client. Server adds the necessary fields.
     // Honeypot
     if (!form.querySelector('input[name="bot_field"]')){
       const hp = document.createElement('input');
@@ -45,19 +45,23 @@
 
       const source = form.getAttribute('data-source') || (location.pathname.includes('viewer') ? 'viewer' : 'homepage');
       const botFieldEl = form.querySelector('input[name="bot_field"]');
-      const payload = {
-        email,
-        source,
-        bot_field: botFieldEl ? (botFieldEl.value || '') : ''
-      };
+
+      const formData = new FormData();
+      formData.append('access_key', ACCESS_KEY);
+      formData.append('email', email);
+      formData.append('subject', 'Apex SDK: New newsletter signup');
+      formData.append('from_name', 'Apex SDK Website');
+      formData.append('source', source);
+      if (botFieldEl && botFieldEl.value) {
+        formData.append('botcheck', botFieldEl.value);
+      }
 
       try {
         if (submitBtn){ submitBtn.disabled = true; submitBtn.dataset._label = submitBtn.textContent; submitBtn.textContent = 'Subscribing…'; }
         status.textContent = 'Submitting…';
-        const res = await fetch(ENDPOINT, { 
-          method: 'POST', 
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+        const res = await fetch(ENDPOINT, {
+          method: 'POST',
+          body: formData
         });
         const data = await res.json().catch(()=>({ ok:false }));
         if ((data && data.ok) || res.ok){

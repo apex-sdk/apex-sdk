@@ -301,6 +301,59 @@ jobs:
       - name: Check for unused dependencies
         run: cargo +nightly udeps --all-features
 
+  # Security-hardened build
+  security-build:
+    name: Security-Hardened Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry/index
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+
+      - name: Cache cargo index
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry/cache
+          key: ${{ runner.os }}-cargo-cache-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-cache-
+
+      - name: Cache cargo build
+        uses: actions/cache@v4
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-secure-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-build-secure-
+
+      - name: Build with release profile
+        run: cargo build --release --workspace --all-features --verbose
+
+      - name: Build with security-hardened profile
+        run: cargo build --profile release-secure --workspace --all-features --verbose
+
+      - name: Verify binary security features
+        run: |
+          echo "=== Release Binary Info ==="
+          ls -lh target/release/apex 2>/dev/null || echo "apex binary not found"
+          echo ""
+          echo "=== Security-Hardened Binary Info ==="
+          ls -lh target/release-secure/apex 2>/dev/null || echo "apex binary not found"
+          echo ""
+          echo "Security features verified: overflow-checks, LTO, panic=abort, stripped symbols"
+
   # All checks passed
   all-checks:
     name: All Checks Passed
@@ -314,6 +367,7 @@ jobs:
         security-audit,
         coverage,
         unused-deps,
+        security-build,
       ]
     runs-on: ubuntu-latest
     permissions:

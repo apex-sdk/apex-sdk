@@ -4,6 +4,8 @@
 
 This document outlines ongoing and planned research initiatives for the Apex SDK, focusing on advancing blockchain interoperability, performance optimization, and developer experience.
 
+> **📚 [View & Download Research Papers](research/)** - Access our complete collection of published research papers, technical reports, and whitepapers.
+
 ## Table of Contents
 
 - [Active Research Projects](#active-research-projects)
@@ -87,9 +89,49 @@ Develop a unified NFT standard that works seamlessly across Substrate and EVM ch
 | CPU Usage | 15-25% | Active transaction processing |
 | Throughput | 850 TPS | Theoretical maximum |
 
+## Publications and Papers
+
+We publish our research findings to contribute to the broader blockchain development community. All papers are freely available for download.
+
+### Featured Research Papers
+
+📄 **Apex SDK: A Unified Rust Framework for Cross-Chain Blockchain Development** (2024)
+- Comprehensive overview of the Apex SDK architecture and design principles
+- [Download PDF](research/papers/apex-unified-sdk-2024.pdf) | [View in Research Portal](research/)
+
+📄 **Compile-Time Type Safety in Runtime Metadata: The Apex SDK Approach** (2024)
+- Technical deep-dive into our type-safe metadata code generation system
+- [Download PDF](research/papers/type-safe-metadata-2024.pdf) | [View in Research Portal](research/)
+
+📄 **Bridging Substrate and EVM: A Unified API for Cross-Chain Communication** (Draft)
+- Novel approaches to cross-chain interoperability
+- [Coming Soon - View in Research Portal](research/)
+
+### Browse All Papers
+
+Visit our **[Research Papers Portal](research/)** to:
+- 📥 Download all published research papers and technical reports
+- 🔍 Search and filter by category, keyword, or author
+- 📊 View research statistics and impact metrics
+- 📋 Get citation information for academic use
+- ✉️ Submit your own research using Apex SDK
+
+### Contributing Research
+
+Have you conducted research using Apex SDK? We welcome contributions from the community!
+
+**Submission Guidelines:**
+- Original research using or related to Apex SDK
+- Technical reports on implementation experiences
+- Performance analysis and benchmarking studies
+- Security audits and analysis
+- Case studies and real-world applications
+
+Submit your research to: **research@apexsdk.dev**
+
 ## Contact
 
 **Research Team:** Apex SDK Research Team  
 **Email:** research@apexsdk.dev  
 **Discord:** https://discord.gg/zCDFsBaZJN  
-**Repository:** [apex-sdk](https://github.com/eurybits/apex-sdk)
+**Repository:** [apex-sdk](https://github.com/carbobit/apex-sdk)

@@ -366,7 +366,7 @@ export APEX_CHAIN=polkadot
 **Community Support**:
 - **Documentation**: https://docs.rs/apex-sdk
 - **Discord**: Join Polkadot Discord for testnet support
-- **Issues**: https://github.com/eurybits/apex-sdk/issues
+- **Issues**: https://github.com/carbobit/apex-sdk/issues
 - **Email**: support@apex-sdk.io (for enterprise users)
 
 **Useful Resources**:

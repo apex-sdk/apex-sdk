@@ -184,4 +184,4 @@ This architecture enables:
 - [Chainlink Price Feeds](https://docs.chain.link/data-feeds)
 - [Acurast Oracle](https://docs.acurast.com/)
 - [Oracle Manipulation Attacks](https://blog.chain.link/flash-loan-attacks/)
-- [Apex SDK Documentation](https://github.com/eurybits/apex-sdk)
+- [Apex SDK Documentation](https://github.com/carbobit/apex-sdk)

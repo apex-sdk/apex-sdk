@@ -567,9 +567,9 @@ See `/examples` directory for complete working examples:
 ## Support & Resources
 
 - **Documentation**: https://docs.apexsdk.io
-- **GitHub**: https://github.com/eurybits/apex-sdk
+- **GitHub**: https://github.com/carbobit/apex-sdk
 - **Discord**: https://discord.gg/zCDFsBaZJN
-- **Issues**: https://github.com/eurybits/apex-sdk/issues
+- **Issues**: https://github.com/carbobit/apex-sdk/issues
 
 
 ## Contributing

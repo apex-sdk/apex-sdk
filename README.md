@@ -1,15 +1,15 @@
 # Apex SDK Protocol
 
-[![CI](https://github.com/eurybits/apex-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/eurybits/apex-sdk/actions/workflows/ci.yml)
-[![Security](https://github.com/eurybits/apex-sdk/actions/workflows/security.yml/badge.svg)](https://github.com/eurybits/apex-sdk/actions/workflows/security.yml/badge.svg)
-[![Benchmarks](https://github.com/eurybits/apex-sdk/actions/workflows/benchmarks.yml/badge.svg)](https://github.com/eurybits/apex-sdk/actions/workflows/benchmarks.yml)
+[![CI](https://github.com/carbobit/apex-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/carbobit/apex-sdk/actions/workflows/ci.yml)
+[![Security](https://github.com/carbobit/apex-sdk/actions/workflows/security.yml/badge.svg)](https://github.com/carbobit/apex-sdk/actions/workflows/security.yml/badge.svg)
+[![Benchmarks](https://github.com/carbobit/apex-sdk/actions/workflows/benchmarks.yml/badge.svg)](https://github.com/carbobit/apex-sdk/actions/workflows/benchmarks.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Rust](https://img.shields.io/badge/Rust-1.85%2B-orange.svg)](https://www.rust-lang.org/)
 [![Docs](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://apexsdk.dev/)
 [![Crates.io](https://img.shields.io/crates/v/apex-sdk.svg)](https://crates.io/crates/apex-sdk)
 [![Downloads](https://img.shields.io/crates/d/apex-sdk.svg)](https://crates.io/crates/apex-sdk)
 [![Discord](https://img.shields.io/discord/322538954119184384.svg?logo=discord&logoColor=white&label=Discord&color=5865F2)](https://discord.gg/zCDFsBaZJN)
-[![Twitter Follow](https://img.shields.io/twitter/follow/eurybits?style=social)](https://twitter.com/eurybits)
+[![Twitter Follow](https://img.shields.io/twitter/follow/apexsdk?style=social)](https://twitter.com/apexsdk)
 
 > **Build secure, multichain blockchain applications with compile-time safety**
 
@@ -66,7 +66,7 @@ apex-sdk-evm = "0.1.0"
 
 ```bash
 # Clone the repository
-git clone https://github.com/eurybits/apex-sdk.git
+git clone https://github.com/carbobit/apex-sdk.git
 cd apex-sdk
 
 # Build from source
@@ -150,7 +150,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 **Quick Start:**
 
 ```bash
-git clone https://github.com/eurybits/apex-sdk.git
+git clone https://github.com/carbobit/apex-sdk.git
 cd apex-sdk
 cargo test --all-features
 ```
@@ -160,16 +160,29 @@ cargo test --all-features
 ## Community
 
 - **Discord**: [Join our community](https://discord.gg/zCDFsBaZJN)
-- **GitHub Discussions**: [Ask questions and share ideas](https://github.com/eurybits/apex-sdk/discussions)
-- **Issues**: [Report bugs or request features](https://github.com/eurybits/apex-sdk/issues)
+- **GitHub Discussions**: [Ask questions and share ideas](https://github.com/carbobit/apex-sdk/discussions)
+- **Issues**: [Report bugs or request features](https://github.com/carbobit/apex-sdk/issues)
 
 ## Security
 
-**Report vulnerabilities:** kherld@duck.com
+**Report vulnerabilities:** security@apexsdk.dev
 
-**[Security Policy](./docs/SECURITY.md)** | **[Security Audit](./docs/SECURITY_AUDIT.md)**
+**[Security Policy](./SECURITY.md)** | **[Security Profiles](./SECURITY_PROFILES.md)** | **[Security Audit](./docs/SECURITY_AUDIT.md)**
+
+### Security-Hardened Builds
+
+Apex SDK includes multiple security-hardened build profiles:
+
+```bash
+# Production build with maximum security
+cargo build --profile release-secure
+
+# Standard production build
+cargo build --release
+
+# See SECURITY_PROFILES.md for detailed information
+```
 
 ## License
 
 [Apache 2.0](LICENSE)
-

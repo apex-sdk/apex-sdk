@@ -93,7 +93,7 @@ This pattern enables:
 
 ## Learn More
 
-- [Apex SDK Documentation](https://github.com/eurybits/apex-sdk)
+- [Apex SDK Documentation](https://github.com/carbobit/apex-sdk)
 - [ink! Smart Contracts](https://use.ink/)
 - [Substrate Development](https://docs.polkadot.com/)
 - [Ethereum Smart Contracts](https://ethereum.org/en/developers/docs/smart-contracts/)

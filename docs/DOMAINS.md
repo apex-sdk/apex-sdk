@@ -24,4 +24,4 @@ Convenient shortcuts to specific documentation sections:
 
 ## Support
 
-For domain or deployment issues, contact: info@eurybits.com
+For domain or deployment issues, contact: support@apexsdk.dev

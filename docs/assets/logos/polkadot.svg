@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
-  <circle cx="32" cy="32" r="30" fill="#E6007A"/>
-  <text x="32" y="39" font-family="Inter, Arial, sans-serif" font-size="28" text-anchor="middle" fill="#fff" font-weight="700">P</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 342 342" width="64" height="64">
+  <circle cx="171" cy="37.8" r="37.8" fill="#000"/>
+  <circle cx="171" cy="304.2" r="37.8" fill="#000"/>
+  <circle cx="60.7" cy="103.5" r="37.8" fill="#000"/>
+  <circle cx="281.3" cy="238.5" r="37.8" fill="#000"/>
+  <circle cx="281.3" cy="103.5" r="37.8" fill="#000"/>
+  <circle cx="60.7" cy="238.5" r="37.8" fill="#000"/>
 </svg>

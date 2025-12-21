@@ -386,5 +386,5 @@ Contributions are welcome! Please read [CONTRIBUTING.md](../CONTRIBUTING.md) for
 ## Support
 
 - [Documentation](https://docs.rs/apex-sdk-evm)
-- [GitHub Issues](https://github.com/eurybits/apex-sdk/issues)
+- [GitHub Issues](https://github.com/carbobit/apex-sdk/issues)
 - [Examples](../examples)
