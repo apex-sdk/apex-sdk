@@ -165,7 +165,7 @@ cargo test --all-features
 
 ## Security
 
-**Report vulnerabilities:** kherld@duck.com
+**Report vulnerabilities:** security@apexsdk.dev
 
 **[Security Policy](./SECURITY.md)** | **[Security Profiles](./SECURITY_PROFILES.md)** | **[Security Audit](./docs/SECURITY_AUDIT.md)**
 
@@ -186,4 +186,3 @@ cargo build --release
 ## License
 
 [Apache 2.0](LICENSE)
-
