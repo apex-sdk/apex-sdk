@@ -32,9 +32,10 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Inject Web3Forms API key
+      - name: Inject Web3Forms API key into config
         run: |
-          sed -i "s/__WEB3FORMS_ACCESS_KEY__/${{ secrets.WEB3FORMS_ACCESS_KEY }}/g" docs/js/subscribe.js
+          sed -i "s/__WEB3FORMS_ACCESS_KEY__/${{ secrets.WEB3FORMS_ACCESS_KEY }}/g" docs/js/config.js
+          echo "✓ API key injected into config.js"
         env:
           WEB3FORMS_ACCESS_KEY: ${{ secrets.WEB3FORMS_ACCESS_KEY }}
 
@@ -44,19 +45,19 @@ jobs:
           source: ./docs
           destination: ./_site
 
-      - name: Verify API key injection
+      - name: Verify API key in built site
         run: |
-          if [ -f ./_site/js/subscribe.js ]; then
-            if grep -q "${{ secrets.WEB3FORMS_ACCESS_KEY }}" ./_site/js/subscribe.js; then
-              echo "✓ API key successfully present in built subscribe.js"
+          if [ -f ./_site/js/config.js ]; then
+            if grep -q "accessKey.*__WEB3FORMS_ACCESS_KEY__" ./_site/js/config.js; then
+              echo "⚠ Warning: API key placeholder still present in built config.js"
+              exit 1
             else
-              echo "⚠ Warning: API key placeholder may still be present"
+              echo "✓ API key successfully injected into built config.js"
             fi
           else
-            echo "⚠ Warning: subscribe.js not found in _site"
+            echo "✗ Error: config.js not found in _site"
+            exit 1
           fi
-        env:
-          WEB3FORMS_ACCESS_KEY: ${{ secrets.WEB3FORMS_ACCESS_KEY }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
