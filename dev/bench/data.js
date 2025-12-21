@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1766320388252,
+  "lastUpdate": 1766322053808,
   "repoUrl": "https://github.com/carbobit/apex-sdk",
   "entries": {
     "Benchmark": [
@@ -1379,6 +1379,120 @@ window.BENCHMARK_DATA = {
             "name": "transaction_signing/evm_sign_simulation",
             "value": 140989,
             "range": "± 358",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "amount_operations/amount_creation",
+            "value": 0,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "amount_operations/amount_arithmetic",
+            "value": 0,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "kherld.hussein@gmail.com",
+            "name": "kh3rld",
+            "username": "kh3rld"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "eec012aa00914924d3fbe549ca1593d1106cd918",
+          "message": "fix: Jekyll build (#55)\n\n* chore(docs): update logos and add new ones\n\n* docs(README): update links\n\n* docs(viewer): improve UI/UX\n\n* docs(viewer): improve UI/UX\n\n* docs(js): update module initialization and add new modules for advanced visualization, metrics, workflow simulator, and personalization\n\n* docs(css): update main stylesheet with new design elements and animations\n\n* docs(search): update search manifest with new categories and paths\n\n* docs(subscribe): update API endpoint and add new subscription handling logic\n\n* Revert \"docs(subscribe): update API endpoint and add new subscription handling logic\"\n\nThis reverts commit 8c1b76092fd71d852af33e6e530af594f7d5cb8c.\n\n* Revert \"docs(search): update search manifest with new categories and paths\"\n\nThis reverts commit 581eaa118c7c0a5c8524b3c9cbb7db47a42b5e0b.\n\n* Revert \"docs(css): update main stylesheet with new design elements and animations\"\n\nThis reverts commit fbe3410ef26484073511a56fa3c2ded72b1dc4c6.\n\n* Revert \"docs(js): update module initialization and add new modules for advanced visualization, metrics, workflow simulator, and personalization\"\n\nThis reverts commit 235e7bbe0f4c95db1d13c32d38856bab005d7311.\n\n* Revert \"docs(viewer): improve UI/UX\"\n\nThis reverts commit 070e644d74c5c28abee8f49147afd051f87caa7a.\n\n* Revert \"docs(viewer): improve UI/UX\"\n\nThis reverts commit f12ba946d40df93c8f846529b867b243405d6a57.\n\n* Revert \"docs(README): update links\"\n\nThis reverts commit b7dcfc536af992ae90dde40f946664ac30ae951d.\n\n* fix(ci): remove unnecessary injection step after the build",
+          "timestamp": "2025-12-21T07:54:16-05:00",
+          "tree_id": "cd4d42c52d46ea6fbaeb8fc44f57432112bf964f",
+          "url": "https://github.com/carbobit/apex-sdk/commit/eec012aa00914924d3fbe549ca1593d1106cd918"
+        },
+        "date": 1766322053171,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "transaction_creation/create_substrate_transfer",
+            "value": 57,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "transaction_creation/create_evm_transfer",
+            "value": 57,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/substrate_validation/0",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/substrate_validation/1",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/substrate_validation/2",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/evm_validation/0",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/evm_validation/1",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/evm_validation/2",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "sdk_initialization/create_substrate_sdk",
+            "value": 14,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "sdk_initialization/create_evm_sdk",
+            "value": 14,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "sdk_initialization/create_multi_chain_sdk",
+            "value": 29,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "transaction_signing/substrate_sign_simulation",
+            "value": 160933,
+            "range": "± 510",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "transaction_signing/evm_sign_simulation",
+            "value": 140970,
+            "range": "± 588",
             "unit": "ns/iter"
           },
           {
