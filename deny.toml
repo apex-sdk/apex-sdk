@@ -40,6 +40,14 @@ ignore = [
     # Transitive dependency from Substrate/Polkadot SDK, no security vulnerabilities
     # Alternative (pastey) available, will be resolved when Substrate migrates
     "RUSTSEC-2024-0436",
+
+    # ruint 1.17.0 unsound reciprocal_mg10 function via alloy-primitives -> alloy ecosystem
+    # Affects safe reciprocal_mg10 function with potential undefined behavior (out-of-bounds access)
+    # The vulnerability is in debug_assert! which is optimized out in release mode
+    # Risk assessment: Low - this specific function is not directly used in our application code
+    # Mitigation: Waiting for upstream fix in ruint crate (no patched version available yet)
+    # Tracking: https://github.com/recmo/uint/issues/550 and RUSTSEC-2025-0137
+    "RUSTSEC-2025-0137",
 ]
 
 [licenses]
