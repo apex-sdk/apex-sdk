@@ -239,7 +239,7 @@ fn test_retry_config_large_retries() {
 
 #[test]
 fn test_fee_config_various_multipliers() {
-    let configs = vec![
+    let configs = [
         FeeConfig::new().with_multiplier(1.0),
         FeeConfig::new().with_multiplier(1.5),
         FeeConfig::new().with_multiplier(2.0),
