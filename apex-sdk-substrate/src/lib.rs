@@ -38,9 +38,7 @@ pub use metrics::{Metrics, MetricsSnapshot};
 pub use pool::{ConnectionPool, PoolConfig};
 pub use signer::{ApexSigner, Ed25519Signer, Sr25519Signer};
 pub use storage::{StorageClient, StorageQuery};
-pub use transaction::{
-    BatchCall, BatchMode, ExtrinsicBuilder, FeeConfig, RetryConfig, TransactionExecutor,
-};
+pub use transaction::{BatchCall, BatchMode, FeeConfig, RetryConfig, TransactionExecutor};
 pub use wallet::{KeyPairType, Wallet, WalletManager};
 pub use xcm::{
     AssetId, Fungibility, Junction, MultiLocation, NetworkId, WeightLimit, XcmAsset, XcmConfig,
