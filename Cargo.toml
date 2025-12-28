@@ -4,8 +4,10 @@ members = [
     "apex-sdk-core",
     "apex-sdk-substrate",
     "apex-sdk-evm",
+    "apex-sdk-move",
     "apex-sdk-types",
     "cli",
+    "integration-tests",
 ]
 resolver = "2"
 
