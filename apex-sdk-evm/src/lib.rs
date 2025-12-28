@@ -73,7 +73,7 @@ pub enum Error {
 }
 
 /// Type alias for the complex Alloy provider type with all fillers
-type AlloyHttpProvider = alloy::providers::fillers::FillProvider<
+pub type AlloyHttpProvider = alloy::providers::fillers::FillProvider<
     alloy::providers::fillers::JoinFill<
         alloy::providers::Identity,
         alloy::providers::fillers::JoinFill<
@@ -99,6 +99,16 @@ pub struct ProviderType {
 }
 
 impl ProviderType {
+    /// Create a new ProviderType from an AlloyHttpProvider
+    ///
+    /// # Note
+    /// This is primarily intended for testing purposes. In production code,
+    /// use `EvmAdapter::connect()` to create a properly initialized provider.
+    #[doc(hidden)]
+    pub fn new(inner: AlloyHttpProvider) -> Self {
+        Self { inner }
+    }
+
     /// Get the current block number
     async fn get_block_number(&self) -> Result<u64, Error> {
         self.inner
@@ -290,7 +300,7 @@ impl EvmAdapter {
     }
 
     /// Get contract instance
-    pub fn contract(&self, address: &str) -> Result<ContractInfo<'_>, Error> {
+    pub fn contract(&self, address: &str) -> Result<ContractInfo, Error> {
         if !self.connected {
             return Err(Error::Connection("Not connected".to_string()));
         }
@@ -301,19 +311,16 @@ impl EvmAdapter {
 
         Ok(ContractInfo {
             address: address.to_string(),
-            adapter: self,
         })
     }
 }
 
 /// Contract information and interaction
-pub struct ContractInfo<'a> {
+pub struct ContractInfo {
     address: String,
-    #[allow(dead_code)]
-    adapter: &'a EvmAdapter,
 }
 
-impl ContractInfo<'_> {
+impl ContractInfo {
     /// Get the contract address
     pub fn address(&self) -> &str {
         &self.address
