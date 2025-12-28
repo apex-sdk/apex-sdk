@@ -64,3 +64,8 @@ mockall = { workspace = true }
 wiremock = "0.6"
 tokio-test = "0.4"
 assert_matches = "1.5"
+criterion.workspace = true
+
+[[bench]]
+name = "substrate_benchmarks"
+harness = false
