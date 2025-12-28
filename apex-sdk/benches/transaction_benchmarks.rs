@@ -1,6 +1,7 @@
 use apex_sdk::{transaction::Transaction, ApexSDK};
-use apex_sdk_types::{Address, Chain};
+use apex_sdk_types::{Address, Chain, ChainType};
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
+use std::hint::black_box;
 use std::time::Duration;
 
 fn benchmark_transaction_creation(c: &mut Criterion) {
@@ -158,13 +159,283 @@ fn benchmark_amount_operations(c: &mut Criterion) {
     group.finish();
 }
 
+// ============================================================================
+// Cross-Chain Operations Benchmarks
+// ============================================================================
+
+fn benchmark_cross_chain_operations(c: &mut Criterion) {
+    let mut group = c.benchmark_group("cross_chain_operations");
+
+    // Define chains for cross-chain benchmarks
+    let chains = vec![
+        (Chain::Polkadot, ChainType::Substrate),
+        (Chain::Kusama, ChainType::Substrate),
+        (Chain::Ethereum, ChainType::Evm),
+        (Chain::Polygon, ChainType::Evm),
+        (Chain::Moonbeam, ChainType::Hybrid),
+        (Chain::Astar, ChainType::Hybrid),
+    ];
+
+    // Benchmark chain type detection
+    group.bench_function("chain_type_detection", |b| {
+        b.iter(|| {
+            for (chain, _) in &chains {
+                black_box(chain.chain_type());
+            }
+        })
+    });
+
+    // Benchmark creating transactions for different chain types
+    group.bench_function("multi_chain_transaction_creation", |b| {
+        b.iter(|| {
+            // Substrate transaction
+            black_box(
+                Transaction::builder()
+                    .from(Address::substrate(
+                        "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+                    ))
+                    .to(Address::substrate(
+                        "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
+                    ))
+                    .amount(1_000_000_000_000)
+                    .chain(Chain::Polkadot)
+                    .build(),
+            );
+
+            #[cfg(feature = "evm")]
+            {
+                // EVM transaction
+                black_box(
+                    Transaction::builder()
+                        .from(Address::evm("0x742d35Cc6634C0532925a3b8D3aC02f1Cfc96bDc"))
+                        .to(Address::evm("0x742d35Cc6634C0532925a3b8D3aC02f1Cfc96bDc"))
+                        .amount(1_000_000_000_000_000_000)
+                        .gas_limit(21000)
+                        .gas_price(20_000_000_000)
+                        .chain(Chain::Ethereum)
+                        .build(),
+                );
+            }
+        })
+    });
+
+    // Benchmark address conversion overhead across chains
+    group.bench_function("cross_chain_address_handling", |b| {
+        b.iter(|| {
+            let substrate_addr =
+                Address::substrate("5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY");
+            black_box(substrate_addr);
+
+            #[cfg(feature = "evm")]
+            {
+                let evm_addr = Address::evm("0x742d35Cc6634C0532925a3b8D3aC02f1Cfc96bDc");
+                black_box(evm_addr);
+            }
+        })
+    });
+
+    group.finish();
+}
+
+fn benchmark_hybrid_chain_operations(c: &mut Criterion) {
+    let mut group = c.benchmark_group("hybrid_chain_operations");
+
+    // Hybrid chains support both Substrate and EVM
+    let hybrid_chains = vec![Chain::Moonbeam, Chain::Astar];
+
+    // Benchmark hybrid chain type checks
+    group.bench_function("hybrid_chain_type_check", |b| {
+        b.iter(|| {
+            for chain in &hybrid_chains {
+                let chain_type = chain.chain_type();
+                black_box(chain_type == ChainType::Hybrid);
+            }
+        })
+    });
+
+    // Benchmark transaction creation for hybrid chains
+    #[cfg(feature = "evm")]
+    group.bench_function("hybrid_evm_transaction", |b| {
+        b.iter(|| {
+            black_box(
+                Transaction::builder()
+                    .from(Address::evm("0x742d35Cc6634C0532925a3b8D3aC02f1Cfc96bDc"))
+                    .to(Address::evm("0x742d35Cc6634C0532925a3b8D3aC02f1Cfc96bDc"))
+                    .amount(1_000_000_000_000_000_000)
+                    .gas_limit(21000)
+                    .gas_price(20_000_000_000)
+                    .chain(Chain::Moonbeam)
+                    .build(),
+            );
+        })
+    });
+
+    group.finish();
+}
+
+fn benchmark_bulk_transaction_creation(c: &mut Criterion) {
+    let mut group = c.benchmark_group("bulk_transaction_creation");
+
+    // Benchmark creating 10 transactions
+    group.bench_with_input(BenchmarkId::new("substrate_bulk", 10), &10, |b, &count| {
+        b.iter(|| {
+            for _ in 0..count {
+                black_box(
+                    Transaction::builder()
+                        .from(Address::substrate(
+                            "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+                        ))
+                        .to(Address::substrate(
+                            "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
+                        ))
+                        .amount(1_000_000_000_000)
+                        .chain(Chain::Polkadot)
+                        .build(),
+                );
+            }
+        })
+    });
+
+    // Benchmark creating 100 transactions
+    group.bench_with_input(
+        BenchmarkId::new("substrate_bulk", 100),
+        &100,
+        |b, &count| {
+            b.iter(|| {
+                for _ in 0..count {
+                    black_box(
+                        Transaction::builder()
+                            .from(Address::substrate(
+                                "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+                            ))
+                            .to(Address::substrate(
+                                "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
+                            ))
+                            .amount(1_000_000_000_000)
+                            .chain(Chain::Polkadot)
+                            .build(),
+                    );
+                }
+            })
+        },
+    );
+
+    #[cfg(feature = "evm")]
+    {
+        // Benchmark EVM bulk transactions
+        group.bench_with_input(BenchmarkId::new("evm_bulk", 10), &10, |b, &count| {
+            b.iter(|| {
+                for _ in 0..count {
+                    black_box(
+                        Transaction::builder()
+                            .from(Address::evm("0x742d35Cc6634C0532925a3b8D3aC02f1Cfc96bDc"))
+                            .to(Address::evm("0x742d35Cc6634C0532925a3b8D3aC02f1Cfc96bDc"))
+                            .amount(1_000_000_000_000_000_000)
+                            .gas_limit(21000)
+                            .gas_price(20_000_000_000)
+                            .chain(Chain::Ethereum)
+                            .build(),
+                    );
+                }
+            })
+        });
+    }
+
+    group.finish();
+}
+
+fn benchmark_decimal_conversions(c: &mut Criterion) {
+    let mut group = c.benchmark_group("decimal_conversions");
+
+    // Different chains have different decimal places
+    // DOT: 10 decimals
+    // KSM: 12 decimals
+    // ETH: 18 decimals
+
+    group.bench_function("dot_to_planck", |b| {
+        let dot_amount = 1u64;
+        b.iter(|| black_box(dot_amount as u128 * 10_000_000_000)) // 10 decimals
+    });
+
+    group.bench_function("ksm_to_planck", |b| {
+        let ksm_amount = 1u64;
+        b.iter(|| black_box(ksm_amount as u128 * 1_000_000_000_000)) // 12 decimals
+    });
+
+    group.bench_function("eth_to_wei", |b| {
+        let eth_amount = 1u64;
+        b.iter(|| black_box(eth_amount as u128 * 1_000_000_000_000_000_000)) // 18 decimals
+    });
+
+    // Reverse conversions
+    group.bench_function("planck_to_dot", |b| {
+        let planck = 10_000_000_000u128;
+        b.iter(|| black_box(planck / 10_000_000_000))
+    });
+
+    group.bench_function("wei_to_eth", |b| {
+        let wei = 1_000_000_000_000_000_000u128;
+        b.iter(|| black_box(wei / 1_000_000_000_000_000_000))
+    });
+
+    group.finish();
+}
+
+fn benchmark_chain_metadata_operations(c: &mut Criterion) {
+    let mut group = c.benchmark_group("chain_metadata_operations");
+
+    let chains = vec![
+        Chain::Polkadot,
+        Chain::Kusama,
+        Chain::Ethereum,
+        Chain::Polygon,
+        Chain::Moonbeam,
+    ];
+
+    // Benchmark getting default RPC endpoints
+    group.bench_function("get_rpc_endpoints", |b| {
+        b.iter(|| {
+            for chain in &chains {
+                black_box(chain.default_endpoint());
+            }
+        })
+    });
+
+    // Benchmark checking smart contract support
+    group.bench_function("check_smart_contract_support", |b| {
+        b.iter(|| {
+            for chain in &chains {
+                black_box(chain.supports_smart_contracts());
+            }
+        })
+    });
+
+    // Benchmark chain ID lookups (EVM)
+    #[cfg(feature = "evm")]
+    group.bench_function("get_chain_ids", |b| {
+        let evm_chains = vec![Chain::Ethereum, Chain::Polygon, Chain::Arbitrum];
+        b.iter(|| {
+            for chain in &evm_chains {
+                black_box(chain.chain_id());
+            }
+        })
+    });
+
+    group.finish();
+}
+
 criterion_group!(
     benches,
     benchmark_transaction_creation,
     benchmark_address_validation,
     benchmark_sdk_initialization,
     benchmark_transaction_signing_simulation,
-    benchmark_amount_operations
+    benchmark_amount_operations,
+    benchmark_cross_chain_operations,
+    benchmark_hybrid_chain_operations,
+    benchmark_bulk_transaction_creation,
+    benchmark_decimal_conversions,
+    benchmark_chain_metadata_operations,
 );
 
 criterion_main!(benches);
