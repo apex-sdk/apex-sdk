@@ -85,175 +85,182 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 ### Creating and Managing Wallets
 
 ```rust
-use apex_sdk_evm::{Wallet, LocalWallet};
+use apex_sdk_evm::wallet::Wallet;
 
 // Generate a new wallet
-let wallet = LocalWallet::new(&mut rand::thread_rng());
-println!("Address: {}", wallet.address());
+let wallet = Wallet::generate();
+println!("Address: {:?}", wallet.eth_address());
+println!("Private key: {}", wallet.private_key_hex());
 
-// Import from private key
-let wallet = LocalWallet::from_bytes(&private_key_bytes)?;
+// Import from private key (hex string with or without 0x prefix)
+let wallet = Wallet::from_private_key("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")?;
 
 // Import from mnemonic
-let wallet = LocalWallet::from_mnemonic("word1 word2 ... word12")?;
+let wallet = Wallet::from_mnemonic("test test test test test test test test test test test junk")?;
+
+// Set chain ID for transaction signing
+let wallet = wallet.with_chain_id(1); // Ethereum mainnet
 ```
 
-### Signing Transactions
+### Executing Transactions with Apex SDK
+
+The recommended way to execute EVM transactions is through the unified Apex SDK interface:
 
 ```rust
-use apex_sdk_evm::{EvmAdapter, TransactionBuilder};
+use apex_sdk::prelude::*;
+use apex_sdk_evm::wallet::Wallet;
 
-let adapter = EvmAdapter::new("https://eth.llamarpc.com");
-let wallet = LocalWallet::from_bytes(&private_key)?;
+#[tokio::main]
+async fn main() -> Result<()> {
+    // Create wallet from private key
+    let wallet = Wallet::from_private_key("0x...")?
+        .with_chain_id(11155111); // Sepolia testnet
 
-// Build and sign transaction
-let tx = TransactionBuilder::new()
-    .to("0x742d35Cc6635C0532925a3b8D45B9909Dc77c167")
-    .value(parse_ether("1.0")?)
-    .build();
+    // Initialize SDK with wallet
+    let sdk = ApexSDK::builder()
+        .with_evm_endpoint("https://eth-sepolia.g.alchemy.com/v2/demo")
+        .with_evm_wallet(wallet)
+        .build()
+        .await?;
 
-let signed_tx = wallet.sign_transaction(&tx).await?;
-let hash = adapter.send_transaction(signed_tx).await?;
+    // Build and execute transaction
+    let recipient = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
+    let amount = 10_000_000_000_000u128; // 0.00001 ETH in wei
 
-println!("Transaction sent: {}", hash);
+    let tx = sdk
+        .transaction()
+        .from_evm_address(&wallet.address())
+        .to_evm_address(recipient)
+        .amount(amount)
+        .build()?;
+
+    let result = sdk.execute(tx).await?;
+
+    println!("Transaction hash: {}", result.source_tx_hash);
+    println!("Status: {:?}", result.status);
+
+    Ok(())
+}
 ```
+
+See [`examples/evm-transfer/`](../examples/evm-transfer/) for a complete working example.
 
 ## Smart Contract Interaction
 
-### Calling Contract Methods
+### Type-Safe Contract Calls with Alloy's `sol!` Macro
+
+Apex SDK uses Alloy's `sol!` macro for compile-time safe contract interactions:
 
 ```rust
-use apex_sdk_evm::EvmAdapter;
-use alloy::primitives::Address;
+use alloy::sol;
+use alloy_primitives::{Address as EthAddress, U256};
+use apex_sdk::prelude::*;
 
-let adapter = EvmAdapter::new("https://eth.llamarpc.com");
+// Define ERC20 interface using Alloy's sol! macro
+sol! {
+    #[sol(rpc)]
+    interface IERC20 {
+        function balanceOf(address account) external view returns (uint256);
+        function totalSupply() external view returns (uint256);
+        function transfer(address to, uint256 amount) external returns (bool);
+    }
+}
 
-// Load contract ABI and create contract instance
-let abi: Abi = serde_json::from_str(&abi_json)?;
-let contract = Contract::new(
-    "0xA0b86a33E6441Fa0c78EB9BB3Db001b0C68f8E9f", // Contract address
-    abi,
-    adapter.clone(),
-);
+#[tokio::main]
+async fn main() -> Result<()> {
+    // Initialize SDK
+    let sdk = ApexSDK::builder()
+        .with_evm_endpoint("https://eth-sepolia.g.alchemy.com/v2/demo")
+        .build()
+        .await?;
 
-// Call a read method
-let balance: U256 = contract
-    .method::<_, U256>("balanceOf", ("0x742d35Cc6635C0532925a3b8D45B9909Dc77c167",))?
-    .call()
-    .await?;
+    let evm = sdk.evm()?;
+    let provider = evm.provider();
 
-println!("Balance: {}", balance);
+    // Contract and account addresses
+    let weth: EthAddress = "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14".parse()?;
+    let account: EthAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045".parse()?;
+
+    // Query balance (read-only, no gas)
+    let balance_call = IERC20::balanceOfCall { account };
+    let balance_data = balance_call.abi_encode();
+
+    let result = provider
+        .inner
+        .call(&alloy::rpc::types::TransactionRequest::default()
+            .to(weth)
+            .input(balance_data.into()))
+        .await?;
+
+    let balance = IERC20::balanceOfCall::abi_decode_returns(&result, true)?._0;
+    println!("Balance: {} WETH", balance);
+
+    Ok(())
+}
 ```
 
-### Deploying Contracts
+For a complete example including write transactions, see [`examples/evm-contract-call/`](../examples/evm-contract-call/).
 
-```rust
-use apex_sdk_evm::{ContractDeployer, EvmAdapter};
+### Key Advantages of `sol!` Macro
 
-let adapter = EvmAdapter::new("https://eth.llamarpc.com");
-let wallet = LocalWallet::from_bytes(&private_key)?;
-
-let deployer = ContractDeployer::new(
-    &bytecode,
-    &abi,
-    adapter.clone(),
-);
-
-let contract = deployer
-    .constructor_args(("Initial Name", 18u8))
-    .signer(wallet)
-    .deploy()
-    .await?;
-
-println!("Contract deployed at: {}", contract.address());
-```
+- **Compile-time safety**: Wrong types won't compile
+- **Automatic ABI encoding/decoding**: No manual serialization
+- **Type inference**: Rust knows the exact types of all parameters
+- **No runtime errors**: All type checking happens at compile time
 
 ## Advanced Features
 
-### Connection Pooling
+### Query Blockchain Data
 
 ```rust
-use apex_sdk_evm::{EvmAdapter, ConnectionPool, PoolConfig};
+use apex_sdk_evm::EvmAdapter;
+use apex_sdk_core::ChainAdapter;
 
-let pool_config = PoolConfig {
-    max_connections: 10,
-    min_connections: 2,
-    connection_timeout: Duration::from_secs(30),
-    idle_timeout: Duration::from_secs(600),
-    health_check_interval: Duration::from_secs(60),
-};
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let adapter = EvmAdapter::connect("https://eth.llamarpc.com").await?;
 
-let adapter = EvmAdapter::with_pool(
-    vec![
-        "https://eth.llamarpc.com",
-        "https://eth.rpc.blxrbdn.com"
-    ],
-    pool_config,
-).await?;
+    // Get account balance
+    let address = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
+    let balance = adapter.get_balance(address).await?;
+    println!("Balance: {} wei", balance);
+
+    // Get balance in ETH format
+    let balance_eth = adapter.get_balance_eth(address).await?;
+    println!("Balance: {} ETH", balance_eth);
+
+    // Get transaction status
+    let tx_hash = "0x5c504ed432cb51138bcf09aa5e8a410dd4a1e204ef84bfed1be16dfba1b22060";
+    let status = adapter.get_transaction_status(tx_hash).await?;
+    println!("Transaction status: {:?}", status);
+
+    // Get latest block number
+    let block_num = adapter.get_block_number().await?;
+    println!("Latest block: {}", block_num);
+
+    // Get chain ID
+    let chain_id = adapter.get_chain_id().await?;
+    println!("Chain ID: {}", chain_id);
+
+    Ok(())
+}
 ```
 
-### Caching
+### Message Signing
 
 ```rust
-use apex_sdk_evm::{EvmAdapter, CacheConfig, CacheLayer};
+use apex_sdk_evm::wallet::Wallet;
 
-let cache_config = CacheConfig {
-    max_entries: 10000,
-    ttl: Duration::from_secs(300), // 5 minutes
-    lru_eviction: true,
-};
+let wallet = Wallet::from_private_key("0x...")?;
 
-let adapter = EvmAdapter::new("https://eth.llamarpc.com")
-    .with_cache(cache_config);
+// Sign a message (EIP-191 personal sign)
+let message = "Hello, Ethereum!";
+let signature = wallet.sign_message(message).await?;
+println!("Signature: {:?}", signature);
 
-// Subsequent calls to same data will be cached
-let balance1 = adapter.get_balance(&account).await?;
-let balance2 = adapter.get_balance(&account).await?; // Cached
-```
-
-### Gas Estimation and Optimization
-
-```rust
-use apex_sdk_evm::{TransactionBuilder, GasOracle};
-
-let adapter = EvmAdapter::new("https://eth.llamarpc.com");
-
-// Automatic gas estimation
-let tx = TransactionBuilder::new()
-    .to("0x742d35Cc6635C0532925a3b8D45B9909Dc77c167")
-    .value(parse_ether("1.0")?)
-    .gas_estimate_auto() // Automatically estimate gas
-    .gas_price_auto()    // Automatically set gas price
-    .build();
-
-// Manual gas settings
-let tx = TransactionBuilder::new()
-    .to("0x742d35Cc6635C0532925a3b8D45B9909Dc77c167")
-    .value(parse_ether("1.0")?)
-    .gas_limit(21000u64)
-    .gas_price(parse_gwei("20")?)
-    .build();
-```
-
-## Monitoring and Metrics
-
-### Built-in Metrics
-
-```rust
-use apex_sdk_evm::{EvmAdapter, MetricsConfig};
-
-let metrics_config = MetricsConfig {
-    enabled: true,
-    prometheus_endpoint: Some("0.0.0.0:9090".to_string()),
-};
-
-let adapter = EvmAdapter::new("https://eth.llamarpc.com")
-    .with_metrics(metrics_config);
-
-// Access metrics
-let metrics = adapter.metrics();
-println!("RPC calls made: {}", metrics.rpc_calls_total());
-println!("Cache hit rate: {:.2}%", metrics.cache_hit_rate() * 100.0);
+// Verify signature
+let recovered_address = signature.recover_address_from_msg(message)?;
+assert_eq!(recovered_address, wallet.eth_address());
 ```
 
 ## Supported Chains
@@ -324,13 +331,15 @@ The integration tests require a running Ethereum node or testnet access.
 
 ## Examples
 
-Complete examples are available in the [examples](../examples) directory:
+Complete working examples are available in the [examples](../examples) directory:
 
-- [Basic Transfer](../examples/basic-transfer) - Simple ETH transfers
-- [Contract Interaction](../examples/contract-interaction) - Smart contract calls
-- [Token Operations](../examples/token-operations) - ERC-20 token transfers
-- [NFT Operations](../examples/nft-operations) - ERC-721/1155 interactions
-- [DeFi Integration](../examples/defi-aggregator) - DeFi protocol interactions
+- **[EVM Transfer](../examples/evm-transfer)** - Execute real ETH transfers on Sepolia testnet with wallet signing
+- **[Contract Interaction](../examples/evm-contract-call)** - Type-safe ERC-20 contract calls using Alloy's `sol!` macro
+- [Account Manager](../examples/account-manager) - Multi-chain account management
+- [Contract Orchestration](../examples/contract-orchestration) - Smart contract deployment across chains
+- [Price Oracle](../examples/price-oracle) - Multi-chain price aggregation
+
+All examples use the modern Alloy library and demonstrate real blockchain interactions.
 
 ## Configuration
 

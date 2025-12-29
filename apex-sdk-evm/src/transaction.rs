@@ -7,6 +7,7 @@
 //! - Transaction monitoring
 
 use crate::{wallet::Wallet, Error, ProviderType};
+use alloy::consensus::SignableTransaction;
 use alloy::network::TransactionBuilder;
 use alloy::primitives::{Address as EthAddress, Bytes, B256, U256};
 use alloy::providers::Provider;
@@ -144,7 +145,6 @@ impl TransactionExecutor {
     ) -> Result<GasEstimate, Error> {
         tracing::debug!("Estimating gas for transaction");
 
-        // Build transaction request
         let mut tx = TransactionRequest::default()
             .from(from)
             .value(value.unwrap_or(U256::ZERO));
@@ -157,10 +157,8 @@ impl TransactionExecutor {
             tx = tx.input(tx_data.into());
         }
 
-        // Estimate gas limit
         let estimated_gas = self.estimate_gas_limit(&tx).await?;
 
-        // Apply safety multiplier
         let gas_limit = U256::from(
             (estimated_gas.to::<u128>() as f64 * self.gas_config.gas_limit_multiplier) as u128,
         );
@@ -171,10 +169,7 @@ impl TransactionExecutor {
             (self.gas_config.gas_limit_multiplier - 1.0) * 100.0
         );
 
-        // Get gas pricing
         let (gas_price, base_fee, priority_fee, is_eip1559) = self.estimate_gas_price().await?;
-
-        // Calculate total cost
         let total_cost = gas_limit * gas_price;
 
         Ok(GasEstimate {
@@ -201,7 +196,6 @@ impl TransactionExecutor {
 
     /// Estimate gas price (handles both EIP-1559 and legacy)
     async fn estimate_gas_price(&self) -> Result<(U256, Option<U256>, Option<U256>, bool), Error> {
-        // Try EIP-1559 first
         match self.get_eip1559_fees().await {
             Ok((base_fee, priority_fee)) => {
                 let max_fee = base_fee * U256::from(2) + priority_fee;
@@ -214,7 +208,6 @@ impl TransactionExecutor {
                 Ok((max_fee, Some(base_fee), Some(priority_fee), true))
             }
             Err(_) => {
-                // Fallback to legacy gas price
                 let gas_price = self.get_legacy_gas_price().await?;
                 tracing::debug!("Using legacy gas price: {} gwei", format_gwei(gas_price));
                 Ok((gas_price, None, None, false))
@@ -224,7 +217,6 @@ impl TransactionExecutor {
 
     /// Get EIP-1559 fee estimates
     async fn get_eip1559_fees(&self) -> Result<(U256, U256), Error> {
-        // Get base fee from latest block
         let block: Block = self
             .provider
             .inner
@@ -239,7 +231,6 @@ impl TransactionExecutor {
             .map(U256::from)
             .ok_or_else(|| Error::Other("EIP-1559 not supported".to_string()))?;
 
-        // Use configured priority fee or default to 2 gwei
         let priority_fee = self
             .gas_config
             .max_priority_fee_per_gas
@@ -275,7 +266,6 @@ impl TransactionExecutor {
     ) -> Result<TransactionRequest, Error> {
         let from = wallet.eth_address();
 
-        // Get gas estimate if not provided
         let gas_est = if let Some(est) = gas_estimate {
             est
         } else {
@@ -283,10 +273,8 @@ impl TransactionExecutor {
                 .await?
         };
 
-        // Get nonce
         let nonce = self.get_transaction_count(from).await?;
 
-        // Build transaction request
         let mut tx = TransactionRequest::default()
             .with_from(from)
             .with_to(to)
@@ -294,7 +282,6 @@ impl TransactionExecutor {
             .with_gas_limit(gas_est.gas_limit.to::<u64>())
             .with_nonce(nonce.to::<u64>());
 
-        // Set gas parameters based on EIP-1559 support
         if gas_est.is_eip1559 {
             if let Some(base_fee) = gas_est.base_fee_per_gas {
                 let max_fee = base_fee * U256::from(2)
@@ -311,12 +298,10 @@ impl TransactionExecutor {
             tx = tx.with_gas_price(gas_est.gas_price.to::<u128>());
         }
 
-        // Set data if provided
         if let Some(tx_data) = data {
             tx = tx.with_input(Bytes::from(tx_data));
         }
 
-        // Set chain ID if available
         if let Some(chain_id) = wallet.chain_id() {
             tx = tx.with_chain_id(chain_id);
         }
@@ -375,7 +360,6 @@ impl TransactionExecutor {
                         e
                     );
 
-                    // Add jitter if configured
                     let delay = if self.retry_config.use_jitter {
                         let jitter =
                             (rand::random::<f64>() * 0.3 + 0.85) * backoff.as_millis() as f64;
@@ -386,7 +370,6 @@ impl TransactionExecutor {
 
                     tokio::time::sleep(delay).await;
 
-                    // Exponential backoff
                     backoff = Duration::from_millis(std::cmp::min(
                         (backoff.as_millis() as f64 * self.retry_config.backoff_multiplier) as u64,
                         self.retry_config.max_backoff_ms,
@@ -403,21 +386,41 @@ impl TransactionExecutor {
     /// Try to send a transaction (single attempt)
     async fn try_send_transaction(
         &self,
-        _wallet: &Wallet,
+        wallet: &Wallet,
         tx: &TransactionRequest,
     ) -> Result<B256, Error> {
-        // For now, we'll use the provider's built-in signing via fillers
-        // The provider should have wallet/signer configured if needed
-        // Send the transaction request directly
+        tracing::debug!("Signing transaction with wallet: {}", wallet.address());
+
+        let typed_tx = tx
+            .clone()
+            .build_typed_tx()
+            .map_err(|e| Error::Transaction(format!("Failed to build transaction: {:?}", e)))?;
+
+        let signature_hash = typed_tx.signature_hash();
+
+        let signature = wallet
+            .sign_transaction_hash(&signature_hash)
+            .await
+            .map_err(|e| Error::Transaction(format!("Failed to sign transaction: {}", e)))?;
+
+        let signed_tx = typed_tx.into_signed(signature);
+
+        let mut encoded = Vec::new();
+        signed_tx.rlp_encode(&mut encoded);
+        let signed_tx_bytes = Bytes::from(encoded);
+
+        tracing::debug!("Transaction signed, sending to network...");
+
         let pending_tx = self
             .provider
             .inner
-            .send_transaction(tx.clone())
+            .send_raw_transaction(&signed_tx_bytes)
             .await
             .map_err(|e| Error::Transaction(format!("Failed to send transaction: {}", e)))?;
 
-        // Get the transaction hash
         let tx_hash = *pending_tx.tx_hash();
+
+        tracing::info!("Transaction sent: {:?}", tx_hash);
 
         Ok(tx_hash)
     }
@@ -537,7 +540,6 @@ mod tests {
 
     #[test]
     fn test_format_gwei() {
-        // Test exact Gwei amounts
         let wei = U256::from(1_000_000_000u64); // 1 Gwei
         assert_eq!(format_gwei(wei), "1");
 
@@ -547,22 +549,18 @@ mod tests {
         let wei = U256::from(2_540_000_000u64); // 2.54 Gwei
         assert_eq!(format_gwei(wei), "2.54");
 
-        // Test zero
         let wei = U256::ZERO;
         assert_eq!(format_gwei(wei), "0");
 
-        // Test large amounts
         let wei = U256::from(100_000_000_000u64); // 100 Gwei
         assert_eq!(format_gwei(wei), "100");
 
-        // Test fractional amounts
         let wei = U256::from(1_500_000_000u64); // 1.5 Gwei
         assert_eq!(format_gwei(wei), "1.5");
     }
 
     #[test]
     fn test_format_eth() {
-        // Test exact ETH amounts
         let wei = U256::from(10_u64.pow(18)); // 1 ETH
         assert_eq!(format_eth(wei), "1");
 
@@ -572,28 +570,23 @@ mod tests {
         let wei = U256::from(123 * 10_u64.pow(16)); // 1.23 ETH
         assert_eq!(format_eth(wei), "1.23");
 
-        // Test zero
         let wei = U256::ZERO;
         assert_eq!(format_eth(wei), "0");
 
-        // Test small amounts
         let wei = U256::from(1u64); // 1 Wei
         assert_eq!(format_eth(wei), "0.000000000000000001");
 
-        // Test large amounts
         let wei = U256::from(1000) * U256::from(10_u64.pow(18)); // 1000 ETH
         assert_eq!(format_eth(wei), "1000");
     }
 
     #[test]
     fn test_format_gwei_edge_cases() {
-        // Test trailing zeros are handled correctly
         let wei = U256::from(1_100_000_000u64); // 1.1 Gwei exactly
         let result = format_gwei(wei);
         assert_eq!(result, "1.1");
         assert!(!result.ends_with('0')); // No trailing zeros
 
-        // Test very small fractions
         let wei = U256::from(1_000_000_001u64); // 1.000000001 Gwei
         let result = format_gwei(wei);
         assert!(result.starts_with("1."));
@@ -602,13 +595,11 @@ mod tests {
 
     #[test]
     fn test_format_eth_edge_cases() {
-        // Test trailing zeros are handled correctly
         let wei = U256::from(11 * 10_u64.pow(17)); // 1.1 ETH exactly
         let result = format_eth(wei);
         assert_eq!(result, "1.1");
         assert!(!result.ends_with('0')); // No trailing zeros
 
-        // Test maximum precision
         let wei = U256::from(10_u64.pow(18)) + U256::from(1); // 1.000000000000000001 ETH
         let result = format_eth(wei);
         assert!(result.starts_with("1."));
@@ -620,11 +611,9 @@ mod tests {
         let config = GasConfig::default();
         let base_gas = 21000u64;
 
-        // Test gas limit multiplication
         let multiplied = (base_gas as f64 * config.gas_limit_multiplier) as u64;
         assert_eq!(multiplied, 25200); // 21000 * 1.2 = 25200
 
-        // Test custom multiplier
         let custom_config = GasConfig {
             gas_limit_multiplier: 1.5,
             ..Default::default()
@@ -637,7 +626,6 @@ mod tests {
     fn test_retry_backoff_calculation() {
         let config = RetryConfig::default();
 
-        // Test exponential backoff calculation
         for attempt in 0..config.max_retries {
             let backoff =
                 config.initial_backoff_ms as f64 * config.backoff_multiplier.powi(attempt as i32);
@@ -650,11 +638,9 @@ mod tests {
 
     #[test]
     fn test_transaction_executor_creation() {
-        // Test that we can create a transaction executor with mock provider
         let provider = create_mock_provider();
         let executor = TransactionExecutor::new(provider);
 
-        // Test default configurations
         assert_eq!(executor.gas_config.gas_limit_multiplier, 1.2);
         assert_eq!(executor.retry_config.max_retries, 3);
     }
@@ -686,7 +672,6 @@ mod tests {
 
     #[test]
     fn test_transaction_request_building() {
-        // Test building a basic transaction request
         let to = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbD"
             .parse::<EthAddress>()
             .unwrap();
@@ -700,7 +685,6 @@ mod tests {
 
     #[test]
     fn test_address_parsing() {
-        // Test valid addresses
         let valid_addresses = [
             "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbD",
             "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
@@ -712,7 +696,6 @@ mod tests {
             assert!(addr.is_ok(), "Failed to parse valid address: {}", addr_str);
         }
 
-        // Test invalid addresses
         let invalid_addresses = [
             "invalid", "0x123", // Too short
         ];
@@ -729,7 +712,6 @@ mod tests {
 
     #[test]
     fn test_value_parsing() {
-        // Test different value formats
         let values = [
             U256::ZERO,
             U256::from(1u64),
@@ -740,14 +722,12 @@ mod tests {
         for value in &values {
             assert!(*value >= U256::ZERO);
 
-            // Test conversion to/from string representation
             let formatted = format_eth(*value);
             assert!(!formatted.is_empty());
         }
     }
 
     fn create_mock_provider() -> ProviderType {
-        // Create a mock provider for testing
         use alloy::providers::ProviderBuilder;
         let inner = ProviderBuilder::new().connect_http("http://localhost:8545".parse().unwrap());
         ProviderType { inner }

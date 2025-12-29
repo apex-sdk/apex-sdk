@@ -179,12 +179,10 @@ impl TransactionExecutor {
             amount
         );
 
-        // Parse destination address
         use sp_core::crypto::Ss58Codec;
         let dest = sp_core::sr25519::Public::from_ss58check(to)
             .map_err(|e| Error::Transaction(format!("Invalid destination address: {}", e)))?;
 
-        // Build the transfer call using dynamic transactions
         use subxt::dynamic::Value;
 
         let dest_value = Value::unnamed_variant("Id", vec![Value::from_bytes(dest.0)]);
@@ -195,7 +193,6 @@ impl TransactionExecutor {
             vec![dest_value, Value::u128(amount)],
         );
 
-        // Submit with retry logic
         self.submit_extrinsic_with_retry(&transfer_call, from).await
     }
 
@@ -233,7 +230,6 @@ impl TransactionExecutor {
                     );
                     sleep(delay).await;
 
-                    // Exponential backoff with jitter
                     delay = Duration::from_secs_f64(
                         (delay.as_secs_f64() * self.retry_config.backoff_multiplier)
                             .min(self.retry_config.max_delay.as_secs_f64()),
@@ -250,15 +246,12 @@ impl TransactionExecutor {
     {
         debug!("Submitting extrinsic");
 
-        // Get the pair from wallet and create our custom signer
         let pair = signer
             .sr25519_pair()
             .ok_or_else(|| Error::Transaction("Wallet does not have SR25519 key".to_string()))?;
 
-        // Create a signer from the pair using our custom implementation
         let apex_signer = Sr25519Signer::new(pair.clone());
 
-        // Submit and watch the transaction
         let mut progress = self
             .client
             .tx()
@@ -266,7 +259,6 @@ impl TransactionExecutor {
             .await
             .map_err(|e| Error::Transaction(format!("Failed to submit transaction: {}", e)))?;
 
-        // Wait for finalization
         while let Some(event) = progress.next().await {
             let event =
                 event.map_err(|e| Error::Transaction(format!("Transaction error: {}", e)))?;
@@ -279,7 +271,6 @@ impl TransactionExecutor {
                 let tx_hash = format!("0x{}", hex::encode(finalized.extrinsic_hash()));
                 info!("Transaction finalized: {}", tx_hash);
 
-                // Wait for success
                 finalized
                     .wait_for_success()
                     .await
@@ -312,31 +303,23 @@ impl TransactionExecutor {
     ) -> Result<u128> {
         debug!("Estimating fee for {}::{}", pallet, call);
 
-        // Build the call
         let tx = subxt::dynamic::tx(pallet, call, args);
 
-        // Create a partial extrinsic for fee estimation
-        // We need the encoded call data to estimate fees
         let payload = self
             .client
             .tx()
             .create_unsigned(&tx)
             .map_err(|e| Error::Transaction(format!("Failed to create unsigned tx: {}", e)))?;
 
-        // Get the encoded bytes
         let encoded = payload.encoded();
 
-        // Query fee details using state_call RPC
-        // The TransactionPaymentApi_query_info runtime call provides fee information
         let call_data = {
             use parity_scale_codec::Encode;
-            // Prepare the runtime API call parameters
             // query_info(extrinsic: Vec<u8>, len: u32) -> RuntimeDispatchInfo
             let params = (encoded, encoded.len() as u32);
             params.encode()
         };
 
-        // Call the runtime API
         let result = self
             .client
             .runtime_api()
@@ -347,21 +330,14 @@ impl TransactionExecutor {
             .await
             .map_err(|e| Error::Transaction(format!("Failed to query fee info: {}", e)))?;
 
-        // Decode the RuntimeDispatchInfo
-        // It contains: weight, class, and partial_fee
-        // The response is a RuntimeDispatchInfo struct
-        // We primarily care about partial_fee (last field, u128)
-        // Simple approach: extract the last 16 bytes as u128
         if result.len() >= 16 {
             let fee_bytes = &result[result.len() - 16..];
             let mut fee_array = [0u8; 16];
             fee_array.copy_from_slice(fee_bytes);
             let base_fee = u128::from_le_bytes(fee_array);
 
-            // Apply multiplier for safety margin
             let estimated_fee = (base_fee as f64 * self.fee_config.multiplier) as u128;
 
-            // Check against max fee if configured
             if let Some(max_fee) = self.fee_config.max_fee {
                 if estimated_fee > max_fee {
                     return Err(Error::Transaction(format!(
@@ -379,7 +355,6 @@ impl TransactionExecutor {
             Ok(estimated_fee + self.fee_config.tip)
         } else {
             warn!("Unexpected fee query response format, using fallback");
-            // Fallback to a conservative estimate
             Ok(1_000_000u128) // 1 million Planck
         }
     }
@@ -434,24 +409,19 @@ impl TransactionExecutor {
             return Err(Error::Transaction("Cannot execute empty batch".to_string()));
         }
 
-        // Convert BatchCalls to dynamic values
-        // Note: This is a simplified implementation. For production use,
         // generate typed metadata using `subxt codegen` for better type safety
         let call_values: Vec<subxt::dynamic::Value> = calls
             .into_iter()
             .map(|call| {
-                // Create the encoded call bytes (pallet_index + call_index + args)
                 let mut call_bytes = Vec::new();
                 call_bytes.push(call.pallet_index);
                 call_bytes.push(call.call_index);
                 call_bytes.extend_from_slice(&call.args_encoded);
 
-                // Return as a Value containing the bytes
                 subxt::dynamic::Value::from_bytes(&call_bytes)
             })
             .collect();
 
-        // Wrap calls in a composite for the batch
         let calls_value = subxt::dynamic::Value::unnamed_composite(call_values);
 
         // Determine which batch call to use
@@ -466,12 +436,10 @@ impl TransactionExecutor {
         // Create the batch transaction
         let tx = subxt::dynamic::tx("Utility", batch_call_name, vec![calls_value]);
 
-        // Get the pair from wallet and create our custom signer
         let pair = wallet
             .sr25519_pair()
             .ok_or_else(|| Error::Transaction("Wallet does not have SR25519 key".to_string()))?;
 
-        // Create a signer from the pair using our custom implementation
         let apex_signer = Sr25519Signer::new(pair.clone());
 
         // Sign and submit
@@ -482,7 +450,6 @@ impl TransactionExecutor {
             .await
             .map_err(|e| Error::Transaction(format!("Failed to submit batch: {}", e)))?;
 
-        // Wait for finalization
         while let Some(event) = signed_tx.next().await {
             let event =
                 event.map_err(|e| Error::Transaction(format!("Batch transaction error: {}", e)))?;
@@ -495,7 +462,6 @@ impl TransactionExecutor {
                 let tx_hash = format!("0x{}", hex::encode(finalized.extrinsic_hash()));
                 info!("Batch transaction finalized: {}", tx_hash);
 
-                // Wait for success
                 finalized
                     .wait_for_success()
                     .await

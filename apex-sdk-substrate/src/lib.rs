@@ -561,12 +561,10 @@ mod tests {
 
     #[test]
     fn test_address_validation_valid_substrate() {
-        // Test address creation without adapter dependency
         let polkadot_addr = Address::substrate("15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5");
         let kusama_addr = Address::substrate("HNZata7iMYWmk5RvZRTiAsSDhV8366zq2YGb3tLH5Upf74F");
         let westend_addr = Address::substrate("5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY");
 
-        // Test that addresses can be created
         match polkadot_addr {
             Address::Substrate(addr) => assert!(!addr.is_empty()),
             _ => panic!("Expected Substrate address"),
@@ -585,12 +583,10 @@ mod tests {
 
     #[test]
     fn test_address_validation_invalid() {
-        // Test address creation for different types
         let invalid_addr = Address::substrate("invalid_address");
         let _short_addr = Address::substrate("123");
         let evm_addr = Address::evm("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7");
 
-        // Test that we can create addresses of different types
         match invalid_addr {
             Address::Substrate(_) => {} // Expected Substrate address
             _ => panic!("Expected Substrate address"),
@@ -604,14 +600,12 @@ mod tests {
 
     #[test]
     fn test_chain_adapter_trait_implementation() {
-        // Test chain adapter trait methods that don't require client
         let config = ChainConfig::custom("MockChain", "wss://mock.endpoint", 42);
         assert_eq!(config.name, "MockChain");
     }
 
     #[test]
     fn test_get_balance_validation() {
-        // Test address validation logic without requiring a client
         let valid_substrate_addr = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
         assert!(valid_substrate_addr.len() > 40); // SS58 addresses are typically longer than this
         assert!(valid_substrate_addr.chars().all(|c| c.is_alphanumeric()));
@@ -619,7 +613,6 @@ mod tests {
 
     #[test]
     fn test_format_balance_calculations() {
-        // Test balance formatting logic
         let decimals = 12u8;
         let amount = 1_000_000_000_000u128; // 1 token with 12 decimals
 
@@ -697,7 +690,6 @@ mod tests {
 
     #[test]
     fn test_from_subxt_error() {
-        // Test error conversion without using specific RPC error variants
         use subxt::Error as SubxtError;
 
         // Create a simple error that we can convert
@@ -739,7 +731,6 @@ mod tests {
             .await
             .unwrap();
 
-        // Test balance query for a known address
         let result = adapter
             .get_balance("5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY")
             .await;
