@@ -46,7 +46,7 @@ async fn test_evm_real_transfer_on_sepolia() {
     let from_address = wallet.eth_address();
     println!("From Address: {:?}", from_address);
 
-    // Recipient address (Vitalik's address, just for testing - he won't mind receiving testnet ETH)
+    // Recipient address (well-known address for testing)
     let to_address = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
 
     // Create SDK with wallet

@@ -24,7 +24,7 @@ async fn test_mainnet_connection() {
     assert_eq!(adapter.chain_name(), "EVM");
 }
 
-/// Test querying balance of a known Ethereum address (Vitalik's address)
+/// Test querying balance of a known Ethereum address
 #[tokio::test]
 #[ignore] // Requires network
 async fn test_get_balance() {
@@ -32,7 +32,7 @@ async fn test_get_balance() {
         .await
         .expect("Failed to connect");
 
-    // Vitalik's address - should have some ETH
+    // Well-known address with expected balance
     let balance = adapter
         .get_balance("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045")
         .await;
@@ -40,7 +40,7 @@ async fn test_get_balance() {
     assert!(balance.is_ok(), "Failed to get balance");
     let balance_wei = balance.unwrap();
 
-    // Vitalik's address should have more than 0 ETH
+    // Address should have non-zero balance
     assert!(balance_wei > U256::ZERO, "Expected non-zero balance");
 }
 
@@ -174,9 +174,9 @@ async fn test_invalid_address_balance() {
 #[ignore] // Requires network and may be slow
 async fn test_concurrent_balance_queries() {
     let addresses = vec![
-        "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", // Vitalik
-        "0xDE0B295669a9FD93d5F28D9Ec85E40f4cb697BAe", // Ethereum Foundation
-        "0x00000000219ab540356cBB839Cbe05303d7705Fa", // ETH2 Deposit Contract
+        "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", // Well-known address 1
+        "0xDE0B295669a9FD93d5F28D9Ec85E40f4cb697BAe", // Well-known address 2
+        "0x00000000219ab540356cBB839Cbe05303d7705Fa", // Beacon Deposit Contract
     ];
 
     let mut handles = vec![];

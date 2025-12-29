@@ -85,7 +85,7 @@ async fn main() -> Result<()> {
     println!("  WETH: {:?}", weth_address);
     println!("  USDC: {:?}\n", usdc_address);
 
-    // Example wallet address (Vitalik's address, used for demonstration)
+    // Example wallet address for demonstration
     let demo_address: EthAddress = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
         .parse()
         .expect("Invalid address");
