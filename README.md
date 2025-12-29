@@ -116,12 +116,6 @@ INTEGRATION_TESTS=1 cargo test --test substrate_integration_test -- --include-ig
 ./docker/scripts/stop-nodes.sh
 ```
 
-**Test Infrastructure:**
-- ✅ **500+ Unit Tests** - Comprehensive coverage of core functionality
-- ✅ **Docker-based Integration Tests** - Test against Hardhat (EVM) and substrate-contracts-node
-- ✅ **Daily CI Checks** - Automated testing and health checks run daily
-- ✅ **Property-based Testing** - Using proptest for fuzzing critical paths
-
 See [`docker/README.md`](docker/README.md) for detailed documentation on the Docker integration test infrastructure.
 
 ## Supported Chains

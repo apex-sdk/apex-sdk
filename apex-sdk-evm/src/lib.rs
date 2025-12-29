@@ -117,7 +117,7 @@ impl ProviderType {
             .map_err(|e| Error::Connection(format!("Failed to get block number: {}", e)))
     }
 
-    async fn get_transaction_receipt(
+    pub async fn get_transaction_receipt(
         &self,
         hash: B256,
     ) -> Result<Option<TransactionReceipt>, Error> {

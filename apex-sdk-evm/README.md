@@ -333,13 +333,13 @@ The integration tests require a running Ethereum node or testnet access.
 
 Complete working examples are available in the [examples](../examples) directory:
 
-- **[EVM Transfer](../examples/evm-transfer)** - Execute real ETH transfers on Sepolia testnet with wallet signing
+- **[EVM Transfer](../examples/evm-transfer)** - Execute ETH transfers on Sepolia testnet with wallet signing
 - **[Contract Interaction](../examples/evm-contract-call)** - Type-safe ERC-20 contract calls using Alloy's `sol!` macro
 - [Account Manager](../examples/account-manager) - Multi-chain account management
 - [Contract Orchestration](../examples/contract-orchestration) - Smart contract deployment across chains
 - [Price Oracle](../examples/price-oracle) - Multi-chain price aggregation
 
-All examples use the modern Alloy library and demonstrate real blockchain interactions.
+All examples use the modern Alloy library and demonstrate blockchain interactions.
 
 ## Configuration
 
