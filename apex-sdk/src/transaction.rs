@@ -148,8 +148,16 @@ impl Transaction {
 
     /// Check if this is a cross-chain transaction
     pub fn is_cross_chain(&self) -> bool {
-        // Implementation would check if from and to addresses are on different chains
-        false
+        // Check if from and to addresses indicate different chain types
+        match (&self.from, &self.to) {
+            (Address::Substrate(_), Address::Evm(_)) => true,
+            (Address::Evm(_), Address::Substrate(_)) => true,
+            _ => {
+                // Same address types - could still be cross-chain if different networks
+                // For now, we consider it same-chain unless explicitly different types
+                false
+            }
+        }
     }
 
     /// Calculate transaction hash
@@ -218,6 +226,7 @@ pub enum TransactionStatus {
     Pending,
     Success,
     Failed,
+    Finalized,
     Unknown,
 }
 
@@ -309,16 +318,15 @@ mod tests {
 
     #[test]
     fn test_transaction_is_not_cross_chain() {
+        // Test same-chain transaction (EVM to EVM)
         let tx = Transaction::builder()
             .from(Address::evm("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7"))
-            .to(Address::substrate(
-                "15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5",
-            ))
+            .to(Address::evm("0x123456789abcdef123456789abcdef123456789a"))
             .amount(1000)
             .build()
             .unwrap();
 
-        assert!(!tx.is_cross_chain()); // For now, always false
+        assert!(!tx.is_cross_chain()); // Same chain type should return false
     }
 
     #[test]

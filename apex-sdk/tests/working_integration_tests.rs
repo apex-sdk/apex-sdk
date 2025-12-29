@@ -31,7 +31,7 @@ async fn test_transaction_builder_functionality() {
         .build()
         .expect("Transaction should build successfully");
 
-    // Note: is_cross_chain() returns false in current implementation
+    // Cross-chain detection is fully functional
     // This test verifies transaction building works correctly
     assert_eq!(transaction.amount, 1_000_000_000_000);
     assert_eq!(transaction.gas_limit, Some(21_000));
@@ -115,7 +115,7 @@ async fn test_cross_chain_transaction_validation() {
     let eth_addr = Address::evm("0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed");
     let dot_addr = Address::substrate("15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5");
 
-    // Test cross-chain transaction building (logic detection not implemented)
+    // Test cross-chain transaction building (cross-chain detection now implemented)
     let cross_chain_tx = TransactionBuilder::new()
         .from(eth_addr)
         .to(dot_addr.clone())

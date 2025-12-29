@@ -47,6 +47,7 @@ pub struct ApexSDKBuilder {
     evm_wallet: Option<apex_sdk_evm::wallet::Wallet>,
 
     timeout: Option<Duration>,
+    config: Option<crate::sdk::SdkConfig>,
 }
 
 impl ApexSDKBuilder {
@@ -157,7 +158,44 @@ impl ApexSDKBuilder {
         self.timeout = Some(timeout);
         self
     }
+    /// Configure the SDK settings.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use apex_sdk::{ApexSDKBuilder, SdkConfig, ConfirmationStrategy};
+    ///
+    /// let config = SdkConfig {
+    ///     confirmation_strategy: ConfirmationStrategy::WaitForFinality,
+    ///     confirmation_blocks: 3,
+    ///     timeout_seconds: 120,
+    /// };
+    /// let builder = ApexSDKBuilder::new().with_config(config);
+    /// ```
+    pub fn with_config(mut self, config: crate::sdk::SdkConfig) -> Self {
+        self.config = Some(config);
+        self
+    }
 
+    /// Configure transaction confirmation strategy.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use apex_sdk::{ApexSDKBuilder, ConfirmationStrategy};
+    ///
+    /// let builder = ApexSDKBuilder::new()
+    ///     .with_confirmation_strategy(ConfirmationStrategy::WaitForFinality);
+    /// ```
+    pub fn with_confirmation_strategy(
+        mut self,
+        strategy: crate::sdk::ConfirmationStrategy,
+    ) -> Self {
+        let mut config = self.config.unwrap_or_default();
+        config.confirmation_strategy = strategy;
+        self.config = Some(config);
+        self
+    }
     /// Build the ApexSDK instance.
     ///
     /// # Errors
@@ -242,6 +280,7 @@ impl ApexSDKBuilder {
             #[cfg(feature = "evm")]
             self.evm_wallet,
             timeout,
+            self.config.unwrap_or_default(),
         )
     }
 }
