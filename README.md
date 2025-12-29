@@ -176,6 +176,8 @@ See [DOMAINS.md](./docs/DOMAINS.md) for the complete domain structure.
 
 Check out the [`examples/`](./examples) directory for complete working examples:
 
+- **[`evm-transfer/`](./examples/evm-transfer/)** - Execute real ETH transfers on testnet with wallet signing
+- **[`evm-contract-call/`](./examples/evm-contract-call/)** - Type-safe ERC-20 contract interactions using Alloy
 - [`account-manager/`](./examples/account-manager/) - Multi-chain account management
 - [`price-oracle/`](./examples/price-oracle/) - Multi-chain price aggregation
 - [`contract-orchestration/`](./examples/contract-orchestration/) - Smart contract deployment
