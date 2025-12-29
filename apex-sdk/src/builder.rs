@@ -102,10 +102,11 @@ impl ApexSDKBuilder {
     /// ```rust,no_run
     /// use apex_sdk::ApexSDKBuilder;
     /// use apex_sdk_substrate::Wallet;
+    /// use apex_sdk_substrate::KeyPairType;
     ///
     /// # #[tokio::main]
     /// # async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let wallet = Wallet::from_seed("your mnemonic seed phrase here", None)?;
+    /// let wallet = Wallet::from_mnemonic("your mnemonic seed phrase here", KeyPairType::Sr25519)?;
     /// let builder = ApexSDKBuilder::new()
     ///     .with_substrate_endpoint("wss://polkadot.api.onfinality.io/public-ws")
     ///     .with_substrate_wallet(wallet);
@@ -204,7 +205,6 @@ impl ApexSDKBuilder {
             None
         };
 
-        // Ensure at least one adapter is configured
         #[cfg(all(feature = "substrate", feature = "evm"))]
         {
             if substrate_adapter.is_none() && evm_adapter.is_none() {

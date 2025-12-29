@@ -68,7 +68,6 @@ impl ApexSDK {
         #[cfg(feature = "evm")] evm_wallet: Option<apex_sdk_evm::wallet::Wallet>,
         timeout: Duration,
     ) -> Result<Self> {
-        // Ensure at least one adapter is provided
         #[cfg(not(any(feature = "substrate", feature = "evm")))]
         {
             return Err(Error::Config(
@@ -114,7 +113,6 @@ impl ApexSDK {
                     ))
                 })?;
 
-                // Convert transaction and execute
                 self.execute_substrate_transaction(adapter, transaction)
                     .await
             }
@@ -128,7 +126,6 @@ impl ApexSDK {
                     ))
                 })?;
 
-                // Convert transaction and execute
                 self.execute_evm_transaction(adapter, transaction).await
             }
 
@@ -178,7 +175,6 @@ impl ApexSDK {
 
             #[cfg(feature = "substrate")]
             apex_sdk_types::ChainType::Hybrid => {
-                // For hybrid chains, try substrate first, then EVM
                 if let Some(adapter) = &self.substrate_adapter {
                     match adapter.get_transaction_status(tx_hash).await {
                         Ok(status) => Ok(status),
@@ -335,7 +331,6 @@ impl ApexSDK {
                 )));
             }
 
-            // Check transaction status
             match self.get_transaction_status(tx_hash, chain).await {
                 Ok(status) => {
                     use apex_sdk_types::TransactionStatus;
@@ -356,19 +351,16 @@ impl ApexSDK {
                             )));
                         }
                         TransactionStatus::Pending | TransactionStatus::InMempool => {
-                            // Still pending, wait and retry
                             tracing::debug!("Transaction {} still pending, waiting...", tx_hash);
                             tokio::time::sleep(Duration::from_secs(2)).await;
                         }
                         TransactionStatus::Unknown => {
-                            // Unknown status, wait and retry
                             tracing::debug!("Transaction {} status unknown, waiting...", tx_hash);
                             tokio::time::sleep(Duration::from_secs(2)).await;
                         }
                     }
                 }
                 Err(e) => {
-                    // Transaction not found yet, might still be in mempool
                     tracing::debug!("Transaction {} not found yet: {}", tx_hash, e);
                     tokio::time::sleep(Duration::from_secs(2)).await;
                 }
@@ -382,7 +374,6 @@ impl ApexSDK {
         adapter: &SubstrateAdapter,
         transaction: Transaction,
     ) -> Result<TransactionResult> {
-        // Check if wallet is configured first
         let wallet = self.substrate_wallet.as_ref().ok_or_else(|| {
             Error::Transaction(
                 "Substrate wallet not configured. Transaction execution requires signing.\n\
@@ -406,9 +397,6 @@ impl ApexSDK {
             )
         })?;
 
-        // Type conversion: Apex SDK Transaction → Substrate types
-
-        // 1. Convert destination address to Substrate SS58 address string
         let to_address = match &transaction.to {
             Address::Substrate(addr) => addr.clone(),
             _ => {
@@ -419,12 +407,9 @@ impl ApexSDK {
             }
         };
 
-        // 2. Amount is already u128, no conversion needed
         let amount = transaction.amount;
 
-        // 3. Check if this is a contract call or simple transfer
         if transaction.data.is_some() {
-            // Contract calls require more complex handling via the adapter API
             return Err(Error::Transaction(
                 "Contract calls require using the adapter API directly for proper SCALE encoding.\n\
                 \n\
@@ -442,10 +427,8 @@ impl ApexSDK {
             amount
         );
 
-        // Actual execution: Call adapter's transaction executor
         let executor = adapter.transaction_executor();
 
-        // Execute simple balance transfer and get the transaction hash
         let tx_hash = executor
             .transfer(wallet.as_ref(), &to_address, amount)
             .await
@@ -462,7 +445,6 @@ impl ApexSDK {
             tx_hash
         );
 
-        // Wait for inclusion in block
         tracing::debug!("Waiting for transaction inclusion in block...");
 
         // Note: Substrate transactions are finalized through the consensus mechanism
@@ -479,7 +461,6 @@ impl ApexSDK {
         // - Wait for finalization
         // - Return immediately without waiting
 
-        // Return transaction result with hash
         let result = TransactionResult::new(tx_hash)
             .with_status(crate::transaction::TransactionStatus::Success);
 
@@ -499,7 +480,6 @@ impl ApexSDK {
     ) -> Result<TransactionResult> {
         use alloy_primitives::{Address as EthAddress, U256};
 
-        // Check if wallet is configured first
         let wallet = self.evm_wallet.as_ref().ok_or_else(|| {
             Error::Transaction(
                 "EVM wallet not configured. Transaction execution requires signing.\n\
@@ -523,9 +503,6 @@ impl ApexSDK {
             )
         })?;
 
-        // Type conversion: Apex SDK Transaction → Alloy types
-
-        // 1. Convert destination address to EthAddress
         let to_address = match &transaction.to {
             Address::Evm(addr) => addr
                 .parse::<EthAddress>()
@@ -537,10 +514,8 @@ impl ApexSDK {
             }
         };
 
-        // 2. Convert amount to U256
         let value = U256::from(transaction.amount);
 
-        // 3. Extract optional contract call data
         let data = transaction.data;
 
         tracing::debug!(
@@ -551,16 +526,13 @@ impl ApexSDK {
             transaction.gas_limit
         );
 
-        // Actual execution: Call adapter's transaction executor
         let executor = adapter.transaction_executor();
 
-        // Execute the transaction and get the hash
         let tx_hash = executor
             .send_transaction(wallet.as_ref(), to_address, value, data.clone())
             .await
             .map_err(|e| Error::Transaction(format!("EVM transaction failed: {}", e)))?;
 
-        // Convert B256 hash to hex string
         let tx_hash_str = format!("{:?}", tx_hash);
 
         tracing::info!(
@@ -574,7 +546,6 @@ impl ApexSDK {
             tx_hash_str
         );
 
-        // Wait for confirmation (1 block confirmation)
         tracing::debug!("Waiting for transaction confirmation...");
 
         // Note: In production, you might want to:
@@ -589,7 +560,6 @@ impl ApexSDK {
         //     .await
         //     .map_err(|e| Error::Transaction(format!("Failed to get receipt: {}", e)))?;
 
-        // Return transaction result with hash
         let result = TransactionResult::new(tx_hash_str)
             .with_status(crate::transaction::TransactionStatus::Pending);
 
@@ -628,16 +598,13 @@ mod tests {
 
     #[test]
     fn test_timeout_getter() {
-        // Test timeout configuration and default values
         let default_timeout = Duration::from_secs(30);
         let custom_timeout = Duration::from_secs(45);
 
-        // Test that we can create durations for timeouts
         assert_eq!(default_timeout.as_secs(), 30);
         assert_eq!(custom_timeout.as_secs(), 45);
         assert!(custom_timeout > default_timeout);
 
-        // Test timeout validation
         let min_timeout = Duration::from_secs(5);
         let max_timeout = Duration::from_secs(300); // 5 minutes
 
@@ -666,7 +633,6 @@ mod tests {
 
     #[test]
     fn test_chain_type_detection() {
-        // Test that we can detect chain types correctly
         assert_eq!(
             Chain::Polkadot.chain_type(),
             apex_sdk_types::ChainType::Substrate
@@ -690,7 +656,6 @@ mod tests {
 
     #[test]
     fn test_chain_name_parsing() {
-        // Test case insensitive parsing of chain names
         assert_eq!(
             Chain::from_str_case_insensitive("polkadot"),
             Some(Chain::Polkadot)
@@ -708,14 +673,12 @@ mod tests {
             Some(Chain::Ethereum)
         );
 
-        // Test invalid chain names
         assert_eq!(Chain::from_str_case_insensitive("invalid"), None);
         assert_eq!(Chain::from_str_case_insensitive(""), None);
     }
 
     #[test]
     fn test_chain_endpoint_validation() {
-        // Test endpoint format validation
         let valid_evm_endpoints = [
             "https://eth.llamarpc.com",
             "https://ethereum.publicnode.com",
@@ -743,59 +706,46 @@ mod tests {
 
     #[test]
     fn test_chain_configuration() {
-        // Test chain configuration data
         let polkadot = Chain::Polkadot;
         let ethereum = Chain::Ethereum;
 
-        // Test Display implementation (if available)
         let _polkadot_str = format!("{:?}", polkadot);
         let _ethereum_str = format!("{:?}", ethereum);
 
-        // Test equality
         assert_eq!(polkadot, Chain::Polkadot);
         assert_ne!(polkadot, ethereum);
 
-        // Test cloning
         let cloned_polkadot = polkadot.clone();
         assert_eq!(polkadot, cloned_polkadot);
     }
 
     #[test]
     fn test_address_validation() {
-        // Test address format validation
         use apex_sdk_types::Address;
 
-        // Test that we can create addresses
         let substrate_address = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
         let evm_address = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbD";
 
-        // Test address creation
         let _substrate_addr = Address::substrate_checked(substrate_address);
         let _evm_addr = Address::evm_checked(evm_address);
-
-        // Both should successfully parse or fail gracefully - test passes if no panic occurs
     }
 
     #[test]
     fn test_adapter_error_handling() {
-        // Test error handling without requiring actual adapters
         use crate::Error;
 
-        // Test that we can create configuration errors
         let config_error = Error::Config("Test configuration error".to_string());
         match config_error {
             Error::Config(msg) => assert_eq!(msg, "Test configuration error"),
             _ => panic!("Wrong error type"),
         }
 
-        // Test error display
         let error_string = format!("{}", Error::Config("Test error".to_string()));
         assert!(error_string.contains("Test error"));
     }
 
     #[test]
     fn test_timeout_configuration() {
-        // Test timeout configuration without actual adapters
         let timeouts = [
             Duration::from_secs(5),
             Duration::from_secs(30),
@@ -807,7 +757,6 @@ mod tests {
             assert!(timeout.as_secs() >= 5);
             assert!(timeout.as_secs() <= 300);
 
-            // Test that we can clone timeouts
             let cloned = *timeout;
             assert_eq!(*timeout, cloned);
         }
@@ -826,7 +775,6 @@ mod tests {
             timeout: Duration::from_secs(30),
         };
 
-        // Should return error when adapter not configured
         let result = sdk.evm();
         assert!(result.is_err());
         if let Err(Error::Config(msg)) = result {
@@ -909,7 +857,6 @@ mod tests {
 
     #[test]
     fn test_chain_defaults() {
-        // Test that chains have sensible default endpoints
         let polkadot = Chain::Polkadot;
         let ethereum = Chain::Ethereum;
 
@@ -925,7 +872,6 @@ mod tests {
 
     #[test]
     fn test_chain_types() {
-        // Test all supported chains have correct types
         let substrate_chains = [Chain::Polkadot, Chain::Kusama, Chain::Westend, Chain::Paseo];
 
         for chain in &substrate_chains {
@@ -942,7 +888,6 @@ mod tests {
     #[test]
     fn test_builder_creates_sdk_instance() {
         let builder = ApexSDK::builder();
-        // Just test that builder can be created
         let builder_type_name = std::any::type_name_of_val(&builder);
         assert!(builder_type_name.contains("ApexSDKBuilder"));
     }

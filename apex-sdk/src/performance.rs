@@ -236,7 +236,6 @@ mod tests {
     #[test]
     fn test_async_memo() {
         let _memo = AsyncMemo::<String, i32>::new();
-        // Test basic creation
     }
 
     #[tokio::test]

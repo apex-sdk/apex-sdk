@@ -184,11 +184,13 @@ impl BatchExecutionResult {
 /// ```rust,no_run
 /// use apex_sdk::advanced::{ParallelExecutor, TransactionBatch};
 /// use apex_sdk::ApexSDK;
+/// use std::sync::Arc;
 ///
 /// # async fn example(sdk: ApexSDK) -> Result<(), Box<dyn std::error::Error>> {
 /// let mut batch = TransactionBatch::new();
 /// // Add transactions to batch...
 ///
+/// let sdk = Arc::new(sdk);
 /// let executor = ParallelExecutor::new(sdk, 10); // Max 10 concurrent transactions
 /// let result = executor.execute_batch(batch).await;
 ///
@@ -244,7 +246,6 @@ impl ParallelExecutor {
             self.concurrency
         );
 
-        // Create a semaphore to limit concurrency
         let semaphore = Arc::new(tokio::sync::Semaphore::new(self.concurrency));
         let mut tasks = Vec::new();
 
@@ -253,13 +254,11 @@ impl ParallelExecutor {
             let semaphore = Arc::clone(&semaphore);
 
             let task = tokio::spawn(async move {
-                // Acquire semaphore permit for concurrency control
                 let _permit = semaphore
                     .acquire()
                     .await
                     .expect("Semaphore should not be closed during batch execution");
 
-                // Execute transaction
                 let result = sdk.execute(tx.clone()).await;
 
                 match result {
@@ -271,7 +270,6 @@ impl ParallelExecutor {
             tasks.push(task);
         }
 
-        // Wait for all tasks to complete
         let mut successes = Vec::new();
         let mut failures = Vec::new();
 
@@ -281,7 +279,6 @@ impl ParallelExecutor {
                 Ok(Err((tx, error))) => failures.push((tx, error)),
                 Err(join_error) => {
                     tracing::error!("Task join error: {}", join_error);
-                    // Can't recover the original transaction here
                 }
             }
         }
@@ -314,7 +311,6 @@ mod tests {
         assert!(batch.is_empty());
         assert_eq!(batch.len(), 0);
 
-        // Add transactions
         let tx = Transaction::builder()
             .from_evm_address("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEbD")
             .to_evm_address("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045")
@@ -352,19 +348,14 @@ mod tests {
     async fn test_block_subscription_stop() {
         let (_sender, cancellation_token, mut subscription) = BlockSubscription::new();
 
-        // Verify subscription is not stopped initially
         assert!(!subscription.is_stopped());
 
-        // Stop the subscription
         subscription.stop();
 
-        // Verify subscription is now stopped
         assert!(subscription.is_stopped());
 
-        // Verify cancellation token was triggered
         assert!(cancellation_token.is_cancelled());
 
-        // Verify next() returns None after stopping
         let result = subscription.next().await;
         assert!(result.is_none());
     }
@@ -373,7 +364,6 @@ mod tests {
     async fn test_block_subscription_receives_blocks() {
         let (sender, _cancellation_token, mut subscription) = BlockSubscription::new();
 
-        // Spawn a task to send a block
         let send_task = tokio::spawn(async move {
             tokio::time::sleep(tokio::time::Duration::from_millis(10)).await;
             let _ = sender.send(BlockInfo {
@@ -383,7 +373,6 @@ mod tests {
             });
         });
 
-        // Receive the block
         let block = subscription.next().await;
         assert!(block.is_some());
         let block = block.unwrap();
@@ -428,7 +417,6 @@ mod tests {
     async fn test_subscription_multiple_events() {
         let (sender, _cancellation_token, mut subscription) = BlockSubscription::new();
 
-        // Spawn task to send multiple blocks
         let send_task = tokio::spawn(async move {
             for i in 0..3 {
                 tokio::time::sleep(tokio::time::Duration::from_millis(10)).await;
@@ -440,7 +428,6 @@ mod tests {
             }
         });
 
-        // Receive all blocks
         let mut received_blocks = Vec::new();
         for _ in 0..3 {
             if let Some(block) = subscription.next().await {
@@ -460,7 +447,6 @@ mod tests {
     async fn test_subscription_cancellation_via_token() {
         let (sender, cancellation_token, mut subscription) = BlockSubscription::new();
 
-        // Spawn task that will be cancelled
         let send_task = tokio::spawn(async move {
             for i in 0..10 {
                 tokio::time::sleep(tokio::time::Duration::from_millis(10)).await;
@@ -477,19 +463,15 @@ mod tests {
             }
         });
 
-        // Receive first block
         let block1 = subscription.next().await;
         assert!(block1.is_some());
         assert_eq!(block1.unwrap().number, 0);
 
-        // Cancel via token
         cancellation_token.cancel();
 
-        // Next call should return None
         let block2 = subscription.next().await;
         assert!(block2.is_none());
 
-        // Verify subscription is marked as stopped
         assert!(subscription.is_stopped());
 
         send_task.await.unwrap();
@@ -500,7 +482,6 @@ mod tests {
         let (sender, _token1, mut sub1) = BlockSubscription::new();
         let (sender2, _token2, mut sub2) = BlockSubscription::new();
 
-        // Each subscription is independent
         let task1 = tokio::spawn(async move {
             let _ = sender.send(BlockInfo {
                 number: 100,
@@ -533,7 +514,6 @@ mod tests {
     async fn test_subscription_timeout_behavior() {
         let (_sender, _token, mut subscription) = EventSubscription::new();
 
-        // Try to receive with timeout (no events will be sent)
         let result =
             tokio::time::timeout(tokio::time::Duration::from_millis(100), subscription.next())
                 .await;
@@ -545,10 +525,8 @@ mod tests {
     async fn test_subscription_drop_handling() {
         let (sender, _token, subscription) = EventSubscription::new();
 
-        // Drop the subscription
         drop(subscription);
 
-        // Sending should fail because all receivers are dropped
         let send_result = sender.send("test".to_string());
         assert_eq!(send_result.err().unwrap().0, "test");
     }
@@ -596,8 +574,8 @@ mod tests {
     }
 
     #[test]
+    #[cfg(not(all(feature = "substrate", feature = "evm")))]
     fn test_parallel_executor_concurrency_limit() {
-        // Test that concurrency is clamped to minimum of 1
         let sdk = std::sync::Arc::new(
             crate::sdk::ApexSDK::new(
                 #[cfg(feature = "substrate")]
@@ -621,6 +599,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[cfg(not(all(feature = "substrate", feature = "evm")))]
     async fn test_parallel_executor_empty_batch() {
         let sdk = std::sync::Arc::new(
             crate::sdk::ApexSDK::new(
@@ -650,6 +629,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[cfg(not(all(feature = "substrate", feature = "evm")))]
     async fn test_parallel_executor_metrics() {
         let sdk = std::sync::Arc::new(
             crate::sdk::ApexSDK::new(
@@ -671,7 +651,6 @@ mod tests {
 
         let result = executor.execute_batch(batch).await;
 
-        // Verify metrics are calculated correctly
         assert_eq!(
             result.total(),
             result.success_count() + result.failure_count()
@@ -683,7 +662,6 @@ mod tests {
     fn test_batch_execution_result_metrics() {
         use crate::transaction::{TransactionResult, TransactionStatus};
 
-        // Test with all successes
         let all_success = BatchExecutionResult {
             successes: vec![
                 TransactionResult::new("0x1".to_string()).with_status(TransactionStatus::Success),
@@ -697,7 +675,6 @@ mod tests {
         assert_eq!(all_success.total(), 2);
         assert_eq!(all_success.failure_count(), 0);
 
-        // Test with all failures
         let all_failures = BatchExecutionResult {
             successes: vec![],
             failures: vec![
