@@ -22,7 +22,6 @@ Thumbs.db
 # Internal/Local scripts
 publish.sh
 deploy.sh
-build.sh
 local-*.sh
 scripts/deploy-docs.sh
 scripts/extract_benchmark_results.sh
