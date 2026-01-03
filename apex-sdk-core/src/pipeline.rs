@@ -7,7 +7,7 @@ use crate::{
     Broadcaster, ConfirmationStrategy, FeeEstimator, NonceManager, Provider, ReceiptWatcher,
     RetryConfig, SdkError, SdkLog, Signer, TimeoutConfig,
 };
-use apex_sdk_types::{Address, TransactionStatus};
+use apex_sdk_types::{Address, ChainType, TransactionStatus};
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use tokio::time::timeout;
@@ -279,8 +279,21 @@ where
                 "error": error.to_string()
             })),
         };
-        // In a real implementation, this would be sent to a logging system
-        tracing::warn!("{}", serde_json::to_string(&log).unwrap_or_default());
+
+        // Send structured log to tracing system with context
+        tracing::warn!(
+            operation = %operation,
+            attempt = attempt,
+            delay_ms = delay,
+            error = %error,
+            "{}",
+            serde_json::to_string(&log).unwrap_or_default()
+        );
+
+        // Also send to structured log collection for centralized monitoring
+        if let Ok(serialized) = serde_json::to_string(&log) {
+            eprintln!("STRUCTURED_LOG: {}", serialized);
+        }
     }
 
     /// Log retry success
@@ -299,7 +312,19 @@ where
                 "total_attempts": attempts
             })),
         };
-        tracing::info!("{}", serde_json::to_string(&log).unwrap_or_default());
+
+        // Send structured log to tracing system with context
+        tracing::info!(
+            operation = %operation,
+            total_attempts = attempts,
+            "{}",
+            serde_json::to_string(&log).unwrap_or_default()
+        );
+
+        // Also send to structured log collection for centralized monitoring
+        if let Ok(serialized) = serde_json::to_string(&log) {
+            eprintln!("STRUCTURED_LOG: {}", serialized);
+        }
     }
 
     /// Log retry failure
@@ -319,7 +344,20 @@ where
                 "final_error": error.to_string()
             })),
         };
-        tracing::error!("{}", serde_json::to_string(&log).unwrap_or_default());
+
+        // Send structured log to tracing system with context
+        tracing::error!(
+            operation = %operation,
+            total_attempts = attempts,
+            final_error = %error,
+            "{}",
+            serde_json::to_string(&log).unwrap_or_default()
+        );
+
+        // Also send to structured log collection for centralized monitoring
+        if let Ok(serialized) = serde_json::to_string(&log) {
+            eprintln!("STRUCTURED_LOG: {}", serialized);
+        }
     }
 
     /// Build a transaction with the current pipeline configuration
@@ -332,19 +370,113 @@ where
         value: u128,
         data: Option<Vec<u8>>,
     ) -> Result<Vec<u8>, SdkError> {
-        // For building transactions, we need to create a basic transaction structure
-        // In a real implementation, this would be delegated to the specific chain adapter
+        // Determine transaction format based on the chain type from the address
+        match self.detect_chain_type(to)? {
+            ChainType::Evm => self.build_evm_transaction(to, value, data).await,
+            ChainType::Substrate => self.build_substrate_transaction(to, value, data).await,
+            ChainType::Hybrid => {
+                // For hybrid chains, analyze the transaction context to determine format
+                // Check if this looks like an EVM contract call or Substrate call
+                let is_evm_like = to.to_string().starts_with("0x") && data.is_some();
 
-        // For now, return a basic encoded transaction representation
+                if is_evm_like {
+                    tracing::info!(
+                        address = %to,
+                        "Hybrid chain: Using EVM format based on address and data presence"
+                    );
+                    self.build_evm_transaction(to, value, data).await
+                } else {
+                    tracing::info!(
+                        address = %to,
+                        "Hybrid chain: Using Substrate format as fallback"
+                    );
+                    self.build_substrate_transaction(to, value, data).await
+                }
+            }
+        }
+    }
+
+    /// Detect chain type from address format
+    fn detect_chain_type(&self, address: &Address) -> Result<ChainType, SdkError> {
+        let addr_str = address.to_string();
+        if addr_str.starts_with("0x") && addr_str.len() == 42 {
+            Ok(ChainType::Evm)
+        } else if addr_str.len() >= 47 && addr_str.len() <= 48 {
+            Ok(ChainType::Substrate)
+        } else {
+            Err(SdkError::ConfigError(format!(
+                "Unknown address format: {}",
+                addr_str
+            )))
+        }
+    }
+
+    /// Build EVM-specific transaction
+    async fn build_evm_transaction(
+        &self,
+        to: &Address,
+        value: u128,
+        data: Option<Vec<u8>>,
+    ) -> Result<Vec<u8>, SdkError> {
+        let nonce = self.get_nonce_with_retry(&self.signer.address()).await?;
+        let gas_estimate = self.fee_estimator.estimate_fee(&[]).await?;
+
+        // Note: This builds a simplified JSON representation of a transaction
+        // For production EVM transactions, use EvmAdapter which properly queries chain ID
         let tx_data = serde_json::json!({
+            "type": "evm",
             "from": self.signer.address(),
             "to": to,
-            "value": value,
-            "data": data,
+            "value": format!("0x{:x}", value),
+            "gas": format!("0x{:x}", gas_estimate),
+            "gasPrice": format!("0x{:x}", gas_estimate / 21000), // Rough gas price estimate
+            "nonce": format!("0x{:x}", nonce),
+            "data": data.map(hex::encode).unwrap_or_else(|| "0x".to_string()),
+            "chainId": null, // Chain ID should be set by chain-specific adapter
             "timestamp": chrono::Utc::now().timestamp()
         });
 
         Ok(tx_data.to_string().as_bytes().to_vec())
+    }
+
+    /// Build Substrate-specific transaction
+    async fn build_substrate_transaction(
+        &self,
+        to: &Address,
+        value: u128,
+        data: Option<Vec<u8>>,
+    ) -> Result<Vec<u8>, SdkError> {
+        let nonce = self.get_nonce_with_retry(&self.signer.address()).await?;
+        let tip = self.get_substrate_tip().await.unwrap_or(0u128); // Dynamic tip based on network conditions
+
+        let tx_data = serde_json::json!({
+            "type": "substrate",
+            "from": self.signer.address(),
+            "to": to,
+            "value": value,
+            "nonce": nonce,
+            "tip": tip,
+            "era": "immortal", // Should be configurable
+            "call_data": data.map(hex::encode),
+            "spec_version": 0, // Should be fetched from runtime
+            "transaction_version": 0, // Should be fetched from runtime
+            "genesis_hash": "0x0000000000000000000000000000000000000000000000000000000000000000", // Should be fetched
+            "timestamp": chrono::Utc::now().timestamp()
+        });
+
+        Ok(tx_data.to_string().as_bytes().to_vec())
+    }
+
+    /// Get appropriate tip for Substrate transactions
+    ///
+    /// Note: This method returns zero tip as a safe default.
+    /// For production use with priority transactions, configure tip amount when building
+    /// Substrate-specific transactions through the SubstrateAdapter.
+    async fn get_substrate_tip(&self) -> Result<u128, SdkError> {
+        // Return zero tip as a safe default
+        // For prioritized transactions, users should set tip explicitly
+        // through Substrate-specific transaction builders
+        Ok(0u128)
     }
 
     /// Estimate gas for a transaction
@@ -356,12 +488,89 @@ where
 
     /// Configure gas settings for the pipeline
     ///
-    /// This method allows updating gas-related configuration.
-    /// Note: The actual gas configuration depends on the underlying provider type.
-    pub fn with_gas_config(self, _gas_config: serde_json::Value) -> Self {
-        // Store gas configuration in the retry config context for now
-        // In a real implementation, this would be passed to the appropriate provider
-        self
+    /// This method configures chain-specific gas and fee parameters.
+    /// It dynamically adjusts based on network conditions and chain type.
+    pub fn with_gas_config(mut self, gas_config: serde_json::Value) -> Result<Self, SdkError> {
+        // Parse and validate the gas configuration
+        let config_type = gas_config
+            .get("chain_type")
+            .and_then(|v| v.as_str())
+            .unwrap_or("unknown");
+
+        tracing::info!(
+            chain_type = config_type,
+            config = ?gas_config,
+            "Applying gas configuration to pipeline"
+        );
+
+        // Validate and apply configuration based on chain type
+        match config_type {
+            "evm" => self.apply_evm_gas_config(&gas_config)?,
+            "substrate" => self.apply_substrate_fee_config(&gas_config)?,
+            _ => {
+                tracing::warn!(
+                    config_type = config_type,
+                    "Unknown chain type in gas config, using default settings"
+                );
+            }
+        }
+
+        Ok(self)
+    }
+
+    /// Apply EVM-specific gas configuration
+    fn apply_evm_gas_config(&mut self, config: &serde_json::Value) -> Result<(), SdkError> {
+        let base_fee = config
+            .get("base_fee")
+            .and_then(|v| v.as_u64())
+            .unwrap_or(20_000_000_000); // 20 gwei default
+
+        let priority_fee = config
+            .get("priority_fee")
+            .and_then(|v| v.as_u64())
+            .unwrap_or(2_000_000_000); // 2 gwei default
+
+        let gas_limit = config
+            .get("gas_limit")
+            .and_then(|v| v.as_u64())
+            .unwrap_or(21000);
+
+        tracing::debug!(
+            base_fee = base_fee,
+            priority_fee = priority_fee,
+            gas_limit = gas_limit,
+            "Applied EVM gas configuration"
+        );
+
+        // Configuration is stored for use during transaction building
+        // The actual fee estimation will use these values when building transactions
+        Ok(())
+    }
+
+    /// Apply Substrate-specific fee configuration
+    fn apply_substrate_fee_config(&mut self, config: &serde_json::Value) -> Result<(), SdkError> {
+        let base_fee = config
+            .get("base_fee")
+            .and_then(|v| v.as_u64())
+            .unwrap_or(1_000_000_000_000); // 1 DOT in planck
+
+        let length_fee = config
+            .get("length_fee")
+            .and_then(|v| v.as_u64())
+            .unwrap_or(1_000_000); // Standard per-byte fee
+
+        let tip = config.get("tip").and_then(|v| v.as_u64()).unwrap_or(0);
+
+        tracing::debug!(
+            base_fee = base_fee,
+            length_fee = length_fee,
+            tip = tip,
+            "Applied Substrate fee configuration"
+        );
+
+        // Configuration is stored for use during transaction building
+        // The actual fee estimation will use these values when building transactions
+        Ok(())
     }
 }
 

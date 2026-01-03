@@ -23,14 +23,14 @@ fn test_golden_vector_creation_and_verification() {
             chain_id: 1,
         },
         expected_encoded: "deadbeef".to_string(),
-        chain_type: ChainType::Evm,
+        chain_type: ChainType::Ethereum,
         encoding_version: "1.0".to_string(),
     };
 
     // Test basic structure
     assert_eq!(vector.name, "test_encoding");
     assert_eq!(vector.expected_encoded, "deadbeef");
-    assert_eq!(vector.chain_type, ChainType::Evm);
+    assert_eq!(vector.chain_type, ChainType::Ethereum);
 
     // Verify we can check encoding
     let expected_bytes = hex::decode("deadbeef").unwrap();
@@ -66,7 +66,7 @@ fn test_golden_vector_set_operations() {
             chain_id: 1,
         },
         expected_encoded: "f86c0185044a817c80825208948742d35cc6634c0532925a3b844bc9e7595f0beb7871000000000000000808025a0".to_string(),
-        chain_type: ChainType::Evm,
+        chain_type: ChainType::Ethereum,
         encoding_version: "1.0".to_string(),
     };
 
@@ -76,7 +76,7 @@ fn test_golden_vector_set_operations() {
     // Verify the vector was added
     assert_eq!(vector_set.vectors.len(), 1);
     assert_eq!(vector_set.vectors[0].name, "evm_legacy_transfer");
-    assert_eq!(vector_set.vectors[0].chain_type, ChainType::Evm);
+    assert_eq!(vector_set.vectors[0].chain_type, ChainType::Ethereum);
 }
 
 #[test]
@@ -98,7 +98,7 @@ fn test_golden_vector_set_serialization() {
                 chain_id: 1,
             },
             expected_encoded: "deadbeef".to_string(),
-            chain_type: ChainType::Evm,
+            chain_type: ChainType::Ethereum,
             encoding_version: "1.0".to_string(),
         }],
     };
@@ -107,7 +107,7 @@ fn test_golden_vector_set_serialization() {
     let json_str = serde_json::to_string_pretty(&vector_set).unwrap();
     assert!(json_str.contains("test_vector"));
     assert!(json_str.contains("deadbeef"));
-    assert!(json_str.contains("Evm"));
+    assert!(json_str.contains("Ethereum"));
 
     // Test JSON deserialization
     let deserialized_set: GoldenVectorSet = serde_json::from_str(&json_str).unwrap();
@@ -135,7 +135,7 @@ fn test_golden_vector_verification_workflow() {
                 chain_id: 1,
             },
             expected_encoded: "deadbeef".to_string(),
-            chain_type: ChainType::Evm,
+            chain_type: ChainType::Ethereum,
             encoding_version: "1.0".to_string(),
         }],
     };
@@ -187,7 +187,10 @@ fn test_substrate_golden_vector_creation() {
                 ),
                 SubstrateValue::Balance(1_000_000_000_000u128),
             ],
-            era: Some(SubstrateEra::Mortal(64)),
+            era: Some(SubstrateEra {
+                period: 64,
+                phase: 0,
+            }),
             nonce: 0,
             tip: 0,
             genesis_hash: "0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3"
@@ -216,11 +219,11 @@ fn test_substrate_golden_vector_creation() {
 #[test]
 fn test_chain_type_enum() {
     // Test that all chain types can be created and compared
-    assert_eq!(ChainType::Evm, ChainType::Evm);
+    assert_eq!(ChainType::Ethereum, ChainType::Ethereum);
     assert_eq!(ChainType::Substrate, ChainType::Substrate);
     assert_eq!(ChainType::Bitcoin, ChainType::Bitcoin);
 
-    assert_ne!(ChainType::Evm, ChainType::Substrate);
+    assert_ne!(ChainType::Ethereum, ChainType::Substrate);
     assert_ne!(ChainType::Substrate, ChainType::Bitcoin);
 }
 
