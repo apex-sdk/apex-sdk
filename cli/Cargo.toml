@@ -6,11 +6,9 @@ description = "CLI tool for Apex SDK"
 license = "Apache-2.0"
 
 [dependencies]
-apex-sdk = { path = "../apex-sdk", version = "0.1.5" }
 apex-sdk-core = { path = "../apex-sdk-core", version = "0.1.5" }
 apex-sdk-types = { path = "../apex-sdk-types", version = "0.1.5" }
 apex-sdk-evm = { path = "../apex-sdk-evm", version = "0.1.5" }
-apex-sdk-substrate = { path = "../apex-sdk-substrate", version = "0.1.5" }
 clap = { version = "4.5.4", features = ["derive"] }
 clap_complete = "4.5"
 tokio = { version = "1.38.0", features = ["full"] }
