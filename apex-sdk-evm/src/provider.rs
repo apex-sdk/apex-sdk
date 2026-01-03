@@ -114,7 +114,7 @@ impl CoreProvider for EvmProvider {
             }
         };
 
-        let fee = (gas_price as u128) * gas_limit;
+        let fee = gas_price * gas_limit;
         Ok(fee)
     }
 
