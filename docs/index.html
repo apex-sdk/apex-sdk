@@ -77,7 +77,6 @@
                 <ul class="nav-links">
                     <li><a href="#features" class="nav-link">Features</a></li>
                     <li><a href="#networks" class="nav-link">Networks</a></li>
-                    <li><a href="#showcase" class="nav-link">Showcase</a></li>
                     <li><a href="viewer.html" class="nav-link">Docs</a></li>
                 </ul>
             </nav>
@@ -381,95 +380,6 @@
             </div>
         </section>
 
-        <!-- Code Showcase Section -->
-        <section id="showcase" class="code-section">
-            <div class="container">
-                <div class="section-header scroll-reveal">
-                    <span class="section-badge">See It In Action</span>
-                    <h2 class="section-title">Write Once, Deploy Everywhere</h2>
-                    <p class="section-description">
-                        The same clean API works across all supported networks.
-                    </p>
-                </div>
-                <div class="code-showcase scroll-reveal">
-                    <div class="code-tabs">
-                        <button class="code-tab active" data-tab="evm">EVM Chains</button>
-                        <button class="code-tab" data-tab="substrate">Substrate</button>
-                        <button class="code-tab" data-tab="xcm">XCM Transfer</button>
-                    </div>
-                    <div class="code-content">
-                        <pre class="code-block active" data-content="evm"><code class="language-rust">use apex_sdk::{ApexSDK, Chain};
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Initialize SDK for any EVM chain
-    let sdk = ApexSDK::builder()
-        .with_evm_endpoint(Chain::Ethereum)
-        .with_evm_wallet("your-private-key")
-        .build()
-        .await?;
-
-    // Get balance - works on Ethereum, Arbitrum, Polygon, etc.
-    let balance = sdk.get_balance("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb").await?;
-    println!("Balance: {} ETH", balance);
-
-    // Send transaction with automatic nonce management and retry
-    let tx = sdk.send_transaction(
-        "0xRecipient...",
-        "1.5",  // Amount in ETH
-    ).await?;
-
-    Ok(())
-}</code></pre>
-                        <pre class="code-block" data-content="substrate"><code class="language-rust">use apex_sdk::{ApexSDK, Chain};
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Initialize SDK for Polkadot
-    let sdk = ApexSDK::builder()
-        .with_substrate_endpoint(Chain::Polkadot)
-        .with_substrate_wallet("your-mnemonic")
-        .build()
-        .await?;
-
-    // Get balance on Polkadot
-    let balance = sdk.get_balance("1AccountId...").await?;
-    println!("Balance: {} DOT", balance);
-
-    // Transfer with automatic fee estimation
-    let tx = sdk.send_transaction(
-        "1Recipient...",
-        "10.5",  // Amount in DOT
-    ).await?;
-
-    Ok(())
-}</code></pre>
-                        <pre class="code-block" data-content="xcm"><code class="language-rust">use apex_sdk::{ApexSDK, Chain, xcm::*};
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let sdk = ApexSDK::builder()
-        .with_substrate_endpoint(Chain::Polkadot)
-        .with_substrate_wallet("your-mnemonic")
-        .build()
-        .await?;
-
-    // Cross-chain transfer from Polkadot to Acala
-    let xcm_transfer = XcmTransfer {
-        destination: Chain::Acala,
-        asset: Asset::native("DOT", 100),
-        recipient: "1AcalaAccount...",
-    };
-
-    let result = sdk.xcm_transfer(xcm_transfer).await?;
-    println!("XCM transfer successful: {:?}", result);
-
-    Ok(())
-}</code></pre>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         <!-- CTA Section -->
         <section class="cta-section">
@@ -528,15 +438,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     </ul>
                 </div>
 
-                <!-- Community Column -->
+                <!-- Contact Column -->
                 <div class="footer-links">
-                    <h4>Community</h4>
+                    <h4>Contact</h4>
                     <ul>
-                        <li><a href="https://github.com/carbobit/apex-sdk" target="_blank" rel="noopener">GitHub</a></li>
-                        <li><a href="https://discord.gg/zCDFsBaZJN" target="_blank" rel="noopener">Discord</a></li>
-                        <li><a href="https://x.com/apexsdk" target="_blank" rel="noopener">X (Twitter)</a></li>
-                        <li><a href="/viewer.html?doc=CONTRIBUTING.md">Contributing</a></li>
-                        <li><a href="https://github.com/carbobit/apex-sdk/issues">Report Issue</a></li>
+                        <li><a href="mailto:support@apexsdk.dev">Support</a></li>
+                        <li><a href="mailto:security@apexsdk.dev">Security</a></li>
+                        <li><a href="mailto:partnerships@apexsdk.dev">Partnerships</a></li>
+                        <li><a href="mailto:research@apexsdk.dev">Research</a></li>
                     </ul>
                 </div>
 
@@ -544,9 +453,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 <div class="footer-links">
                     <h4>Company</h4>
                     <ul>
-                        <li><a href="https://carbobit.com" target="_blank" rel="noopener">About Carbobit</a></li>
-                        <li><a href="mailto:support@apexsdk.dev">Support</a></li>
-                        <li><a href="mailto:team@carbobit.com">Contact</a></li>
+                        <li><a href="https://carbobit.com" target="_blank" rel="noopener">Carbobit</a></li>
+                        <li><a href="https://github.com/carbobit/apex-sdk" target="_blank" rel="noopener">GitHub</a></li>
+                        <li><a href="https://discord.gg/zCDFsBaZJN" target="_blank" rel="noopener">Discord</a></li>
+                        <li><a href="/viewer.html?doc=CONTRIBUTING.md">Contributing</a></li>
                         <li><a href="https://github.com/carbobit/apex-sdk/blob/main/LICENSE">License</a></li>
                     </ul>
                 </div>
