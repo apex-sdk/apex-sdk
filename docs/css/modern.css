@@ -3578,58 +3578,25 @@ a:hover::after {
 }
 
 .error code {
-    background: rgba(239, 68, 68, 0.1);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-family: monospace;
-}
-
-/* ============================================
-   SUPPORTED NETWORKS SECTION - MODERN REDESIGN
-   ============================================ */
-
+/* Updated Networks Section - Modern Design */
 .networks-section {
     padding: 120px 0;
-    background: linear-gradient(180deg,
-        var(--bg-primary) 0%,
-        var(--bg-secondary) 50%,
-        var(--bg-primary) 100%);
-    position: relative;
-    overflow: hidden;
-}
-
-.networks-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at 50% 50%, rgba(33, 118, 255, 0.05) 0%, transparent 70%);
-    pointer-events: none;
+    background: linear-gradient(135deg, 
+        rgba(33, 118, 255, 0.03) 0%, 
+        rgba(251, 133, 0, 0.03) 50%, 
+        rgba(33, 118, 255, 0.03) 100%);
 }
 
 /* Network Explorer */
 .network-explorer {
     margin-top: 4rem;
-    position: relative;
-    z-index: 1;
-}
-
-.networks-section .container {
-    position: relative;
-    z-index: 1;
 }
 
 .explorer-tabs {
     display: flex;
-    gap: 1.25rem;
-    margin-bottom: 3.5rem;
+    gap: 1rem;
+    margin-bottom: 3rem;
     justify-content: center;
-    flex-wrap: wrap;
-    max-width: 900px;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .explorer-tab {
@@ -3638,21 +3605,19 @@ a:hover::after {
     gap: 1rem;
     background: var(--bg-card);
     border: 2px solid var(--border-color);
-    border-radius: 16px;
-    padding: 1.25rem 1.75rem;
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 2rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     position: relative;
-    overflow: hidden;
-    flex: 1 1 auto;
-    min-width: 220px;
-    max-width: 280px;
+    overflow: visible;
+    flex: 1;
+    min-width: 200px;
 }
 
 .explorer-tab:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    border-color: rgba(33, 118, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
 .explorer-tab::before {
@@ -3677,17 +3642,12 @@ a:hover::after {
 
 .explorer-tab.active::before {
     opacity: 1;
+    box-shadow: 0 0 30px rgba(33, 118, 255, 0.4);
 }
 
 .explorer-tab.active {
     border-color: transparent;
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 12px 35px rgba(33, 118, 255, 0.25), 0 0 0 1px rgba(33, 118, 255, 0.1);
-}
-
-.explorer-tab > * {
-    position: relative;
-    z-index: 1;
+    transform: translateY(-4px);
 }
 
 .tab-icon {
@@ -3765,20 +3725,14 @@ a:hover::after {
 /* Advanced Networks Grid */
 .advanced-networks-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
-    gap: 1.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 2rem;
     margin-top: 2rem;
 }
 
-@media (min-width: 1400px) {
+@media (max-width: 1200px) {
     .advanced-networks-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-@media (max-width: 1200px) and (min-width: 769px) {
-    .advanced-networks-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     }
 }
 
@@ -3832,19 +3786,7 @@ a:hover::after {
 }
 
 .network-card.featured {
-    grid-column: 1 / -1;
-}
-
-@media (min-width: 1400px) {
-    .network-card.featured {
-        grid-column: span 2;
-    }
-}
-
-@media (max-width: 768px) {
-    .network-card.featured {
-        grid-column: 1;
-    }
+    grid-column: span 2;
 }
 
 .network-card.compact {
@@ -3920,25 +3862,45 @@ a:hover::after {
     color: white;
 }
 
-.network-icon.polkadot,
-.network-icon.kusama,
-.network-icon.acala,
-.network-icon.astar,
-.network-icon.moonbeam,
-.network-icon.westend,
-.network-icon.sepolia,
-.network-icon.paseo {
-    background: transparent;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
+.network-icon.polkadot {
+    background: linear-gradient(135deg, #e6007a, #ff1a8c);
+    color: white;
 }
 
-.network-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+.network-icon.kusama {
+    background: linear-gradient(135deg, #000000, #1a1a1a);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.network-icon.acala {
+    background: linear-gradient(135deg, #645aff, #7b73ff);
+    color: white;
+}
+
+.network-icon.astar {
+    background: linear-gradient(135deg, #0ae2ff, #1cebff);
+    color: white;
+}
+
+.network-icon.moonbeam {
+    background: linear-gradient(135deg, #53cbc8, #67d8d5);
+    color: white;
+}
+
+.network-icon.westend {
+    background: linear-gradient(135deg, #da68a7, #e37bb8);
+    color: white;
+}
+
+.network-icon.sepolia {
+    background: linear-gradient(135deg, #9ca3af, #b0b7c0);
+    color: white;
+}
+
+.network-icon.paseo {
+    background: linear-gradient(135deg, #6b7280, #7d8794);
+    color: white;
 }
 
 .network-info {
@@ -4051,37 +4013,32 @@ a:hover::after {
     color: var(--primary-color);
 }
 
-/* ============================================
-   RESPONSIVE BREAKPOINTS - NETWORKS SECTION
-   ============================================ */
-
 /* Tablet and below */
 @media (max-width: 1024px) {
     .networks-section {
         padding: 80px 0;
     }
 
+    .advanced-networks-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .network-card.featured {
+        grid-column: span 1;
+    }
+
     .explorer-tabs {
-        gap: 1rem;
-        max-width: 100%;
+        gap: 0.75rem;
     }
 
     .explorer-tab {
-        padding: 1.125rem 1.5rem;
-        min-width: 180px;
+        padding: 1.25rem 1.75rem;
     }
 
     .tab-icon {
         width: 40px;
         height: 40px;
-    }
-
-    .tab-content h4 {
-        font-size: 1rem;
-    }
-
-    .tab-content p {
-        font-size: 0.8125rem;
     }
 }
 
@@ -4091,48 +4048,44 @@ a:hover::after {
         padding: 60px 0;
     }
 
-    .section-header {
-        padding: 0 1rem;
-    }
-
     .explorer-tabs {
         flex-direction: column;
-        gap: 0.875rem;
-        padding: 0 1rem;
+        gap: 1rem;
     }
 
     .explorer-tab {
-        padding: 1rem 1.25rem;
+        padding: 1rem 1.5rem;
         width: 100%;
-        max-width: 100%;
-        min-width: auto;
     }
 
     .advanced-networks-grid {
         grid-template-columns: 1fr;
-        gap: 1.25rem;
-        padding: 0 1rem;
+        gap: 1.5rem;
     }
 
-    .network-card {
-        padding: 1.5rem;
+    .network-card.featured {
+        grid-column: span 1;
     }
 
     .network-header {
-        flex-direction: row;
-        gap: 1rem;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
     }
 
-    .network-info h4 {
-        font-size: 1.25rem;
+    .network-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
-    .panel-header {
-        padding: 0 1.5rem;
+    .network-status {
+        justify-content: center;
+        margin-top: 0.5rem;
     }
 
     .panel-header h3 {
-        font-size: 1.75rem;
+        font-size: 1.5rem;
     }
 
     .panel-header p {
@@ -4147,12 +4100,12 @@ a:hover::after {
     }
 
     .network-card {
-        padding: 1.25rem;
+        padding: 1.5rem;
     }
 
     .network-icon {
-        width: 52px;
-        height: 52px;
+        width: 56px;
+        height: 56px;
     }
 
     .network-card.compact .network-icon {
@@ -4161,32 +4114,22 @@ a:hover::after {
     }
 
     .network-info h4 {
-        font-size: 1.125rem;
+        font-size: 1.25rem;
     }
 
     .network-card.compact h5 {
-        font-size: 0.9375rem;
+        font-size: 1rem;
     }
 
-    .network-description {
-        font-size: 0.875rem;
+    .explorer-tab {
+        padding: 0.875rem 1.25rem;
     }
 
-    .feature-tag {
-        font-size: 0.6875rem;
-        padding: 0.3rem 0.625rem;
+    .tab-content h4 {
+        font-size: 1rem;
     }
 
-    .panel-header h3 {
-        font-size: 1.5rem;
-    }
-
-    .panel-header p {
-        font-size: 0.9375rem;
-    }
-
-    .tab-icon {
-        width: 36px;
-        height: 36px;
+    .tab-content p {
+        font-size: 0.8125rem;
     }
 }
