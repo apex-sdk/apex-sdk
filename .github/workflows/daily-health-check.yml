@@ -215,7 +215,7 @@ jobs:
           cargo llvm-cov --workspace || echo "Coverage: Check detailed report"
 
       - name: Upload coverage to artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-report
           path: lcov.info

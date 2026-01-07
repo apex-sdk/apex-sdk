@@ -1,0 +1,203 @@
+/* Footer Styles - High specificity to override any conflicts */
+
+footer.modern-footer {
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    padding: 64px 0 24px;
+    margin-top: 5rem;
+    text-align: left; /* Override any inherited center alignment */
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 48px;
+}
+
+.footer-brand .footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.footer-logo img {
+    border-radius: 8px;
+}
+
+.footer-logo span {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.footer-tagline {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    line-height: 1.6;
+    max-width: 280px;
+}
+
+.footer-social {
+    display: flex;
+    gap: 12px;
+}
+
+.social-link {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--bg-glass-card);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+}
+
+.social-link::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-accent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.social-link:hover::before {
+    opacity: 0.1;
+}
+
+.social-link:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: var(--shadow-glow);
+}
+
+.social-link svg {
+    position: relative;
+    z-index: 1;
+}
+
+.footer-links h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+}
+
+.footer-links ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li {
+    margin-bottom: 12px;
+}
+
+.footer-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    position: relative;
+    display: inline-block;
+    padding: 2px 0;
+}
+
+/* Gradient hover effect for footer links */
+.footer-links a::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background: var(--gradient-accent);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.footer-links a:hover::before {
+    width: 100%;
+}
+
+.footer-links a:hover {
+    color: var(--primary-color);
+    transform: translateX(4px);
+}
+
+.footer-bottom {
+    padding: 24px 0;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.footer-bottom p {
+    color: var(--text-tertiary);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.footer-bottom a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+    position: relative;
+}
+
+.footer-bottom a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 0;
+    height: 1px;
+    background: var(--gradient-accent);
+    transition: width 0.3s ease;
+}
+
+.footer-bottom a:hover::after {
+    width: 100%;
+}
+
+.footer-bottom a:hover {
+    color: var(--primary-color);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        text-align: center;
+    }
+
+    .footer-tagline {
+        max-width: none;
+    }
+
+    .footer-social {
+        justify-content: center;
+    }
+
+    .modern-footer {
+        padding: 48px 0 24px;
+    }
+}
+
+@media (max-width: 640px) {
+    .footer-grid {
+        gap: 24px;
+    }
+    
+    .modern-footer {
+        padding: 32px 0 16px;
+    }
+}

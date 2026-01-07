@@ -1,0 +1,75 @@
+<!-- HTML Head Component -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    
+    <!-- Dynamic Title (will be set by page) -->
+    <title>{{PAGE_TITLE}} - Apex SDK</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="{{PAGE_DESCRIPTION}}">
+    <meta name="keywords" content="{{PAGE_KEYWORDS}}">
+    <meta name="author" content="Apex SDK Team">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{PAGE_URL}}">
+
+    <!-- Open Graph & Twitter Cards -->
+    <meta property="og:title" content="{{PAGE_TITLE}} - Apex SDK">
+    <meta property="og:description" content="{{PAGE_DESCRIPTION}}">
+    <meta property="og:image" content="https://apexsdk.dev/assets/og-image.png">
+    <meta property="og:url" content="{{PAGE_URL}}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{PAGE_TITLE}} - Apex SDK">
+    <meta name="twitter:description" content="{{PAGE_DESCRIPTION}}">
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Favicons & Manifest -->
+    <link rel="icon" type="image/png" href="assets/apex_logo.png">
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/modular.css">
+    
+    <!-- Page-specific CSS (if any) -->
+    {{PAGE_CSS}}
+
+    <!-- Schema Markup -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Apex SDK",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Linux, macOS, Windows",
+      "description": "Enterprise Rust blockchain SDK for building cross-chain dApps on Ethereum, Polkadot and 15+ networks",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "programmingLanguage": "Rust",
+      "author": {
+        "@type": "Organization",
+        "name": "Carbobit",
+        "url": "https://carbobit.com"
+      },
+      "url": "https://apexsdk.dev",
+      "softwareVersion": "0.1.5",
+      "license": "https://github.com/carbobit/apex-sdk/blob/main/LICENSE",
+      "downloadUrl": "https://crates.io/crates/apex-sdk",
+      "documentation": "https://apexsdk.dev/api",
+      "codeRepository": "https://github.com/carbobit/apex-sdk",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "12"
+      }
+    }
+    </script>
+</head>
