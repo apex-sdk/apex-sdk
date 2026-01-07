@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1767653043608,
+  "lastUpdate": 1767767358441,
   "repoUrl": "https://github.com/carbobit/apex-sdk",
   "entries": {
     "Benchmark": [
@@ -3730,6 +3730,216 @@ window.BENCHMARK_DATA = {
           {
             "name": "chain_metadata_operations/check_smart_contract_support",
             "value": 1,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "chain_metadata_operations/get_chain_ids",
+            "value": 1,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2543f529874081587545f24a297fe04ff733d888",
+          "message": "ci(deps): bump upload-artifact v6 (#67)\n\nBumps [actions/upload-artifact](https://github.com/actions/upload-artifact) from 4 to 6.\n- [Release notes](https://github.com/actions/upload-artifact/releases)\n- [Commits](https://github.com/actions/upload-artifact/compare/v4...v6)\n\n---\nupdated-dependencies:\n- dependency-name: actions/upload-artifact\n  dependency-version: '6'\n  dependency-type: direct:production\n  update-type: version-update:semver-major\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>\nCo-authored-by: carbobits <carbobit@gmail.com>\nCo-authored-by: Kherld <50875687+kherldhussein@users.noreply.github.com>",
+          "timestamp": "2026-01-07T01:09:09-05:00",
+          "tree_id": "6bd306a7e6e4c96bfdd0fcbc59c93d0c773660e4",
+          "url": "https://github.com/carbobit/apex-sdk/commit/2543f529874081587545f24a297fe04ff733d888"
+        },
+        "date": 1767767358113,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "transaction_creation/create_substrate_transfer",
+            "value": 57,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "transaction_creation/create_evm_transfer",
+            "value": 57,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/substrate_validation/0",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/substrate_validation/1",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/substrate_validation/2",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/evm_validation/0",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/evm_validation/1",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/evm_validation/2",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "sdk_initialization/create_substrate_sdk",
+            "value": 30,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "sdk_initialization/create_evm_sdk",
+            "value": 30,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "sdk_initialization/create_multi_chain_sdk",
+            "value": 53,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "transaction_signing/substrate_sign_simulation",
+            "value": 161106,
+            "range": "± 698",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "transaction_signing/evm_sign_simulation",
+            "value": 141165,
+            "range": "± 539",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "amount_operations/amount_creation",
+            "value": 0,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "amount_operations/amount_arithmetic",
+            "value": 0,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cross_chain_operations/chain_type_detection",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cross_chain_operations/multi_chain_transaction_creation",
+            "value": 118,
+            "range": "± 4",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cross_chain_operations/cross_chain_address_handling",
+            "value": 20,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hybrid_chain_operations/hybrid_chain_type_check",
+            "value": 1,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hybrid_chain_operations/hybrid_evm_transaction",
+            "value": 58,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "bulk_transaction_creation/substrate_bulk/10",
+            "value": 582,
+            "range": "± 26",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "bulk_transaction_creation/substrate_bulk/100",
+            "value": 5874,
+            "range": "± 257",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "bulk_transaction_creation/evm_bulk/10",
+            "value": 580,
+            "range": "± 29",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "decimal_conversions/dot_to_planck",
+            "value": 6,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "decimal_conversions/ksm_to_planck",
+            "value": 6,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "decimal_conversions/eth_to_wei",
+            "value": 6,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "decimal_conversions/planck_to_dot",
+            "value": 6,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "decimal_conversions/wei_to_eth",
+            "value": 6,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "chain_metadata_operations/get_rpc_endpoints",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "chain_metadata_operations/check_smart_contract_support",
+            "value": 3,
             "range": "± 0",
             "unit": "ns/iter"
           },
