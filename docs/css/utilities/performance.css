@@ -1,0 +1,224 @@
+/* Performance and Loading Optimizations */
+
+/* Image Loading States */
+img {
+    transition: opacity 0.3s ease;
+}
+
+img[data-src] {
+    opacity: 0;
+}
+
+img.loaded,
+img.bg-loaded {
+    opacity: 1;
+}
+
+img.load-error {
+    opacity: 0.5;
+    filter: grayscale(100%);
+}
+
+/* Lazy Loading Skeleton */
+.lazy-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 4px;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Dark mode skeleton */
+@media (prefers-color-scheme: dark) {
+    .lazy-skeleton {
+        background: linear-gradient(90deg, #2a3441 25%, #1e2831 50%, #2a3441 75%);
+    }
+}
+
+/* Loading States for Components */
+[data-lazy-load] {
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    transition: all 0.3s ease;
+}
+
+[data-lazy-load]:not(.loaded):not(.load-error)::before {
+    content: "Loading...";
+    opacity: 0.6;
+}
+
+[data-lazy-load].loaded {
+    min-height: auto;
+    border: none;
+    background: transparent;
+}
+
+[data-lazy-load].load-error {
+    border-color: var(--error);
+    color: var(--error);
+}
+
+[data-lazy-load].load-error::before {
+    content: "⚠️ Failed to load";
+}
+
+/* Critical Resource Optimization */
+.critical-css {
+    font-display: swap;
+}
+
+/* Preload hints for critical resources */
+link[rel="preload"] {
+    /* Browser will handle this automatically */
+}
+
+/* Optimize rendering performance */
+.gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+/* Smooth scrolling performance */
+html {
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+    
+    .lazy-skeleton {
+        animation: none;
+    }
+    
+    img {
+        transition: none;
+    }
+}
+
+/* Container queries for responsive images */
+@supports (container-type: inline-size) {
+    .responsive-image-container {
+        container-type: inline-size;
+    }
+
+    @container (max-width: 400px) {
+        .responsive-image-container img {
+            width: 100%;
+            height: auto;
+        }
+    }
+}
+
+/* Modern image format support */
+.webp-supported img[data-webp] {
+    /* Will be handled by JavaScript */
+}
+
+.avif-supported img[data-avif] {
+    /* Will be handled by JavaScript */
+}
+
+/* Progressive enhancement for modern features */
+.supports-intersection-observer [data-src] {
+    /* Intersection Observer available */
+}
+
+.no-intersection-observer [data-src] {
+    /* Fallback for older browsers */
+    opacity: 1;
+}
+
+/* Performance budget indicators (development only) */
+.perf-budget-warning {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background: orange;
+    color: white;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 9999;
+    display: none;
+}
+
+/* Cache indicator */
+.cache-status {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.cache-status.show {
+    opacity: 1;
+}
+
+.cache-status.from-cache {
+    background: rgba(40, 167, 69, 0.8);
+}
+
+.cache-status.from-network {
+    background: rgba(0, 123, 255, 0.8);
+}
+
+/* Print optimizations */
+@media print {
+    [data-lazy-load],
+    .performance-overlay,
+    .cache-status,
+    .global-error-message,
+    .global-success-message {
+        display: none !important;
+    }
+    
+    img {
+        opacity: 1 !important;
+        filter: none !important;
+    }
+}
+
+/* Accessibility optimizations */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .lazy-skeleton {
+        background: repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 10px,
+            rgba(0, 0, 0, 0.1) 10px,
+            rgba(0, 0, 0, 0.1) 20px
+        );
+    }
+}

@@ -1,0 +1,174 @@
+/* Additional UI Components */
+
+/* General Link Hover Effects with Gradient */
+a:not(.btn):not(.social-link):not(.nav-link) {
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+a:not(.btn):not(.social-link):not(.nav-link)::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 0;
+    height: 2px;
+    background: var(--gradient-accent);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+a:not(.btn):not(.social-link):not(.nav-link):hover::after {
+    width: 100%;
+}
+
+a:not(.btn):not(.social-link):not(.nav-link):hover {
+    background: var(--text-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Copy code button */
+.copy-code-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: var(--transition);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.copy-code-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Global error message */
+.global-error-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    box-shadow: var(--shadow-lg);
+    max-width: 400px;
+    animation: slideInError 0.3s ease;
+}
+
+[data-theme="dark"] .global-error-message {
+    background: #450a0a;
+    border-color: #7f1d1d;
+    color: #fca5a5;
+}
+
+.error-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.error-content button {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.error-content button:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+@keyframes slideInError {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Screen reader only class */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Chain logo fallback */
+.chain-logo-fallback {
+    width: 32px;
+    height: 32px;
+    background: var(--gradient-primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+/* Chain status badges */
+.chain-status-badge {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    border-radius: 1rem;
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: rgba(251, 133, 0, 0.1);
+    color: var(--accent-color);
+    margin-top: 0.25rem;
+}
+
+/* Loading spinner */
+.loading-spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Loaded image state */
+img.loaded {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+img[data-src] {
+    opacity: 0;
+}

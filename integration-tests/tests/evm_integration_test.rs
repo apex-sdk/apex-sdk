@@ -5,8 +5,8 @@
 #[path = "integration_helpers.rs"]
 mod integration_helpers;
 
-use alloy::primitives::{Address, U256};
-use apex_sdk_evm::{wallet::Wallet, EvmAdapter};
+use apex_sdk_core::Signer;
+use apex_sdk_evm::{wallet::Wallet, EvmAdapter, EvmSigner};
 use integration_helpers::*;
 
 #[tokio::test]
@@ -22,11 +22,9 @@ async fn test_evm_connection_to_docker_node() {
         .await
         .expect("Should connect to EVM node");
 
-    let chain_id = adapter.provider().get_chain_id().await;
-    assert!(chain_id.is_ok(), "Should get chain ID");
+    let chain_id = adapter.provider().chain_id();
     assert_eq!(
-        chain_id.unwrap(),
-        31337,
+        chain_id, 31337,
         "Chain ID should be 31337 (Hardhat default)"
     );
 
@@ -52,7 +50,7 @@ async fn test_evm_get_balance_from_docker_node() {
     assert!(balance.is_ok(), "Should get balance");
 
     let balance_value = balance.unwrap();
-    assert!(balance_value > U256::ZERO, "Balance should be > 0");
+    assert!(balance_value > 0, "Balance should be > 0");
 
     println!("Test account balance: {} wei", balance_value);
 }
@@ -70,41 +68,42 @@ async fn test_evm_send_transaction_to_docker_node() {
         .await
         .expect("Should connect to EVM node");
 
-    let wallet = Wallet::from_private_key(
-        "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
-    )
-    .expect("Should create wallet")
-    .with_chain_id(31337); // Hardhat default chain ID
+    let signer =
+        EvmSigner::new("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
+            .expect("Should create signer");
 
-    let from_address = wallet.address();
+    // Configure the adapter with the signer
+    let adapter = adapter.with_signer(signer.clone());
+
+    let from_address = signer.address();
+    let from_address_str = from_address.to_string();
     let to_address_str = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
-    let to_address: Address = to_address_str.parse().expect("Invalid address");
 
-    let initial_from = adapter.get_balance(&from_address).await.unwrap();
+    let initial_from = adapter.get_balance(&from_address_str).await.unwrap();
     let initial_to = adapter.get_balance(to_address_str).await.unwrap();
 
     println!("Initial balances:");
     println!("  From: {} wei", initial_from);
     println!("  To:   {} wei", initial_to);
 
-    // Execute actual transaction using transaction executor
-    let executor = adapter.transaction_executor();
-    let transfer_amount = U256::from(1_000_000_000_000_000u128); // 0.001 ETH
+    // Execute actual transaction
+    let transfer_amount = 1_000_000_000_000_000u128; // 0.001 ETH
 
     println!("\nExecuting transaction...");
     println!("  Amount: {} wei", transfer_amount);
 
-    let tx_hash = executor
-        .send_transaction(&wallet, to_address, transfer_amount, None)
+    let to_address = apex_sdk::prelude::Address::evm(to_address_str);
+    let tx_result = adapter
+        .transfer_eth(&to_address, transfer_amount)
         .await
         .expect("Transaction should execute successfully");
 
-    println!("  TX Hash: {:?}", tx_hash);
+    println!("  TX Result: {:?}", tx_result);
 
     // Verify balances changed
     tokio::time::sleep(tokio::time::Duration::from_millis(500)).await; // Wait for block
 
-    let final_from = adapter.get_balance(&from_address).await.unwrap();
+    let final_from = adapter.get_balance(&from_address_str).await.unwrap();
     let final_to = adapter.get_balance(to_address_str).await.unwrap();
 
     println!("\nFinal balances:");
@@ -142,11 +141,7 @@ async fn test_evm_multiple_accounts() {
     for (i, account) in test_accounts.iter().enumerate() {
         let balance = adapter.get_balance(account).await;
         assert!(balance.is_ok(), "Should get balance for account {}", i);
-        assert!(
-            balance.unwrap() > U256::ZERO,
-            "Account {} should have balance",
-            i
-        );
+        assert!(balance.unwrap() > 0, "Account {} should have balance", i);
     }
 
     println!("All {} test accounts verified", test_accounts.len());
