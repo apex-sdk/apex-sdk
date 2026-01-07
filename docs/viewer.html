@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Docs - Apex SDK</title>
-    <link rel="stylesheet" href="css/modern.css">
+    <link rel="stylesheet" href="css/modular.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 </head>
 <body>
+    <!-- Skip Navigation for Accessibility -->
+    <a href="#doc-content" class="skip-nav">Skip to main content</a>
     <header id="navbar" class="navbar">
         <div class="nav-container">
             <a href="index.html" class="nav-logo">
@@ -74,6 +76,11 @@
         }
         document.head.appendChild(canonical);
     </script>
-    <script src="js/main.js" defer></script>
+    <!-- Utility scripts -->
+    <script src="js/utils/error-handler.js" defer></script>
+    <script src="js/utils/performance.js" defer></script>
+    
+    <!-- Main application script -->
+    <script src="js/main-browser.js" defer></script>
 </body>
 </html>
