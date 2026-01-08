@@ -72,6 +72,9 @@ sha3 = "0.10"
 zeroize = "1.7"
 chrono = "0.4"
 
+# Network and HTTP
+reqwest = { version = "0.13", features = ["json"] }
+
 # Dev-dependencies
 proptest = "1.4"
 criterion = "0.8.1"
