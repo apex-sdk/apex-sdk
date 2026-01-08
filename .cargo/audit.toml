@@ -76,6 +76,22 @@ ignore = [
     # Alternative: pastey (fork) available, but requires Substrate update
     # Mitigation: Will be resolved when Substrate updates to pastey or alternative
     "RUSTSEC-2024-0436",
+
+    # lru 0.12.5, 0.13.0 unsound IterMut (RUSTSEC-2026-0002)
+    # ------------------------------------------------
+    # Source: subxt-lightclient -> smoldot-light -> lru 0.12.5
+    #         alloy-provider -> lru 0.13.0
+    # Issue: IterMut violates Stacked Borrows by invalidating internal pointer
+    # Risk Assessment: LOW
+    #   - Unsound behavior but not directly exploitable in typical usage
+    #   - Transitive dependency through subxt and alloy ecosystems
+    #   - Would require very specific usage patterns to trigger
+    # Mitigation Plan:
+    #   - Short-term: Monitoring for upstream updates
+    #   - Tracking: Waiting for subxt 0.45+ and alloy 2.0+ releases
+    #   - Long-term: Will update when dependencies use fixed lru versions
+    # Tracking: https://rustsec.org/advisories/RUSTSEC-2026-0002
+    "RUSTSEC-2026-0002",
 ]
 
 [database]

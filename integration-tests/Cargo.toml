@@ -11,7 +11,7 @@ apex-sdk-core = { path = "../apex-sdk-core" }
 apex-sdk-evm = { path = "../apex-sdk-evm" }
 apex-sdk-substrate = { path = "../apex-sdk-substrate" }
 tokio = { workspace = true }
-reqwest = "0.13"
+reqwest = { version = "0.13", features = ["json"] }
 serde_json = { workspace = true }
 alloy = { workspace = true }
 alloy-primitives = { workspace = true }
