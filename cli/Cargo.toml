@@ -15,7 +15,7 @@ tokio = { version = "1.38.0", features = ["full"] }
 anyhow = "1.0.86"
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
-colored = "2.1"
+colored = "3.0"
 sp-core = { workspace = true }
 rand = { workspace = true }
 alloy = { workspace = true }
@@ -23,7 +23,7 @@ alloy-signer-local = { workspace = true }
 subxt = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-dialoguer = "0.11"
+dialoguer = "0.12"
 aes-gcm = "0.10"
 argon2 = "0.5"
 zeroize = { workspace = true }
@@ -33,7 +33,7 @@ indicatif = "0.18"
 subxt-signer = "0.44"
 hex = { workspace = true }
 rpassword = "7.3"
-dirs = "5.0"
+dirs = "6.0"
 
 [dev-dependencies]
 tempfile = "3.24"
