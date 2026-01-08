@@ -48,6 +48,15 @@ ignore = [
     # Mitigation: Waiting for upstream fix in ruint crate (no patched version available yet)
     # Tracking: https://github.com/recmo/uint/issues/550 and RUSTSEC-2025-0137
     "RUSTSEC-2025-0137",
+
+    # lru 0.12.5, 0.13.0 unsound IterMut via subxt and alloy ecosystems
+    # IterMut violates Stacked Borrows by invalidating internal pointer
+    # Transitive dependency through subxt-lightclient -> smoldot-light -> lru 0.12.5
+    # and alloy-provider -> lru 0.13.0
+    # Risk assessment: Low - unsound behavior requires specific usage patterns to trigger
+    # Mitigation: Waiting for upstream updates to subxt and alloy that use fixed lru versions
+    # Tracking: https://rustsec.org/advisories/RUSTSEC-2026-0002
+    "RUSTSEC-2026-0002",
 ]
 
 [licenses]

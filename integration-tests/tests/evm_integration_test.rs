@@ -10,9 +10,13 @@ use apex_sdk_evm::{wallet::Wallet, EvmAdapter, EvmSigner};
 use integration_helpers::*;
 
 #[tokio::test]
-#[ignore]
+#[ignore] // Integration test - requires Docker EVM node
 async fn test_evm_connection_to_docker_node() {
-    skip_if_not_integration!();
+    // Always skip this test unless explicitly enabled with INTEGRATION_TESTS=1
+    if !is_integration_enabled() {
+        println!("Skipping Docker integration test - set INTEGRATION_TESTS=1 to run");
+        return;
+    }
 
     wait_for_evm_node(30)
         .await
@@ -32,9 +36,13 @@ async fn test_evm_connection_to_docker_node() {
 }
 
 #[tokio::test]
-#[ignore]
+#[ignore] // Integration test - requires Docker EVM node
 async fn test_evm_get_balance_from_docker_node() {
-    skip_if_not_integration!();
+    // Always skip this test unless explicitly enabled with INTEGRATION_TESTS=1
+    if !is_integration_enabled() {
+        println!("Skipping Docker integration test - set INTEGRATION_TESTS=1 to run");
+        return;
+    }
 
     wait_for_evm_node(30)
         .await
@@ -56,7 +64,7 @@ async fn test_evm_get_balance_from_docker_node() {
 }
 
 #[tokio::test]
-#[ignore]
+#[ignore] // Integration test - requires Docker EVM node
 async fn test_evm_send_transaction_to_docker_node() {
     skip_if_not_integration!();
 
