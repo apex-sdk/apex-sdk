@@ -52,6 +52,9 @@ impl EvmAdapter {
     pub fn with_signer(mut self, signer: EvmSigner) -> Self {
         let provider_clone = self.provider.clone();
 
+        // Set the provider on the signer so it can build proper EVM transactions
+        let signer_with_provider = signer.with_provider(provider_clone.provider.clone());
+
         // Create all the pipeline components
         let fee_estimator = EvmFeeEstimator::new(provider_clone.provider.clone());
         let nonce_manager = EvmNonceManager::new(provider_clone.provider.clone());
@@ -61,7 +64,7 @@ impl EvmAdapter {
         // Create the transaction pipeline
         let pipeline = TransactionPipeline::new(
             provider_clone,
-            signer,
+            signer_with_provider,
             fee_estimator,
             nonce_manager,
             broadcaster,
