@@ -80,8 +80,10 @@ async fn test_evm_send_transaction_to_docker_node() {
         EvmSigner::new("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
             .expect("Should create signer");
 
-    // Configure the adapter with the signer
-    let adapter = adapter.with_signer(signer.clone());
+    // Configure the adapter with the signer and immediate confirmation for faster tests
+    let adapter = adapter
+        .with_signer(signer.clone())
+        .with_confirmation_strategy(apex_sdk_core::ConfirmationStrategy::Immediate);
 
     let from_address = signer.address();
     let from_address_str = from_address.to_string();
