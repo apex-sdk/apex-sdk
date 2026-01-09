@@ -7,6 +7,7 @@ use alloy::primitives::{Address as EthAddress, Bytes, Signature as EthSignature,
 use alloy::providers::Provider;
 use alloy::rpc::types::{Block, BlockNumberOrTag, TransactionRequest};
 use alloy::signers::{local::PrivateKeySigner, Signer as AlloySigner};
+use alloy_eips::eip2718::Encodable2718;
 use apex_sdk_core::{SdkError, Signer as CoreSigner};
 use apex_sdk_types::Address;
 use async_trait::async_trait;
@@ -268,9 +269,8 @@ impl CoreSigner for EvmSigner {
         // Create signed transaction
         let signed_tx = typed_tx.into_signed(signature);
 
-        // RLP encode the signed transaction
-        let mut encoded = Vec::new();
-        signed_tx.rlp_encode(&mut encoded);
+        // Encode according to EIP-2718 (includes transaction type prefix)
+        let encoded = signed_tx.encoded_2718();
 
         Ok(encoded)
     }

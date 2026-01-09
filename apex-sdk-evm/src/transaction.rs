@@ -12,6 +12,7 @@ use alloy::network::TransactionBuilder;
 use alloy::primitives::{Address as EthAddress, Bytes, B256, U256};
 use alloy::providers::Provider;
 use alloy::rpc::types::{Block, BlockNumberOrTag, TransactionReceipt, TransactionRequest};
+use alloy_eips::eip2718::Encodable2718;
 use apex_sdk_core::{FeeEstimator, SdkError};
 use async_trait::async_trait;
 use std::time::Duration;
@@ -407,8 +408,7 @@ impl TransactionExecutor {
 
         let signed_tx = typed_tx.into_signed(signature);
 
-        let mut encoded = Vec::new();
-        signed_tx.rlp_encode(&mut encoded);
+        let encoded = signed_tx.encoded_2718();
         let signed_tx_bytes = Bytes::from(encoded);
 
         tracing::debug!("Transaction signed, sending to network...");
