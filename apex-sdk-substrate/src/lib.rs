@@ -23,6 +23,7 @@ use tracing::{debug, info};
 pub mod cache;
 pub mod contracts;
 pub mod metrics;
+pub mod nonce_manager;
 pub mod pool;
 pub mod signer;
 pub mod storage;
@@ -39,9 +40,10 @@ pub use contracts::{
     StorageDepositLimit,
 };
 pub use metrics::{Metrics, MetricsSnapshot};
+pub use nonce_manager::SubstrateNonceManager;
 pub use pool::{ConnectionPool, PoolConfig};
 pub use signer::{ApexSigner, Ed25519Signer, Sr25519Signer};
-pub use storage::{StorageClient, StorageQuery};
+pub use storage::{AccountInfo, StorageClient, StorageQuery};
 pub use transaction::{BatchCall, BatchMode, FeeConfig, RetryConfig, TransactionExecutor};
 pub use wallet::{KeyPairType, Wallet, WalletManager};
 pub use xcm::{
@@ -542,43 +544,10 @@ impl CoreProvider for SubstrateAdapter {
     async fn get_transaction_count(&self, address: &Address) -> std::result::Result<u64, SdkError> {
         match address {
             Address::Substrate(addr) => {
-                // Parse SS58 address to get AccountId32
-                use sp_core::crypto::{AccountId32, Ss58Codec};
-                let account_id = AccountId32::from_ss58check(addr)
-                    .map_err(|e| SdkError::ConfigError(format!("Invalid SS58 address: {}", e)))?;
+                // Use StorageClient to properly query the nonce
+                let storage_client = StorageClient::new(self.client.clone(), self.metrics.clone());
 
-                // Query account info from System pallet using dynamic API
-                let account_bytes: &[u8] = account_id.as_ref();
-                let storage_query = subxt::dynamic::storage(
-                    "System",
-                    "Account",
-                    vec![subxt::dynamic::Value::from_bytes(account_bytes)],
-                );
-
-                let result = self
-                    .client
-                    .storage()
-                    .at_latest()
-                    .await
-                    .map_err(Error::from)?
-                    .fetch(&storage_query)
-                    .await
-                    .map_err(Error::from)?;
-
-                if let Some(account_data) = result {
-                    // Decode the storage value
-                    let _decoded = account_data.to_value().map_err(|e| {
-                        SdkError::ProviderError(format!("Failed to decode account data: {}", e))
-                    })?;
-
-                    // Extract the nonce - simplified approach since we can't access the decoded structure directly
-                    // In a real implementation, you would use the typed API for better performance
-                    let nonce = 0u64; // Placeholder - use typed metadata for proper decoding
-
-                    Ok(nonce)
-                } else {
-                    Ok(0)
-                }
+                storage_client.get_nonce(addr).await.map_err(SdkError::from)
             }
             _ => Err(SdkError::ConfigError(
                 "Invalid address type for Substrate adapter".to_string(),
