@@ -1,0 +1,39 @@
+services:
+  # EVM test node (Hardhat)
+  evm-node:
+    build:
+      context: ./docker/evm
+      dockerfile: Dockerfile
+    container_name: apex-evm-node
+    ports:
+      - "8545:8545"
+    networks:
+      - apex-test-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8545"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  # Substrate test node (contracts-node)
+  substrate-node:
+    build:
+      context: ./docker/substrate
+      dockerfile: Dockerfile
+    container_name: apex-substrate-node
+    ports:
+      - "9944:9944"  # WebSocket
+      - "9933:9933"  # HTTP RPC
+    networks:
+      - apex-test-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9933/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 20s
+
+networks:
+  apex-test-network:
+    driver: bridge

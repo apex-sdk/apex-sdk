@@ -123,7 +123,6 @@ pub enum Chain {
 }
 
 impl Chain {
-    /// Get the chain type
     pub fn chain_type(&self) -> ChainType {
         match self {
             // Pure Substrate chains
@@ -483,14 +482,55 @@ fn validate_ss58_for_network(addr: &str, expected_ss58_format: u16) -> bool {
 
     // Extract SS58 format from first byte(s)
     let network_id = if decoded[0] & 0b01000000 == 0 {
-        // Simple format: 6-bit network ID
+        // Simple format: 6-bit network ID (0-63)
         u16::from(decoded[0] & 0b00111111)
     } else {
-        // Reserved/extended format: not implemented for now
-        return expected_ss58_format >= 64;
+        // Extended format: 14-bit network ID
+        // First byte: 01xxxxxx (6 bits, lower part)
+        // Second byte: xxxxxxxx (8 bits, upper part)
+        // Network ID = ((first_byte & 0x3F) << 2) | ((second_byte & 0xFC) >> 2) | 0x0040
+        if decoded.len() < 2 {
+            return false;
+        }
+        let lower = u16::from(decoded[0] & 0b00111111);
+        let upper = u16::from(decoded[1]);
+        // Combine to form 14-bit ID: lower 6 bits from first byte, upper 8 bits from second byte
+        ((lower << 8) | upper) | 0x0040
     };
 
     network_id == expected_ss58_format
+}
+
+/// Extract SS58 network prefix from an address string
+/// Returns None if the address cannot be decoded
+pub fn extract_ss58_prefix(address: &str) -> Option<u16> {
+    use bs58;
+
+    // Decode the base58 string
+    let decoded = match bs58::decode(address).into_vec() {
+        Ok(bytes) => bytes,
+        Err(_) => return None,
+    };
+
+    if decoded.is_empty() {
+        return None;
+    }
+
+    // Extract SS58 format from first byte(s)
+    let network_id = if decoded[0] & 0b01000000 == 0 {
+        // Simple format: 6-bit network ID (0-63)
+        u16::from(decoded[0] & 0b00111111)
+    } else {
+        // Extended format: 14-bit network ID
+        if decoded.len() < 2 {
+            return None;
+        }
+        let lower = u16::from(decoded[0] & 0b00111111);
+        let upper = u16::from(decoded[1]);
+        ((lower << 8) | upper) | 0x0040
+    };
+
+    Some(network_id)
 }
 
 /// Generic address type for different chains
@@ -649,7 +689,6 @@ impl Address {
         }
     }
 
-    /// Get the address as a string
     pub fn as_str(&self) -> &str {
         match self {
             Address::Substrate(s) | Address::Evm(s) => s,
@@ -659,7 +698,7 @@ impl Address {
     /// Validate the address format and checksum
     ///
     /// For EVM addresses, validates EIP-55 checksum.
-    /// For Substrate addresses, always returns Ok (validation not implemented).
+    /// For Substrate addresses, validates SS58 format.
     pub fn validate(&self) -> Result<(), ValidationError> {
         match self {
             Address::Evm(addr) => {
@@ -681,41 +720,164 @@ impl Address {
     }
 }
 
+impl std::fmt::Display for Address {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Address::Substrate(addr) => write!(f, "{}", addr),
+            Address::Evm(addr) => write!(f, "{}", addr),
+        }
+    }
+}
+
 /// Transaction status
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TransactionStatus {
-    /// Transaction is pending.
-    ///
-    /// The transaction has been created but has not yet been broadcasted to the network.
-    /// This status typically indicates that the transaction is awaiting submission or signing.
+pub enum TxStatus {
+    /// Transaction is pending
     Pending,
-    /// Transaction is in memory pool (mempool).
-    ///
-    /// The transaction has been broadcasted to the network and is waiting to be included in a block.
-    /// This status indicates that the transaction is known to the network but not yet confirmed.
+    /// Transaction is in mempool
     InMempool,
     /// Transaction is confirmed
-    Confirmed {
-        /// Block hash
-        block_hash: String,
-        /// Block number where transaction was included
-        block_number: Option<u64>,
-    },
-    /// Transaction is finalized (for Substrate chains)
-    Finalized {
-        /// Block hash
-        block_hash: String,
-        /// Block number
-        block_number: u64,
-    },
+    Confirmed,
+    /// Transaction is finalized
+    Finalized,
     /// Transaction failed
-    Failed {
-        /// Error message
-        error: String,
-    },
+    Failed,
     /// Transaction status unknown
     Unknown,
 }
+
+/// Comprehensive transaction status information
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct TransactionStatus {
+    /// Transaction hash
+    pub hash: String,
+    /// Current status
+    pub status: TxStatus,
+    /// Block number where transaction was included
+    pub block_number: Option<u64>,
+    /// Block hash
+    pub block_hash: Option<String>,
+    /// Gas used by the transaction
+    pub gas_used: Option<u64>,
+    /// Effective gas price
+    pub effective_gas_price: Option<u128>,
+    /// Number of confirmations
+    pub confirmations: Option<u32>,
+    /// Error message (if status is Failed)
+    pub error: Option<String>,
+}
+
+impl TransactionStatus {
+    pub fn pending(hash: String) -> Self {
+        Self {
+            hash,
+            status: TxStatus::Pending,
+            block_number: None,
+            block_hash: None,
+            gas_used: None,
+            effective_gas_price: None,
+            confirmations: None,
+            error: None,
+        }
+    }
+
+    /// Create a new confirmed transaction status
+    pub fn confirmed(
+        hash: String,
+        block_number: u64,
+        block_hash: String,
+        gas_used: Option<u64>,
+        effective_gas_price: Option<u128>,
+        confirmations: Option<u32>,
+    ) -> Self {
+        Self {
+            hash,
+            status: TxStatus::Confirmed,
+            block_number: Some(block_number),
+            block_hash: Some(block_hash),
+            gas_used,
+            effective_gas_price,
+            confirmations,
+            error: None,
+        }
+    }
+
+    /// Create a new finalized transaction status
+    pub fn finalized(
+        hash: String,
+        block_number: u64,
+        block_hash: String,
+        gas_used: Option<u64>,
+        effective_gas_price: Option<u128>,
+        confirmations: Option<u32>,
+    ) -> Self {
+        Self {
+            hash,
+            status: TxStatus::Finalized,
+            block_number: Some(block_number),
+            block_hash: Some(block_hash),
+            gas_used,
+            effective_gas_price,
+            confirmations,
+            error: None,
+        }
+    }
+
+    /// Create a new failed transaction status
+    pub fn failed(hash: String, error: String) -> Self {
+        Self {
+            hash,
+            status: TxStatus::Failed,
+            block_number: None,
+            block_hash: None,
+            gas_used: None,
+            effective_gas_price: None,
+            confirmations: None,
+            error: Some(error),
+        }
+    }
+
+    pub fn unknown(hash: String) -> Self {
+        Self {
+            hash,
+            status: TxStatus::Unknown,
+            block_number: None,
+            block_hash: None,
+            gas_used: None,
+            effective_gas_price: None,
+            confirmations: None,
+            error: None,
+        }
+    }
+
+    /// Check if transaction is confirmed or finalized
+    pub fn is_confirmed(&self) -> bool {
+        matches!(self.status, TxStatus::Confirmed | TxStatus::Finalized)
+    }
+
+    /// Check if transaction is finalized
+    pub fn is_finalized(&self) -> bool {
+        matches!(self.status, TxStatus::Finalized)
+    }
+}
+
+impl Default for TransactionStatus {
+    fn default() -> Self {
+        Self {
+            hash: String::new(),
+            status: TxStatus::Unknown,
+            block_number: None,
+            block_hash: None,
+            gas_used: None,
+            effective_gas_price: None,
+            confirmations: None,
+            error: None,
+        }
+    }
+}
+
+// Backward compatibility alias
+pub use TransactionStatus as OldTransactionStatus;
 
 /// Represents a blockchain event emitted by a smart contract or runtime.
 ///
@@ -869,7 +1031,6 @@ mod tests {
 
     #[test]
     fn test_eip55_valid_checksummed_addresses() {
-        // Test vectors from EIP-55
         let valid_addresses = vec![
             "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
             "0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359",
@@ -1048,7 +1209,6 @@ mod tests {
 
     #[test]
     fn test_substrate_ss58_validation_error_types() {
-        // Test invalid format
         let invalid_format = "not-base58!@#";
         let result = Address::substrate_checked(invalid_format);
         assert!(result.is_err());
@@ -1057,7 +1217,6 @@ mod tests {
             _ => panic!("Expected InvalidSubstrateAddress error"),
         }
 
-        // Test invalid checksum (valid base58 but wrong checksum)
         let invalid_checksum = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQX";
         let result = Address::substrate_checked(invalid_checksum);
         assert!(result.is_err());
@@ -1066,14 +1225,12 @@ mod tests {
 
     #[test]
     fn test_validation_error_messages() {
-        // Test EVM validation error
         let invalid_evm = "0xinvalid";
         let result = Address::evm_checked(invalid_evm);
         assert!(result.is_err());
         let err = result.unwrap_err();
         assert!(err.to_string().contains("Invalid EVM address"));
 
-        // Test checksum error
         let invalid_checksum = "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAeD";
         let result = Address::evm_checked(invalid_checksum);
         assert!(result.is_err());
@@ -1083,7 +1240,6 @@ mod tests {
 
     #[test]
     fn test_overflow_protection_in_validation() {
-        // Test that validation handles edge cases without panicking
         let long_string = "a".repeat(1000);
         let result = Address::evm_checked(&long_string);
         assert!(result.is_err());

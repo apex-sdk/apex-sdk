@@ -108,7 +108,7 @@ let mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon 
 let wallet = Wallet::from_mnemonic(mnemonic, None)?;
 
 // With custom derivation path
-let wallet = Wallet::from_mnemonic(mnemonic, Some("//Alice"))?;
+let wallet = Wallet::from_mnemonic(mnemonic, Some("//Ilara"))?;
 ```
 
 ### Account Queries
@@ -142,7 +142,7 @@ let adapter = SubstrateAdapter::westend("wss://westend-rpc.polkadot.io").await?;
 let wallet = Wallet::from_mnemonic("your mnemonic", None)?;
 
 // Build transfer transaction
-let dest = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"; // Alice
+let dest = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"; // Ilara
 let amount = 1_000_000_000_000u128; // 1 WND
 
 let tx = TransactionBuilder::new(&adapter)

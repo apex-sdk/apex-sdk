@@ -228,12 +228,6 @@ impl Config {
             _ => anyhow::bail!("Unknown configuration key: {}", key),
         }
     }
-
-    /// Get endpoint for a chain
-    #[allow(dead_code)]
-    pub fn get_endpoint(&self, chain: &str) -> Option<&String> {
-        self.endpoints.get(chain)
-    }
 }
 
 /// Get the default config path

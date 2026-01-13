@@ -43,8 +43,34 @@ const CONFIG = {
 
     // Web3Forms Configuration
     web3forms: {
-        accessKey: '__WEB3FORMS_ACCESS_KEY__', // Will be replaced during deployment
-        endpoint: 'https://api.web3forms.com/submit'
+        accessKey: (() => {
+            // Build-time placeholder (replaced by Cloudflare Pages build)
+            const buildTimeKey = '__WEB3FORMS_ACCESS_KEY__';
+
+            // Try multiple sources for the access key
+            const key =
+                // 1. From build-time injection (Cloudflare Pages)
+                (buildTimeKey && !buildTimeKey.startsWith('__WEB3FORMS')) ? buildTimeKey :
+                // 2. From window global (set by build process)
+                window.WEB3FORMS_ACCESS_KEY ||
+                // 3. From meta tag
+                document.querySelector('meta[name="web3forms-key"]')?.content ||
+                // 4. From environment (if using bundler)
+                (typeof process !== 'undefined' && process.env?.WEB3FORMS_ACCESS_KEY) ||
+                // 5. From local storage (for development)
+                localStorage.getItem('web3forms-key') ||
+                null;
+
+            if (!key) {
+                console.warn('Web3Forms access key not found. Contact form will be disabled.');
+            }
+
+            return key;
+        })(),
+        endpoint: 'https://api.web3forms.com/submit',
+        enabled: function() {
+            return !!this.accessKey;
+        }
     },
     
     // Animation Settings

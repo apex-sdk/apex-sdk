@@ -31,10 +31,30 @@ impl TransactionBuilder {
         self
     }
 
+    /// Set the sender address from an EVM address string
+    pub fn from_evm_address(self, address: &str) -> Self {
+        self.from(Address::evm(address))
+    }
+
+    /// Set the sender address from a Substrate account string
+    pub fn from_substrate_account(self, address: &str) -> Self {
+        self.from(Address::substrate(address))
+    }
+
     /// Set the recipient address
     pub fn to(mut self, address: Address) -> Self {
         self.to = Some(address);
         self
+    }
+
+    /// Set the recipient address from an EVM address string
+    pub fn to_evm_address(self, address: &str) -> Self {
+        self.to(Address::evm(address))
+    }
+
+    /// Set the recipient address from a Substrate account string
+    pub fn to_substrate_account(self, address: &str) -> Self {
+        self.to(Address::substrate(address))
     }
 
     /// Set the transfer amount
@@ -49,6 +69,11 @@ impl TransactionBuilder {
         self
     }
 
+    /// Alias for gas_limit (for consistency with documentation)
+    pub fn with_gas_limit(self, limit: u64) -> Self {
+        self.gas_limit(limit)
+    }
+
     /// Set the gas price
     pub fn gas_price(mut self, price: u64) -> Self {
         self.gas_price = Some(price);
@@ -59,6 +84,11 @@ impl TransactionBuilder {
     pub fn data(mut self, data: Vec<u8>) -> Self {
         self.data = Some(data);
         self
+    }
+
+    /// Alias for data (for consistency with documentation)
+    pub fn with_data(self, data: Vec<u8>) -> Self {
+        self.data(data)
     }
 
     /// Set the target chain
@@ -118,8 +148,33 @@ impl Transaction {
 
     /// Check if this is a cross-chain transaction
     pub fn is_cross_chain(&self) -> bool {
-        // Implementation would check if from and to addresses are on different chains
-        false
+        // Check if from and to addresses indicate different chain types
+        match (&self.from, &self.to) {
+            (Address::Substrate(_), Address::Evm(_)) => true,
+            (Address::Evm(_), Address::Substrate(_)) => true,
+            (Address::Substrate(from_addr), Address::Substrate(to_addr)) => {
+                // For Substrate-to-Substrate, check if they have different SS58 prefixes
+                // indicating different parachains/relay chains
+                !Self::same_substrate_network(from_addr, to_addr)
+            }
+            (Address::Evm(_), Address::Evm(_)) => {
+                // For EVM-to-EVM, same chain unless proven otherwise
+                // Would need chain_id comparison in future enhancement
+                false
+            }
+        }
+    }
+
+    /// Check if two Substrate addresses are on the same network
+    fn same_substrate_network(addr1: &str, addr2: &str) -> bool {
+        // Extract network prefix from SS58 addresses
+        // Different prefixes indicate different networks (e.g., Polkadot vs Kusama)
+        use apex_sdk_types::extract_ss58_prefix;
+
+        match (extract_ss58_prefix(addr1), extract_ss58_prefix(addr2)) {
+            (Some(prefix1), Some(prefix2)) => prefix1 == prefix2,
+            _ => true, // If we can't determine, assume same network
+        }
     }
 
     /// Calculate transaction hash
@@ -133,10 +188,53 @@ impl Transaction {
 /// Transaction execution result
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TransactionResult {
-    pub hash: String,
+    /// Transaction hash on the source chain
+    pub source_tx_hash: String,
+    /// Transaction hash on the destination chain (for cross-chain transfers)
+    pub destination_tx_hash: Option<String>,
+    /// Transaction status
     pub status: TransactionStatus,
+    /// Block number where transaction was included
     pub block_number: Option<u64>,
+    /// Gas used by the transaction
     pub gas_used: Option<u64>,
+}
+
+impl TransactionResult {
+    /// Create a new transaction result
+    pub fn new(source_tx_hash: String) -> Self {
+        Self {
+            source_tx_hash,
+            destination_tx_hash: None,
+            status: TransactionStatus::Pending,
+            block_number: None,
+            gas_used: None,
+        }
+    }
+
+    /// Set the transaction status
+    pub fn with_status(mut self, status: TransactionStatus) -> Self {
+        self.status = status;
+        self
+    }
+
+    /// Set the block number
+    pub fn with_block_number(mut self, block_number: u64) -> Self {
+        self.block_number = Some(block_number);
+        self
+    }
+
+    /// Set the gas used
+    pub fn with_gas_used(mut self, gas_used: u64) -> Self {
+        self.gas_used = Some(gas_used);
+        self
+    }
+
+    /// Set the destination transaction hash (for cross-chain transfers)
+    pub fn with_destination_tx_hash(mut self, tx_hash: String) -> Self {
+        self.destination_tx_hash = Some(tx_hash);
+        self
+    }
 }
 
 /// Transaction status
@@ -145,6 +243,7 @@ pub enum TransactionStatus {
     Pending,
     Success,
     Failed,
+    Finalized,
     Unknown,
 }
 
@@ -236,16 +335,15 @@ mod tests {
 
     #[test]
     fn test_transaction_is_not_cross_chain() {
+        // Test same-chain transaction (EVM to EVM)
         let tx = Transaction::builder()
             .from(Address::evm("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7"))
-            .to(Address::substrate(
-                "15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5",
-            ))
+            .to(Address::evm("0x123456789abcdef123456789abcdef123456789a"))
             .amount(1000)
             .build()
             .unwrap();
 
-        assert!(!tx.is_cross_chain()); // For now, always false
+        assert!(!tx.is_cross_chain()); // Same chain type should return false
     }
 
     #[test]
@@ -279,13 +377,12 @@ mod tests {
 
     #[test]
     fn test_transaction_result_serialization() {
-        let result = TransactionResult {
-            hash: "0x123".to_string(),
-            status: TransactionStatus::Success,
-            block_number: Some(100),
-            gas_used: Some(21000),
-        };
+        let result = TransactionResult::new("0x123".to_string())
+            .with_status(TransactionStatus::Success)
+            .with_block_number(100)
+            .with_gas_used(21000);
 
         let _serialized = serde_json::to_string(&result).unwrap();
+        assert_eq!(result.source_tx_hash, "0x123");
     }
 }

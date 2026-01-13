@@ -1,0 +1,276 @@
+/* Error Handling and Fallback Styles */
+
+/* Global Error Messages */
+.global-error-message,
+.global-success-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    max-width: 400px;
+    min-width: 300px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: slideInRight 0.3s ease-out;
+}
+
+.global-error-message {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.global-success-message {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.error-content,
+.success-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    gap: 12px;
+}
+
+.error-content span,
+.success-content span {
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.error-content button,
+.success-content button {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.error-content button:hover,
+.success-content button:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.error-content button:focus,
+.success-content button:focus {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+/* Animation */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Image Error Fallbacks */
+.image-error {
+    opacity: 0.5;
+    filter: grayscale(100%);
+}
+
+.chain-logo-fallback {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--primary-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+/* Fallback Loading States */
+.loading-error {
+    background: #f8f9fa;
+    color: #6c757d;
+    padding: 40px 20px;
+    text-align: center;
+    border-radius: 8px;
+    border: 2px dashed #dee2e6;
+}
+
+.loading-error::before {
+    content: "⚠️";
+    display: block;
+    font-size: 32px;
+    margin-bottom: 16px;
+}
+
+/* Network Status Indicator */
+.network-status {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.network-status.offline {
+    background: #dc3545;
+    color: white;
+}
+
+.network-status.online {
+    background: #28a745;
+    color: white;
+}
+
+/* Accessibility Error States */
+.error-boundary {
+    border: 2px solid #dc3545;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 16px 0;
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.error-boundary h3 {
+    margin: 0 0 12px 0;
+    color: #721c24;
+}
+
+.error-boundary p {
+    margin: 0 0 16px 0;
+}
+
+.error-boundary button {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.error-boundary button:hover {
+    background: #c82333;
+}
+
+.error-boundary button:focus {
+    outline: 2px solid #721c24;
+    outline-offset: 2px;
+}
+
+/* Graceful Degradation */
+.no-js .js-only {
+    display: none !important;
+}
+
+.no-js .no-js-fallback {
+    display: block !important;
+}
+
+.js-error .js-dependent {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Fallback Typography */
+.fallback-typography {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+.fallback-typography h1 { font-size: 2rem; margin-bottom: 1rem; }
+.fallback-typography h2 { font-size: 1.5rem; margin-bottom: 0.75rem; }
+.fallback-typography h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+.fallback-typography p { margin-bottom: 1rem; }
+.fallback-typography a { color: #007bff; text-decoration: underline; }
+
+/* Mobile Error Handling */
+@media (max-width: 768px) {
+    .global-error-message,
+    .global-success-message {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+        min-width: auto;
+    }
+    
+    .error-content,
+    .success-content {
+        padding: 16px;
+    }
+    
+    .network-status {
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 10px;
+    }
+}
+
+/* Dark Mode Error Styles */
+@media (prefers-color-scheme: dark) {
+    .global-error-message {
+        background: #722c2c;
+        border-color: #8b3538;
+        color: #f8d7da;
+    }
+    
+    .global-success-message {
+        background: #1e4620;
+        border-color: #28a745;
+        color: #d4edda;
+    }
+    
+    .loading-error {
+        background: #2d3748;
+        color: #a0aec0;
+        border-color: #4a5568;
+    }
+    
+    .chain-logo-fallback {
+        background: var(--primary-gradient-dark, linear-gradient(135deg, #4a5568 0%, #2d3748 100%));
+    }
+    
+    .fallback-typography {
+        color: #e2e8f0;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .global-error-message,
+    .global-success-message {
+        animation: none;
+    }
+    
+    .error-content button,
+    .success-content button,
+    .network-status {
+        transition: none;
+    }
+}

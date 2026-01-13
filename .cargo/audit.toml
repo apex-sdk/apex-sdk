@@ -6,6 +6,21 @@
 ignore = [
     # === VULNERABILITIES ===
     
+    # ruint 1.17.0 reciprocal_mg10 unsoundness (RUSTSEC-2025-0137)
+    # ------------------------------------------------
+    # Source: alloy-primitives -> ruint 1.17.0
+    # Issue: Unsoundness in safe reciprocal_mg10 function allowing out-of-bounds access
+    # Risk Assessment: LOW
+    #   - Function not directly used in application code
+    #   - Transitive dependency from Alloy ecosystem
+    #   - Memory corruption possible if function is called with specific inputs
+    # Mitigation Plan:
+    #   - Short-term: Updated to latest Alloy v1.2.1 and alloy-primitives v1.5.2
+    #   - Monitoring: Waiting for upstream ruint fix
+    #   - Long-term: Will update immediately when ruint releases patched version
+    # Tracking: https://rustsec.org/advisories/RUSTSEC-2025-0137
+    "RUSTSEC-2025-0137",
+
     # ring 0.16.20 AES panic vulnerability (RUSTSEC-2025-0009)
     # ------------------------------------------------
     # Source: ethers -> ethers-providers -> jsonwebtoken -> ring 0.16.20
@@ -61,6 +76,22 @@ ignore = [
     # Alternative: pastey (fork) available, but requires Substrate update
     # Mitigation: Will be resolved when Substrate updates to pastey or alternative
     "RUSTSEC-2024-0436",
+
+    # lru 0.12.5, 0.13.0 unsound IterMut (RUSTSEC-2026-0002)
+    # ------------------------------------------------
+    # Source: subxt-lightclient -> smoldot-light -> lru 0.12.5
+    #         alloy-provider -> lru 0.13.0
+    # Issue: IterMut violates Stacked Borrows by invalidating internal pointer
+    # Risk Assessment: LOW
+    #   - Unsound behavior but not directly exploitable in typical usage
+    #   - Transitive dependency through subxt and alloy ecosystems
+    #   - Would require very specific usage patterns to trigger
+    # Mitigation Plan:
+    #   - Short-term: Monitoring for upstream updates
+    #   - Tracking: Waiting for subxt 0.45+ and alloy 2.0+ releases
+    #   - Long-term: Will update when dependencies use fixed lru versions
+    # Tracking: https://rustsec.org/advisories/RUSTSEC-2026-0002
+    "RUSTSEC-2026-0002",
 ]
 
 [database]

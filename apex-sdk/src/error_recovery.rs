@@ -116,8 +116,6 @@ fn is_retryable<E: std::fmt::Display>(_error: &E) -> bool {
 #[derive(Debug)]
 pub struct CircuitBreaker {
     failure_threshold: usize,
-    #[allow(dead_code)]
-    recovery_timeout: Duration,
     state: CircuitBreakerState,
     failure_count: usize,
 }
@@ -126,15 +124,12 @@ pub struct CircuitBreaker {
 enum CircuitBreakerState {
     Closed,
     Open,
-    #[allow(dead_code)]
-    HalfOpen,
 }
 
 impl CircuitBreaker {
-    pub fn new(failure_threshold: usize, recovery_timeout: Duration) -> Self {
+    pub fn new(failure_threshold: usize, _recovery_timeout: Duration) -> Self {
         Self {
             failure_threshold,
-            recovery_timeout,
             state: CircuitBreakerState::Closed,
             failure_count: 0,
         }

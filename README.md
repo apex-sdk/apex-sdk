@@ -1,6 +1,8 @@
 # Apex SDK Protocol
 
 [![CI](https://github.com/carbobit/apex-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/carbobit/apex-sdk/actions/workflows/ci.yml)
+[![Integration Tests](https://github.com/carbobit/apex-sdk/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/carbobit/apex-sdk/actions/workflows/integration-tests.yml)
+[![Daily Health Check](https://github.com/carbobit/apex-sdk/actions/workflows/daily-health-check.yml/badge.svg)](https://github.com/carbobit/apex-sdk/actions/workflows/daily-health-check.yml)
 [![Security](https://github.com/carbobit/apex-sdk/actions/workflows/security.yml/badge.svg)](https://github.com/carbobit/apex-sdk/actions/workflows/security.yml/badge.svg)
 [![Benchmarks](https://github.com/carbobit/apex-sdk/actions/workflows/benchmarks.yml/badge.svg)](https://github.com/carbobit/apex-sdk/actions/workflows/benchmarks.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -79,6 +81,43 @@ cargo test --all-features
 cargo install --path ./cli
 ```
 
+## Testing
+
+Apex SDK includes comprehensive testing infrastructure with unit tests, integration tests, and Docker-based testing against local blockchain nodes.
+
+### Quick Testing
+
+```bash
+# Run all unit tests
+cargo test
+
+# Run with all features
+cargo test --all-features
+
+# Run doc tests
+cargo test --doc
+```
+
+### Docker Integration Tests
+
+Test against actual blockchain nodes running in Docker containers:
+
+```bash
+# Start test nodes (Hardhat + Substrate)
+./docker/scripts/start-nodes.sh
+
+# Run EVM integration tests
+INTEGRATION_TESTS=1 cargo test --test evm_integration_test -- --include-ignored
+
+# Run Substrate integration tests
+INTEGRATION_TESTS=1 cargo test --test substrate_integration_test -- --include-ignored
+
+# Stop test nodes
+./docker/scripts/stop-nodes.sh
+```
+
+See [`docker/README.md`](docker/README.md) for detailed documentation on the Docker integration test infrastructure.
+
 ## Supported Chains
 
 ### Currently Supported
@@ -131,6 +170,8 @@ See [DOMAINS.md](./docs/DOMAINS.md) for the complete domain structure.
 
 Check out the [`examples/`](./examples) directory for complete working examples:
 
+- **[`evm-transfer/`](./examples/evm-transfer/)** - Execute actual ETH transfers on testnet with wallet signing
+- **[`evm-contract-call/`](./examples/evm-contract-call/)** - Type-safe ERC-20 contract interactions using Alloy
 - [`account-manager/`](./examples/account-manager/) - Multi-chain account management
 - [`price-oracle/`](./examples/price-oracle/) - Multi-chain price aggregation
 - [`contract-orchestration/`](./examples/contract-orchestration/) - Smart contract deployment
@@ -154,6 +195,17 @@ git clone https://github.com/carbobit/apex-sdk.git
 cd apex-sdk
 cargo test --all-features
 ```
+
+**Setup Git Hooks (Recommended):**
+
+Install pre-commit hooks to catch CI failures before pushing:
+
+```bash
+./scripts/install-git-hooks.sh
+```
+
+This will automatically run format checks, clippy lints, and builds before each commit.
+To bypass (use sparingly): `git commit --no-verify`
 
 **[Development Guide](./docs/DEVELOPMENT.md)**
 

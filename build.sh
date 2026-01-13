@@ -1,19 +1,18 @@
 #!/bin/bash
-# Build script for Cloudflare Pages deployment
+set -e
 
-echo "Building Apex SDK documentation..."
+echo "building docs."
 
-# Create dist directory
 mkdir -p dist
 
-# Copy all documentation files
-cp -r docs/* dist/
+if [ -d "docs" ]; then
+    echo "copying docs files..."
+    cp -r docs/* dist/
+    echo "docs copied to dist/"
+else
+    echo "docs dir not found"
+    exit 1
+fi
 
-# Copy root level files that should be accessible
-cp README.md dist/
-cp LICENSE dist/
-cp CONTRIBUTING.md dist/
-
-echo "Build complete! Documentation ready for deployment."
-echo "Output directory: dist/"
-echo "Files copied: $(find dist -type f | wc -l)"
+echo "docs build completed successfully!"
+echo "files ready for Cloudflare Pages deployment in dist/"

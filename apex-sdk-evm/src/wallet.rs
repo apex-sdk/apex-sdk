@@ -8,10 +8,11 @@
 
 use crate::Error;
 use alloy::primitives::{Address as EthAddress, Signature, B256};
-use alloy::signers::{
-    local::{coins_bip39::English, MnemonicBuilder, PrivateKeySigner},
-    Signer,
-};
+use alloy::signers::Signer;
+use alloy_signer_local::{coins_bip39::English, MnemonicBuilder, PrivateKeySigner};
+use apex_sdk_core::{SdkError, Signer as CoreSigner};
+use apex_sdk_types::Address;
+use async_trait::async_trait;
 use std::str::FromStr;
 
 /// Wallet for managing EVM accounts and signing transactions
@@ -184,7 +185,6 @@ impl Wallet {
     /// # Returns
     /// The signature
     pub async fn sign_typed_data_hash(&self, hash: &B256) -> Result<Signature, Error> {
-        // For EIP-712, we sign the hash directly
         let signature = self
             .inner
             .sign_hash(hash)
@@ -217,6 +217,37 @@ impl std::fmt::Debug for Wallet {
             .field("address", &self.address())
             .field("chain_id", &self.chain_id())
             .finish()
+    }
+}
+
+#[async_trait]
+impl CoreSigner for Wallet {
+    async fn sign_transaction(&self, tx: &[u8]) -> std::result::Result<Vec<u8>, SdkError> {
+        use alloy::primitives::keccak256;
+
+        // Properly handle different transaction input formats
+        if tx.len() == 32 {
+            // If it's exactly 32 bytes, treat it as a pre-computed hash
+            let hash = B256::from_slice(tx);
+            let signature = self
+                .sign_transaction_hash(&hash)
+                .await
+                .map_err(|e| SdkError::SignerError(e.to_string()))?;
+            Ok(signature.as_bytes().to_vec())
+        } else {
+            // For any other length, hash the transaction data first
+            // This properly handles RLP-encoded transactions or any other format
+            let hash = keccak256(tx);
+            let signature = self
+                .sign_transaction_hash(&hash)
+                .await
+                .map_err(|e| SdkError::SignerError(e.to_string()))?;
+            Ok(signature.as_bytes().to_vec())
+        }
+    }
+
+    fn address(&self) -> Address {
+        Address::Evm(self.address())
     }
 }
 
@@ -308,22 +339,18 @@ mod tests {
 
     #[test]
     fn test_from_private_key() {
-        // Test private key (from hardhat default)
         let private_key = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
         let wallet = Wallet::from_private_key(private_key).unwrap();
 
-        // Expected address for this key
         let expected_address = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
         assert_eq!(wallet.address().to_lowercase(), expected_address);
     }
 
     #[test]
     fn test_from_mnemonic() {
-        // Test mnemonic (common test phrase)
         let mnemonic = "test test test test test test test test test test test junk";
         let wallet = Wallet::from_mnemonic(mnemonic, 0).unwrap();
 
-        // Should create a valid address
         assert!(wallet.address().starts_with("0x"));
         assert_eq!(wallet.address().len(), 42);
     }
@@ -341,7 +368,6 @@ mod tests {
 
         let signature = wallet.sign_message(message).await.unwrap();
 
-        // Signature should be valid
         let sig_bytes = signature.as_bytes();
         assert_eq!(sig_bytes.len(), 65);
     }
@@ -350,7 +376,6 @@ mod tests {
     fn test_wallet_manager() {
         let mut manager = WalletManager::new();
 
-        // Create wallets
         let idx1 = manager.create_wallet();
         let idx2 = manager.create_wallet();
 
@@ -358,14 +383,11 @@ mod tests {
         assert_eq!(idx1, 0);
         assert_eq!(idx2, 1);
 
-        // Test active wallet
         assert!(manager.active_wallet().is_some());
 
-        // Change active wallet
         manager.set_active(1).unwrap();
         assert!(manager.active_wallet().is_some());
 
-        // List addresses
         let addresses = manager.list_addresses();
         assert_eq!(addresses.len(), 2);
     }

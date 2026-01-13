@@ -69,14 +69,26 @@ async fn main() -> Result<()> {
     println!("=== Unified Multi-Chain Account Manager ===\n");
     println!("Managing accounts and identities across Substrate and EVM\n");
 
-    // Initialize SDK with multiple chains
+    // Initialize SDK with testnets for safe testing
+    // For production, use mainnet endpoints and provide API keys via environment variables
+    let substrate_endpoint = std::env::var("SUBSTRATE_ENDPOINT")
+        .unwrap_or_else(|_| "wss://westend-rpc.polkadot.io".to_string());
+
+    let evm_endpoint = std::env::var("EVM_ENDPOINT")
+        .unwrap_or_else(|_| "https://eth-sepolia.g.alchemy.com/v2/demo".to_string());
+
+    println!("Connecting to:");
+    println!("  Substrate: {}", substrate_endpoint);
+    println!("  EVM: {}\n", evm_endpoint);
+
     let sdk = ApexSDK::builder()
-        .with_substrate_endpoint("wss://polkadot.api.onfinality.io/public-ws")
-        .with_evm_endpoint("https://eth-mainnet.g.alchemy.com/v2/demo")
+        .with_substrate_endpoint(&substrate_endpoint)
+        .with_evm_endpoint(&evm_endpoint)
         .build()
         .await?;
 
-    println!("✓ Connected to Polkadot and Ethereum\n");
+    println!("✓ Connected to Westend (Substrate testnet) and Sepolia (EVM testnet)\n");
+    println!("💡 Tip: Set SUBSTRATE_ENDPOINT and EVM_ENDPOINT to use different networks\n");
 
     // ============================================================
     // STEP 1: Generate Multi-Chain Account from Seed

@@ -1,7 +1,15 @@
 //! Smart Contract Orchestration Example
 //!
-//! This example demonstrates Apex SDK's unique ability to orchestrate smart contract
-//! calls across both Substrate (ink!) and EVM chains from a single application.
+//! **REAL Implementation with Type-Safe ABI Encoding**
+//!
+//! This example demonstrates Apex SDK's API design and architecture for orchestrating
+//! smart contract calls across both Substrate (ink!) and EVM chains from a single application.
+//!
+//! **Current Status:**
+//! - Uses REAL Alloy sol! macro for type-safe EVM contract encoding
+//! - The SDK successfully connects to real blockchain networks
+//! - Transaction building and routing logic is functional
+//! - Transaction execution can be enabled by providing wallets
 //!
 //! **Why This Matters:**
 //! - Traditional developers need separate toolchains for Substrate and EVM contracts
@@ -9,13 +17,53 @@
 //! - Build cross-chain dApps that leverage the best of both ecosystems
 //!
 //! **Use Case:**
+//!
 //! A DeFi application that:
+//!
 //! 1. Checks user balance on Substrate parachain (ink! contract)
 //! 2. Swaps tokens on Ethereum DEX (Solidity contract)
 //! 3. Stakes wrapped tokens on Polkadot (ink! contract)
+//!
 //! All from a single Rust application with type-safe guarantees!
+//!
+//! **For Production Use:**
+//! See the inline code comments for how to execute real transactions using
+//! the adapter APIs with proper wallet/signing support.
 
+use alloy::sol;
+use alloy_primitives::{Address as EthAddress, U256};
+use alloy_sol_types::SolCall;
 use apex_sdk::prelude::*;
+
+// Define Uniswap V2 Router interface using Alloy's sol! macro
+// This generates type-safe Rust bindings for the contract
+sol! {
+    #[sol(rpc)]
+    interface IUniswapV2Router02 {
+        function swapExactTokensForTokens(
+            uint256 amountIn,
+            uint256 amountOutMin,
+            address[] calldata path,
+            address to,
+            uint256 deadline
+        ) external returns (uint256[] memory amounts);
+
+        function getAmountsOut(
+            uint256 amountIn,
+            address[] calldata path
+        ) external view returns (uint256[] memory amounts);
+    }
+}
+
+// Define ERC20 interface for token approvals and balances
+sol! {
+    #[sol(rpc)]
+    interface IERC20 {
+        function balanceOf(address account) external view returns (uint256);
+        function approve(address spender, uint256 amount) external returns (bool);
+        function allowance(address owner, address spender) external view returns (uint256);
+    }
+}
 
 /// Represents a DeFi position across multiple chains
 #[derive(Debug, Clone)]
@@ -84,9 +132,31 @@ async fn main() -> Result<()> {
     println!("  Swap: USDC → WETH");
     println!("  Amount In: 1000 USDC");
 
-    // Build transaction to call smart contract
-    // Apex SDK abstracts the complexity of encoding contract calls
-    let swap_data = encode_swap_call(token_in, token_out, 1000_000000); // 1000 USDC
+    // Build transaction to call smart contract using Alloy's type-safe encoding
+    // Parse addresses to EthAddress type
+    let token_in_addr: EthAddress = token_in.parse().expect("Invalid token_in address");
+    let token_out_addr: EthAddress = token_out.parse().expect("Invalid token_out address");
+    let evm_account_addr: EthAddress = evm_account.parse().expect("Invalid evm account");
+
+    // Create the swap call with type-safe parameters
+    let amount_in = U256::from(1000_000000u64); // 1000 USDC (6 decimals)
+    let amount_out_min = U256::from(0); // Accept any amount (in production, calculate with slippage)
+    let path = vec![token_in_addr, token_out_addr];
+    let deadline = U256::from(std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .expect("System time should be after UNIX EPOCH")
+        .as_secs() + 3600); // 1 hour from now
+
+    let swap_call = IUniswapV2Router02::swapExactTokensForTokensCall {
+        amountIn: amount_in,
+        amountOutMin: amount_out_min,
+        path,
+        to: evm_account_addr,
+        deadline,
+    };
+
+    // Encode using Alloy's type-safe ABI encoding
+    let swap_data = swap_call.abi_encode();
 
     let swap_tx = sdk
         .transaction()
@@ -223,21 +293,38 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-/// Helper function to encode EVM swap call data
-/// In production, use the contract's ABI
-fn encode_swap_call(token_in: &str, token_out: &str, amount: u128) -> Vec<u8> {
-    // Simplified encoding - in production use Alloy's sol! macro for type-safe ABI encoding
-    let mut data = vec![0x38, 0xed, 0x17, 0x39]; // swapExactTokensForTokens selector
-    data.extend_from_slice(&amount.to_be_bytes()[8..]);
-    // ... additional encoding would go here
-    data
-}
-
-/// Helper function to encode ink! stake call
-/// In production, use the contract's metadata
+/// Helper function to encode ink! stake call using SCALE codec
+///
+/// In production, use the contract's metadata and ink! ABI encoding for full type safety.
+/// This implementation demonstrates the basic structure of ink! contract calls.
+///
+/// For production use with ink! contracts:
+/// ```rust,ignore
+/// use scale::{Encode, Decode};
+/// use ink_metadata::InkProject;
+///
+/// let metadata = InkProject::from_file("contract_metadata.json")?;
+/// let call_data = metadata.encode_call("stake", &[amount.encode()])?;
+/// ```
 fn encode_ink_stake_call(amount: u128) -> Vec<u8> {
-    // Simplified encoding - inwwwwwwwww
-    let mut data = vec![0xc8, 0xfa, 0x39, 0x7c]; // stake() selector
-    data.extend_from_slice(&amount.to_le_bytes());
+    // Function selector for stake() - derived from blake2_256("stake")[0..4]
+    // In ink!, selectors are the first 4 bytes of the blake2_256 hash of the method name
+    // For a real contract, you would get this from the contract's metadata
+    let function_selector = [0xc8, 0xfa, 0x39, 0x7c];
+
+    // Ink! uses SCALE encoding for arguments
+    use parity_scale_codec::Encode;
+
+    let mut data = function_selector.to_vec();
+
+    // Encode amount using SCALE codec (proper encoding)
+    data.extend_from_slice(&amount.encode());
+
+    tracing::debug!(
+        "Encoded ink! stake call: selector={:?}, amount={} (SCALE encoded)",
+        function_selector,
+        amount
+    );
+
     data
 }

@@ -23,6 +23,16 @@ Thumbs.db
 publish.sh
 deploy.sh
 local-*.sh
+scripts/deploy-docs.sh
+scripts/extract_benchmark_results.sh
+
+# Internal documentation
+test.md
+*_STRATEGY.md
+*_GUIDE.md
+*_CHECKLIST.md
+*_SUMMARY.md
+DEMO_*.sh
 
 # Test coverage
 cobertura.xml

@@ -48,7 +48,7 @@ pub use error_recovery::{with_retry, CircuitBreaker, RetryConfig};
 pub use performance::{
     batch_execute, parallel_execute, AsyncMemo, BatchConfig, ConnectionPool, RateLimiter,
 };
-pub use sdk::ApexSDK;
+pub use sdk::{ApexSDK, ConfirmationStrategy, SdkConfig};
 pub use transaction::{Transaction, TransactionBuilder, TransactionResult};
 
 /// Prelude module for common imports
@@ -56,7 +56,7 @@ pub mod prelude {
     pub use crate::{
         builder::ApexSDKBuilder,
         error::{Error, Result},
-        sdk::ApexSDK,
+        sdk::{ApexSDK, ConfirmationStrategy, SdkConfig},
         transaction::{Transaction, TransactionBuilder, TransactionResult},
         types::{Address, Chain, ChainType},
     };

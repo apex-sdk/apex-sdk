@@ -60,7 +60,11 @@ where
         let f = f.clone();
 
         async move {
-            let _permit = semaphore.acquire().await.unwrap();
+            // Acquire semaphore permit - only fails if semaphore is closed (which shouldn't happen)
+            let _permit = semaphore
+                .acquire()
+                .await
+                .expect("Semaphore should not be closed");
             f(item).await
         }
     });
@@ -119,28 +123,34 @@ impl<K: Hash + Eq + Clone, V: Clone> AsyncMemo<K, V> {
     }
 
     fn get_cached(&self, key: &K) -> Option<(V, Instant)> {
-        self.cache.lock().unwrap().get(key).cloned()
+        self.cache
+            .lock()
+            .expect("Cache mutex should not be poisoned")
+            .get(key)
+            .cloned()
     }
 
     fn insert(&self, key: K, value: V) {
         self.cache
             .lock()
-            .unwrap()
+            .expect("Cache mutex should not be poisoned")
             .insert(key, (value, Instant::now()));
     }
 
     pub fn clear(&self) {
-        self.cache.lock().unwrap().clear();
+        self.cache
+            .lock()
+            .expect("Cache mutex should not be poisoned")
+            .clear();
     }
 }
 
 /// Connection pool for managing database/RPC connections
 #[derive(Debug)]
 pub struct ConnectionPool<T> {
-    #[allow(dead_code)]
-    connections: Vec<T>,
     available: Arc<Semaphore>,
     max_size: usize,
+    _phantom: std::marker::PhantomData<T>,
 }
 
 impl<T> ConnectionPool<T> {
@@ -149,14 +159,18 @@ impl<T> ConnectionPool<T> {
         let available = Arc::new(Semaphore::new(max_size));
 
         Self {
-            connections,
             available,
             max_size,
+            _phantom: std::marker::PhantomData,
         }
     }
 
     pub async fn acquire(&self) -> ConnectionGuard<'_, T> {
-        let permit = self.available.acquire().await.unwrap();
+        let permit = self
+            .available
+            .acquire()
+            .await
+            .expect("Connection pool semaphore should not be closed");
         ConnectionGuard { permit, pool: self }
     }
 
@@ -180,24 +194,35 @@ pub struct ConnectionGuard<'a, T> {
 /// Rate limiter for controlling request rates
 #[derive(Debug)]
 pub struct RateLimiter {
-    semaphore: Semaphore,
-    #[allow(dead_code)]
+    semaphore: Arc<Semaphore>,
     interval: Duration,
 }
 
 impl RateLimiter {
     pub fn new(max_requests: usize, interval: Duration) -> Self {
         Self {
-            semaphore: Semaphore::new(max_requests),
+            semaphore: Arc::new(Semaphore::new(max_requests)),
             interval,
         }
     }
 
     pub async fn acquire(&self) -> RateLimitGuard {
-        let _permit = self.semaphore.acquire().await.unwrap();
+        let permit = self
+            .semaphore
+            .clone()
+            .acquire_owned()
+            .await
+            .expect("Rate limiter semaphore should not be closed");
 
-        // Return guard immediately - in a real implementation
-        // we'd use a different strategy to release after interval
+        // Schedule permit release after the interval
+        let interval = self.interval;
+
+        tokio::spawn(async move {
+            tokio::time::sleep(interval).await;
+            // Permit is automatically released when dropped
+            drop(permit);
+        });
+
         RateLimitGuard
     }
 }
@@ -221,7 +246,6 @@ mod tests {
     #[test]
     fn test_async_memo() {
         let _memo = AsyncMemo::<String, i32>::new();
-        // Test basic creation
     }
 
     #[tokio::test]
@@ -249,7 +273,6 @@ mod tests {
     }
 
     #[tokio::test]
-    #[ignore] // Rate limiter implementation is a placeholder - doesn't actually implement time delays
     async fn test_rate_limiter() {
         let limiter = RateLimiter::new(2, Duration::from_millis(100));
 

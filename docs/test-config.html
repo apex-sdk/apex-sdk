@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web3Forms Configuration Test</title>
+</head>
+<body>
+    <h1>Web3Forms Configuration Test</h1>
+    
+    <div id="status"></div>
+    
+    <div id="dev-setup" style="margin: 20px 0; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+        <h3>Development Setup:</h3>
+        <p>For local testing, set the access key:</p>
+        <input type="text" id="keyInput" placeholder="Enter your Web3Forms access key">
+        <button onclick="setDevKey()">Set Key</button>
+        <button onclick="clearDevKey()">Clear Key</button>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script>
+        function checkConfig() {
+            const statusDiv = document.getElementById('status');
+            const config = window.CONFIG;
+            
+            if (config.web3forms.enabled()) {
+                statusDiv.innerHTML = `
+                    <div style="color: green;">
+                        ✅ Web3Forms is properly configured<br>
+                        Key: ${config.web3forms.accessKey.substring(0, 8)}...
+                    </div>
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <div style="color: red;">
+                        ❌ Web3Forms access key not found<br>
+                        Contact form will be disabled
+                    </div>
+                `;
+            }
+        }
+        
+        function setDevKey() {
+            const key = document.getElementById('keyInput').value;
+            if (key) {
+                localStorage.setItem('web3forms-key', key);
+                alert('Key saved! Refresh the page to apply.');
+            }
+        }
+        
+        function clearDevKey() {
+            localStorage.removeItem('web3forms-key');
+            alert('Key cleared! Refresh the page to apply.');
+        }
+        
+        // Check configuration on page load
+        document.addEventListener('DOMContentLoaded', checkConfig);
+    </script>
+</body>
+</html>

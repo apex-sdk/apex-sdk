@@ -16,6 +16,7 @@ categories.workspace = true
 [dependencies]
 # Async runtime
 tokio.workspace = true
+tokio-util = "0.7"
 async-trait.workspace = true
 futures = "0.3"
 
@@ -31,6 +32,13 @@ thiserror.workspace = true
 tracing.workspace = true
 url.workspace = true
 sha3.workspace = true
+hex.workspace = true
+
+# Substrate dependencies (conditional)
+sp-core = { workspace = true, optional = true }
+
+# EVM dependencies (conditional)
+alloy-primitives = { workspace = true, optional = true }
 
 # Internal workspace dependencies
 apex-sdk-core.workspace = true
@@ -49,9 +57,12 @@ criterion.workspace = true
 
 [features]
 default = ["substrate", "evm"]
-substrate = ["apex-sdk-substrate"]
-evm = ["apex-sdk-evm"]
+substrate = ["apex-sdk-substrate", "sp-core"]
+evm = ["apex-sdk-evm", "alloy-primitives"]
 mocks = ["apex-sdk-core/mocks"]
+
+[package.metadata.cargo-udeps.ignore]
+development = ["mockall", "proptest", "tokio-test"]  # May be used in conditional compilation
 
 [[bench]]
 name = "transaction_benchmarks"

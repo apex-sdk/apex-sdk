@@ -431,7 +431,7 @@ mod tests {
         let config = Config {
             default_chain: "polkadot".to_string(),
             default_endpoint: "wss://polkadot.api.onfinality.io".to_string(),
-            default_account: Some("alice".to_string()),
+            default_account: Some("Ilara".to_string()),
             preferences: Preferences {
                 color_output: false,
                 progress_bars: true,
@@ -447,7 +447,7 @@ mod tests {
         // Verify all fields
         assert_eq!(loaded.default_chain, "polkadot");
         assert_eq!(loaded.default_endpoint, "wss://polkadot.api.onfinality.io");
-        assert_eq!(loaded.default_account, Some("alice".to_string()));
+        assert_eq!(loaded.default_account, Some("Ilara".to_string()));
         assert!(!loaded.preferences.color_output);
         assert!(loaded.preferences.progress_bars);
         assert_eq!(loaded.preferences.log_level, "warn");

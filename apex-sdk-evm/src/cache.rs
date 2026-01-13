@@ -428,14 +428,12 @@ mod tests {
     async fn test_evm_cache() {
         let cache = EvmCache::new();
 
-        // Test balance cache
         cache
             .set_balance("0x123", "1000000000000000000".to_string())
             .await;
         let balance = cache.get_balance("0x123").await;
         assert_eq!(balance, Some("1000000000000000000".to_string()));
 
-        // Test tx status cache
         cache.set_tx_status("0xabc", "confirmed".to_string()).await;
         let status = cache.get_tx_status("0xabc").await;
         assert_eq!(status, Some("confirmed".to_string()));

@@ -12,6 +12,7 @@ use subxt::{OnlineClient, PolkadotConfig};
 use tracing::debug;
 
 /// Storage query client for accessing chain storage
+#[derive(Debug, Clone)]
 pub struct StorageClient {
     client: OnlineClient<PolkadotConfig>,
     metrics: Metrics,

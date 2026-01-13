@@ -7,6 +7,7 @@
 //! - Connection reuse
 
 use crate::{Error, EvmAdapter};
+use apex_sdk_core::Provider;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
@@ -389,7 +390,6 @@ mod tests {
         assert_eq!(endpoints.len(), 3);
         assert!(endpoints.iter().all(|e| e.starts_with("https://")));
 
-        // Test endpoint validation
         for endpoint in &endpoints {
             assert!(!endpoint.is_empty());
             assert!(endpoint.contains("eth"));
@@ -407,7 +407,6 @@ mod tests {
 
         let counter = AtomicUsize::new(0);
 
-        // Test round-robin pattern
         for expected_index in [0, 1, 2, 0, 1, 2] {
             let index = counter.fetch_add(1, Ordering::Relaxed) % endpoints.len();
             assert_eq!(index, expected_index);
@@ -422,7 +421,6 @@ mod tests {
 
         assert_eq!(interval, Duration::from_secs(30));
 
-        // Test custom interval
         let custom_config = PoolConfig {
             health_check_interval_secs: 60,
             ..Default::default()
@@ -503,7 +501,6 @@ mod tests {
 
     #[test]
     fn test_connection_pool_stats() {
-        // Test pool statistics tracking
         let mut stats = HashMap::new();
 
         // Simulate connection usage statistics
@@ -561,7 +558,6 @@ mod tests {
 
     #[tokio::test]
     async fn test_connection_pool_creation_empty() {
-        // Test that empty endpoint list is handled
         let endpoints: Vec<String> = vec![];
         let result = ConnectionPool::new(endpoints).await;
 

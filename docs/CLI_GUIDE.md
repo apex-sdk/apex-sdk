@@ -367,7 +367,7 @@ The CLI stores configuration in `.apex/config.json`:
     {
       "type": "substrate",
       "address": "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
-      "name": "Alice"
+      "name": "Ilara"
     }
   ],
   "custom_endpoints": {
