@@ -82,10 +82,10 @@ criterion = "0.8.1"
 mockall = "0.14.0"
 
 # Internal workspace dependencies
-apex-sdk-core = { path = "apex-sdk-core" }
-apex-sdk-substrate = { path = "apex-sdk-substrate" }
-apex-sdk-evm = { path = "apex-sdk-evm" }
-apex-sdk-types = { path = "apex-sdk-types" }
+apex-sdk-core = { path = "apex-sdk-core", version = "0.1.5" }
+apex-sdk-substrate = { path = "apex-sdk-substrate", version = "0.1.5" }
+apex-sdk-evm = { path = "apex-sdk-evm", version = "0.1.5" }
+apex-sdk-types = { path = "apex-sdk-types", version = "0.1.5" }
 
 # Development profile - fast compilation, minimal optimizations
 [profile.dev]

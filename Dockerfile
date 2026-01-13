@@ -1,7 +1,7 @@
 # Multi-stage build for Apex SDK CLI
 
 # Stage 1: Build
-FROM rust:1.75-slim as builder
+FROM rust:1.85-slim as builder
 
 # Install deps
 RUN apt-get update && apt-get install -y \
@@ -19,6 +19,7 @@ COPY apex-sdk-evm/Cargo.toml apex-sdk-evm/
 COPY apex-sdk-substrate/Cargo.toml apex-sdk-substrate/
 COPY apex-sdk-types/Cargo.toml apex-sdk-types/
 COPY cli/Cargo.toml cli/
+COPY integration-tests/Cargo.toml integration-tests/
 
 # Copy source code
 COPY apex-sdk apex-sdk
@@ -27,9 +28,10 @@ COPY apex-sdk-evm apex-sdk-evm
 COPY apex-sdk-substrate apex-sdk-substrate
 COPY apex-sdk-types apex-sdk-types
 COPY cli cli
+COPY integration-tests integration-tests
 
 # Build the CLI binary
-RUN cargo build --release --bin apex
+RUN cargo build --release --bin apex-cli
 
 # Stage 2: Runtime
 FROM debian:bookworm-slim
@@ -44,7 +46,7 @@ RUN apt-get update && apt-get install -y \
 RUN useradd -m -u 1000 apex
 
 # Copy binary from builder
-COPY --from=builder /app/target/release/apex /usr/local/bin/apex
+COPY --from=builder /app/target/release/apex-cli /usr/local/bin/apex
 
 # Set user
 USER apex
