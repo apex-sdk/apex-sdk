@@ -8,6 +8,10 @@ repository = "https://github.com/carbobit/apex-sdk"
 homepage = "https://github.com/carbobit/apex-sdk"
 documentation = "https://docs.rs/apex-sdk-cli"
 
+[[bin]]
+name = "apex-cli"
+path = "src/main.rs"
+
 [dependencies]
 apex-sdk-core = { path = "../apex-sdk-core", version = "0.1.5" }
 apex-sdk-types = { path = "../apex-sdk-types", version = "0.1.5" }
