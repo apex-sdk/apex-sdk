@@ -145,7 +145,7 @@ jobs:
           key: ${{ runner.os }}-cargo-build-bloat-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build release binary
-        run: cargo build --release --package apex-cli --bin apex-cli
+        run: cargo build --release --package apex-sdk-cli --bin apex-cli
 
       - name: Check binary size
         run: |
@@ -156,5 +156,5 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Top 20 Functions by Size:" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          cargo bloat --release --package apex-cli --bin apex-cli -n 20 >> $GITHUB_STEP_SUMMARY
+          cargo bloat --release --package apex-sdk-cli --bin apex-cli -n 20 >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY

@@ -1,9 +1,16 @@
 [package]
-name = "apex-cli"
+name = "apex-sdk-cli"
 version = "0.1.5"
 edition = "2021"
 description = "CLI tool for Apex SDK"
 license = "Apache-2.0"
+repository = "https://github.com/carbobit/apex-sdk"
+homepage = "https://github.com/carbobit/apex-sdk"
+documentation = "https://docs.rs/apex-sdk-cli"
+
+[[bin]]
+name = "apex-cli"
+path = "src/main.rs"
 
 [dependencies]
 apex-sdk-core = { path = "../apex-sdk-core", version = "0.1.5" }
