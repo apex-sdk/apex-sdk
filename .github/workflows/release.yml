@@ -42,6 +42,45 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Version: $VERSION"
 
+      - name: Generate Release Notes
+        id: release_notes
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data } = await github.rest.repos.generateReleaseNotes({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: 'v${{ steps.get_version.outputs.version }}'
+            });
+
+            // Enhance with installation instructions
+            const enhancedBody = data.body + `
+
+            ## 📦 Installation
+
+            ### Via Cargo
+            \`\`\`bash
+            cargo install apex-cli@${{ steps.get_version.outputs.version }}
+            \`\`\`
+
+            ### Download Binary
+            Download the appropriate binary for your platform from the assets below.
+
+            ## 📚 Documentation
+
+            - [Quick Start](https://github.com/${{ github.repository }}/blob/main/docs/QUICK_START.md)
+            - [API Reference](https://apexsdk.dev/api)
+            - [Examples](https://github.com/${{ github.repository }}/tree/main/examples)
+
+            ---
+
+            **Full Changelog**: https://github.com/${{ github.repository }}/compare/v${{ steps.get_version.outputs.version }}...HEAD
+            `;
+
+            core.setOutput('body', enhancedBody);
+            return enhancedBody;
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -50,21 +89,7 @@ jobs:
         with:
           tag_name: v${{ steps.get_version.outputs.version }}
           release_name: Release v${{ steps.get_version.outputs.version }}
-          body: |
-            Release v${{ steps.get_version.outputs.version }}
-            
-            ## Changes
-            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.
-            
-            ## Installation
-            
-            ### Via Cargo
-            ```bash
-            cargo install apex-sdk-cli@${{ steps.get_version.outputs.version }}
-            ```
-            
-            ### Download Binary
-            Download the appropriate binary for your platform from the assets below.
+          body: ${{ steps.release_notes.outputs.body }}
           draft: false
           prerelease: false
 
