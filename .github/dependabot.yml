@@ -14,6 +14,9 @@ updates:
     labels:
       - "dependencies"
       - "github-actions"
+      - "automated"
+    reviewers:
+      - "apex-sdk/core-maintainers"
     commit-message:
       prefix: "ci"
       include: "scope"
@@ -29,6 +32,9 @@ updates:
     labels:
       - "dependencies"
       - "rust"
+      - "automated"
+    reviewers:
+      - "apex-sdk/core-maintainers"
     commit-message:
       prefix: "deps"
       include: "scope"
