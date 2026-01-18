@@ -1,0 +1,59 @@
+# Automatically label PRs based on changed files
+# https://github.com/actions/labeler
+
+'substrate':
+  - changed-files:
+    - any-glob-to-any-file: 'apex-sdk-substrate/**/*'
+
+'evm':
+  - changed-files:
+    - any-glob-to-any-file: 'apex-sdk-evm/**/*'
+
+'core':
+  - changed-files:
+    - any-glob-to-any-file: 'apex-sdk-core/**/*'
+
+'types':
+  - changed-files:
+    - any-glob-to-any-file: 'apex-sdk-types/**/*'
+
+'cli':
+  - changed-files:
+    - any-glob-to-any-file: 'cli/**/*'
+
+'documentation':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'docs/**/*'
+      - '**/*.md'
+      - 'README.md'
+
+'tests':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*test*.rs'
+      - 'tests/**/*'
+      - '**/tests/**/*'
+
+'ci':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/workflows/**/*'
+      - '.github/**/*.yml'
+
+'dependencies':
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/Cargo.toml'
+      - '**/Cargo.lock'
+
+'examples':
+  - changed-files:
+    - any-glob-to-any-file: 'examples/**/*'
+
+'docker':
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'docker/**/*'
+      - 'Dockerfile'
+      - 'docker-compose.yml'
