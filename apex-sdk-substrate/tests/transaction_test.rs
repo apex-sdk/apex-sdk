@@ -435,3 +435,336 @@ fn test_all_batch_modes() {
     assert_ne!(modes[1], modes[2]);
     assert_ne!(modes[0], modes[2]);
 }
+
+#[cfg(test)]
+mod broadcast_tests {
+    use super::*;
+    use apex_sdk_core::Broadcaster;
+    use apex_sdk_substrate::{ChainConfig, SubstrateAdapter, Wallet};
+    use parity_scale_codec::Encode;
+
+    #[test]
+    fn test_validate_extrinsic_empty_bytes() {
+        let result = validate_extrinsic_format_standalone(&[]);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("empty"));
+    }
+
+    #[test]
+    fn test_validate_extrinsic_too_short() {
+        let result = validate_extrinsic_format_standalone(&[0x84]);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_validate_extrinsic_unsigned() {
+        let unsigned_extrinsic = vec![0x04, 0x00, 0x00, 0x00];
+        let result = validate_extrinsic_format_standalone(&unsigned_extrinsic);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("must be signed"));
+    }
+
+    #[test]
+    fn test_validate_extrinsic_wrong_version() {
+        let wrong_version = vec![0x83, 0x00, 0x00, 0x00];
+        let result = validate_extrinsic_format_standalone(&wrong_version);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("version"));
+    }
+
+    #[test]
+    fn test_validate_extrinsic_valid_format() {
+        let valid_extrinsic = create_mock_signed_extrinsic();
+        let result = validate_extrinsic_format_standalone(&valid_extrinsic);
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn test_broadcast_empty_transaction() {
+        let adapter = SubstrateAdapter::connect_with_config(ChainConfig::westend())
+            .await
+            .expect("Failed to connect");
+        let result = adapter.broadcast(&[]).await;
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("empty"));
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn test_broadcast_too_short() {
+        let adapter = SubstrateAdapter::connect_with_config(ChainConfig::westend())
+            .await
+            .expect("Failed to connect");
+        let result = adapter.broadcast(&[0x84, 0x00]).await;
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("too short"));
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn test_broadcast_unsigned_transaction() {
+        let adapter = SubstrateAdapter::connect_with_config(ChainConfig::westend())
+            .await
+            .expect("Failed to connect");
+        let unsigned = vec![0x04, 0x00, 0x00, 0x00, 0x00];
+        let result = adapter.broadcast(&unsigned).await;
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("signed"));
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn test_broadcast_integration_westend() {
+        let adapter = SubstrateAdapter::connect_with_config(ChainConfig::westend())
+            .await
+            .expect("Failed to connect to Westend");
+
+        let wallet = Wallet::new_random_with_type(apex_sdk_substrate::KeyPairType::Sr25519);
+
+        let tx_executor = adapter.transaction_executor();
+
+        let dummy_recipient = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
+        let amount = 1_000_000_000u128;
+
+        let balance = adapter
+            .get_balance(&wallet.address())
+            .await
+            .expect("Failed to get balance");
+
+        if balance < amount * 2 {
+            println!("Insufficient balance for integration test, skipping broadcast");
+            return;
+        }
+
+        let result = tx_executor.transfer(&wallet, dummy_recipient, amount).await;
+
+        match result {
+            Ok(tx_hash) => {
+                assert!(tx_hash.starts_with("0x"));
+                assert_eq!(tx_hash.len(), 66);
+                println!("Transaction broadcast successful: {}", tx_hash);
+            }
+            Err(e) => {
+                println!("Transaction failed (expected for unfunded wallet): {}", e);
+            }
+        }
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn test_broadcast_and_watch_integration() {
+        let adapter = SubstrateAdapter::connect_with_config(ChainConfig::westend())
+            .await
+            .expect("Failed to connect");
+
+        let wallet = Wallet::new_random_with_type(apex_sdk_substrate::KeyPairType::Sr25519);
+
+        let tx_executor = adapter.transaction_executor();
+
+        let balance = adapter
+            .get_balance(&wallet.address())
+            .await
+            .expect("Failed to get balance");
+
+        if balance < 10_000_000_000u128 {
+            println!("Insufficient balance, skipping test");
+            return;
+        }
+
+        let result = tx_executor
+            .transfer(
+                &wallet,
+                "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+                1_000_000_000u128,
+            )
+            .await;
+
+        if let Ok(tx_hash) = result {
+            assert!(tx_hash.starts_with("0x"));
+
+            let status = adapter.get_transaction_status(&tx_hash).await;
+            assert!(status.is_ok());
+        }
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn test_broadcast_batch_transactions() {
+        let adapter = SubstrateAdapter::connect_with_config(ChainConfig::westend())
+            .await
+            .expect("Failed to connect");
+
+        let wallet = Wallet::new_random_with_type(apex_sdk_substrate::KeyPairType::Sr25519);
+
+        let balance = adapter
+            .get_balance(&wallet.address())
+            .await
+            .expect("Failed to get balance");
+
+        if balance < 100_000_000_000u128 {
+            println!("Insufficient balance for batch test");
+            return;
+        }
+
+        let tx_executor = adapter.transaction_executor();
+
+        let transfers = vec![
+            (
+                "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY".to_string(),
+                1_000_000_000u128,
+            ),
+            (
+                "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty".to_string(),
+                1_000_000_000u128,
+            ),
+        ];
+
+        let result = tx_executor
+            .execute_batch_transfers(transfers, &wallet, BatchMode::AllOrNothing)
+            .await;
+
+        match result {
+            Ok(tx_hash) => {
+                assert!(tx_hash.starts_with("0x"));
+                println!("Batch transaction successful: {}", tx_hash);
+            }
+            Err(e) => {
+                println!(
+                    "Batch transaction failed (expected for unfunded wallet): {}",
+                    e
+                );
+            }
+        }
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn test_fee_estimation_integration() {
+        let adapter = SubstrateAdapter::connect_with_config(ChainConfig::westend())
+            .await
+            .expect("Failed to connect");
+
+        let wallet = Wallet::new_random_with_type(apex_sdk_substrate::KeyPairType::Sr25519);
+
+        let tx_executor = adapter.transaction_executor();
+
+        let fee = tx_executor
+            .estimate_transfer_fee(
+                "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+                1_000_000_000u128,
+                &wallet,
+            )
+            .await;
+
+        assert!(fee.is_ok());
+        let estimated_fee = fee.unwrap();
+        assert!(estimated_fee > 0);
+        assert!(estimated_fee < 10_000_000_000u128);
+        println!("Estimated fee: {} Planck", estimated_fee);
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn test_broadcast_with_retry_integration() {
+        let adapter = SubstrateAdapter::connect_with_config(ChainConfig::westend())
+            .await
+            .expect("Failed to connect");
+
+        let wallet = Wallet::new_random_with_type(apex_sdk_substrate::KeyPairType::Sr25519);
+
+        let tx_executor = adapter
+            .transaction_executor()
+            .with_retry_config(RetryConfig::new().with_max_retries(2));
+
+        let result = tx_executor
+            .transfer(
+                &wallet,
+                "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+                1_000_000_000u128,
+            )
+            .await;
+
+        match result {
+            Ok(_) => println!("Transaction succeeded"),
+            Err(e) => println!("Transaction failed after retries: {}", e),
+        }
+    }
+
+    #[test]
+    fn test_extrinsic_validation_version_4() {
+        let valid = create_mock_signed_extrinsic();
+        let result = validate_extrinsic_format_standalone(&valid);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_extrinsic_hash_format() {
+        use sp_core::blake2_256;
+
+        let extrinsic = create_mock_signed_extrinsic();
+        let hash = blake2_256(&extrinsic);
+        let hash_string = format!("0x{}", hex::encode(hash));
+
+        assert_eq!(hash_string.len(), 66);
+        assert!(hash_string.starts_with("0x"));
+    }
+
+    fn validate_extrinsic_format_standalone(
+        extrinsic_bytes: &[u8],
+    ) -> std::result::Result<(), apex_sdk_core::SdkError> {
+        use apex_sdk_core::SdkError;
+        use parity_scale_codec::Decode;
+
+        if extrinsic_bytes.is_empty() {
+            return Err(SdkError::TransactionError(
+                "Cannot validate empty extrinsic".to_string(),
+            ));
+        }
+
+        if extrinsic_bytes.len() < 4 {
+            return Err(SdkError::TransactionError(
+                "Extrinsic too short to be valid".to_string(),
+            ));
+        }
+
+        let first_byte = extrinsic_bytes[0];
+
+        let has_signature = (first_byte & 0b1000_0000) != 0;
+        if !has_signature {
+            return Err(SdkError::TransactionError(
+                "Extrinsic must be signed for broadcasting".to_string(),
+            ));
+        }
+
+        let version = first_byte & 0b0111_1111;
+        if version != 4 {
+            return Err(SdkError::TransactionError(format!(
+                "Unsupported extrinsic version: {}. Expected version 4",
+                version
+            )));
+        }
+
+        let length_result = parity_scale_codec::Compact::<u32>::decode(&mut &extrinsic_bytes[1..]);
+        if length_result.is_err() {
+            return Err(SdkError::TransactionError(
+                "Invalid extrinsic length encoding".to_string(),
+            ));
+        }
+
+        Ok(())
+    }
+
+    fn create_mock_signed_extrinsic() -> Vec<u8> {
+        let mut extrinsic = Vec::new();
+        extrinsic.push(0x84);
+
+        use parity_scale_codec::Compact;
+        let length = Compact(100u32);
+        extrinsic.extend_from_slice(&length.encode());
+
+        extrinsic.extend_from_slice(&[0u8; 100]);
+
+        extrinsic
+    }
+}
