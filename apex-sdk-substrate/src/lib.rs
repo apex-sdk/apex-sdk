@@ -667,7 +667,10 @@ impl Broadcaster for SubstrateAdapter {
 }
 
 impl SubstrateAdapter {
-    fn validate_extrinsic_format(&self, extrinsic_bytes: &[u8]) -> std::result::Result<(), SdkError> {
+    fn validate_extrinsic_format(
+        &self,
+        extrinsic_bytes: &[u8],
+    ) -> std::result::Result<(), SdkError> {
         use parity_scale_codec::Decode;
 
         let first_byte = extrinsic_bytes[0];
@@ -681,9 +684,10 @@ impl SubstrateAdapter {
 
         let version = first_byte & 0b0111_1111;
         if version != 4 {
-            return Err(SdkError::TransactionError(
-                format!("Unsupported extrinsic version: {}. Expected version 4", version),
-            ));
+            return Err(SdkError::TransactionError(format!(
+                "Unsupported extrinsic version: {}. Expected version 4",
+                version
+            )));
         }
 
         let length_result = parity_scale_codec::Compact::<u32>::decode(&mut &extrinsic_bytes[1..]);
