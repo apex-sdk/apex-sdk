@@ -630,17 +630,95 @@ impl NonceManager for SubstrateAdapter {
 #[async_trait]
 impl Broadcaster for SubstrateAdapter {
     async fn broadcast(&self, signed_tx: &[u8]) -> std::result::Result<String, SdkError> {
-        // We need to decode the signed transaction bytes back into a subxt payload
-        // This is tricky because subxt expects strongly typed payloads or dynamic values
-        // For now, we'll assume the bytes are the raw encoded extrinsic
+        if !self.connected {
+            return Err(SdkError::NetworkError("Not connected to chain".to_string()));
+        }
 
-        // Note: This implementation is limited because subxt's submit_raw expects the bytes
-        // to be a valid extrinsic.
+        if signed_tx.is_empty() {
+            return Err(SdkError::TransactionError(
+                "Cannot broadcast empty transaction".to_string(),
+            ));
+        }
 
-        let hash = "0x1234567890abcdef"; // self.client.rpc().submit_extrinsic(signed_tx).await
-        let _signed_tx = signed_tx; // Use parameter
+        if signed_tx.len() < 4 {
+            return Err(SdkError::TransactionError(
+                "Transaction too short to be valid extrinsic".to_string(),
+            ));
+        }
 
-        Ok(hash.to_string())
+        self.validate_extrinsic_format(signed_tx)?;
+
+        self.metrics.record_transaction_attempt();
+        debug!("Broadcasting extrinsic ({} bytes)", signed_tx.len());
+
+        let tx_hash = self
+            .submit_and_watch_extrinsic(signed_tx)
+            .await
+            .map_err(|e| {
+                self.metrics.record_transaction_failure();
+                SdkError::TransactionError(format!("Broadcast failed: {}", e))
+            })?;
+
+        self.metrics.record_transaction_success();
+        info!("Extrinsic broadcast successful: {}", tx_hash);
+
+        Ok(tx_hash)
+    }
+}
+
+impl SubstrateAdapter {
+    fn validate_extrinsic_format(
+        &self,
+        extrinsic_bytes: &[u8],
+    ) -> std::result::Result<(), SdkError> {
+        use parity_scale_codec::Decode;
+
+        let first_byte = extrinsic_bytes[0];
+
+        let has_signature = (first_byte & 0b1000_0000) != 0;
+        if !has_signature {
+            return Err(SdkError::TransactionError(
+                "Extrinsic must be signed for broadcasting".to_string(),
+            ));
+        }
+
+        let version = first_byte & 0b0111_1111;
+        if version != 4 {
+            return Err(SdkError::TransactionError(format!(
+                "Unsupported extrinsic version: {}. Expected version 4",
+                version
+            )));
+        }
+
+        let length_result = parity_scale_codec::Compact::<u32>::decode(&mut &extrinsic_bytes[1..]);
+        if length_result.is_err() {
+            return Err(SdkError::TransactionError(
+                "Invalid extrinsic length encoding".to_string(),
+            ));
+        }
+
+        Ok(())
+    }
+
+    async fn submit_and_watch_extrinsic(&self, extrinsic_bytes: &[u8]) -> Result<String> {
+        use subxt::backend::{legacy::LegacyRpcMethods, rpc::RpcClient};
+
+        let rpc_client = RpcClient::from_url(&self.endpoint)
+            .await
+            .map_err(|e| Error::Connection(format!("Failed to create RPC client: {}", e)))?;
+
+        let legacy_rpc = LegacyRpcMethods::<PolkadotConfig>::new(rpc_client);
+
+        let tx_hash = legacy_rpc
+            .author_submit_extrinsic(extrinsic_bytes)
+            .await
+            .map_err(|e| Error::Transaction(format!("Failed to submit extrinsic: {}", e)))?;
+
+        let hash_string = format!("0x{}", hex::encode(tx_hash.0));
+
+        debug!("Extrinsic submitted with hash: {}", hash_string);
+
+        Ok(hash_string)
     }
 }
 
