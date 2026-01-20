@@ -84,11 +84,12 @@ impl Default for Config {
             "https://ethereum-sepolia-rpc.publicnode.com".to_string(),
         );
 
-        // Get default endpoint from the map to avoid duplication
-        let default_endpoint = endpoints
-            .get(DEFAULT_CHAIN)
-            .cloned()
-            .expect("Default chain must have an endpoint configured");
+        let default_endpoint = endpoints.get(DEFAULT_CHAIN).cloned().unwrap_or_else(|| {
+            panic!(
+                "Default chain '{}' must have an endpoint configured in default config",
+                DEFAULT_CHAIN
+            )
+        });
 
         Self {
             default_chain: DEFAULT_CHAIN.to_string(),
@@ -196,7 +197,9 @@ impl Config {
                 self.preferences.log_level = value.to_string();
             }
             key if key.starts_with("endpoints.") => {
-                let chain = key.strip_prefix("endpoints.").unwrap();
+                let chain = key
+                    .strip_prefix("endpoints.")
+                    .expect("Key must start with 'endpoints.' prefix");
                 self.endpoints.insert(chain.to_string(), value.to_string());
             }
             _ => {
@@ -219,7 +222,9 @@ impl Config {
             "preferences.progress_bars" => Ok(self.preferences.progress_bars.to_string()),
             "preferences.log_level" => Ok(self.preferences.log_level.clone()),
             key if key.starts_with("endpoints.") => {
-                let chain = key.strip_prefix("endpoints.").unwrap();
+                let chain = key
+                    .strip_prefix("endpoints.")
+                    .expect("Key must start with 'endpoints.' prefix");
                 self.endpoints
                     .get(chain)
                     .cloned()
@@ -314,5 +319,87 @@ mod tests {
         let mut config = Config::default();
         let result = config.set("preferences.log_level", "invalid");
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_config_get_nonexistent_endpoint() {
+        let config = Config::default();
+        let result = config.get("endpoints.nonexistent");
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("No endpoint defined"));
+    }
+
+    #[test]
+    fn test_config_set_and_get_endpoint() {
+        let mut config = Config::default();
+        config
+            .set("endpoints.custom", "wss://custom.example.com")
+            .unwrap();
+
+        let endpoint = config.get("endpoints.custom").unwrap();
+        assert_eq!(endpoint, "wss://custom.example.com");
+    }
+
+    #[test]
+    fn test_config_invalid_boolean_values() {
+        let mut config = Config::default();
+
+        let result = config.set("preferences.color_output", "not_a_bool");
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Invalid boolean value"));
+
+        let result = config.set("preferences.progress_bars", "yes");
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_config_validation_with_invalid_endpoint_url() {
+        let mut config = Config::default();
+        config
+            .endpoints
+            .insert("invalid".to_string(), "not-a-url".to_string());
+
+        let warnings = config.validate().unwrap();
+        assert!(!warnings.is_empty());
+        assert!(warnings.iter().any(|w| w.contains("invalid endpoint URL")));
+    }
+
+    #[test]
+    fn test_config_validation_with_missing_default_chain_endpoint() {
+        let config = Config {
+            default_chain: "nonexistent_chain".to_string(),
+            ..Default::default()
+        };
+
+        let warnings = config.validate().unwrap();
+        assert!(!warnings.is_empty());
+        assert!(warnings
+            .iter()
+            .any(|w| w.contains("has no endpoint defined")));
+    }
+
+    #[test]
+    fn test_config_get_unknown_key() {
+        let config = Config::default();
+        let result = config.get("unknown.key");
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Unknown configuration key"));
+    }
+
+    #[test]
+    fn test_config_preferences_defaults() {
+        let prefs = Preferences::default();
+        assert!(prefs.color_output);
+        assert!(prefs.progress_bars);
+        assert_eq!(prefs.log_level, "info");
     }
 }

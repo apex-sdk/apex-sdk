@@ -190,11 +190,10 @@ pub async fn init_config_interactive() -> Result<()> {
         .default(0)
         .interact()?;
 
-    // Extract chain name from the display string
     let default_chain = chains[default_chain_idx]
         .split_whitespace()
         .next()
-        .unwrap()
+        .ok_or_else(|| anyhow::anyhow!("Failed to parse chain name from selection"))?
         .to_string();
 
     let default_endpoint: String = Input::new()
@@ -238,16 +237,17 @@ pub async fn init_config_interactive() -> Result<()> {
 
     let log_level = log_levels[log_level_idx].to_string();
 
-    // Create configuration
+    let default_config = Config::default();
     let config = Config {
         default_chain,
         default_endpoint,
+        default_account: None,
+        endpoints: default_config.endpoints,
         preferences: Preferences {
             color_output,
             progress_bars,
             log_level,
         },
-        ..Default::default()
     };
 
     // Save configuration
