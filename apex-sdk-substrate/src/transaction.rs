@@ -559,6 +559,82 @@ impl TransactionExecutor {
 
         self.execute_batch(calls, wallet, batch_mode).await
     }
+
+    /// This provides access to advanced fee estimation features including:
+    /// - Dynamic weight-based calculations
+    /// - Network congestion monitoring
+    /// - Multiple fee strategies (Fast, Normal, Slow)
+    /// - Fee estimation accuracy tracking
+    pub fn dynamic_fee_estimator(&self) -> crate::fee_estimator::DynamicFeeEstimator {
+        crate::fee_estimator::DynamicFeeEstimator::new(self.client.clone())
+    }
+
+    /// Estimate fee using dynamic fee estimator with strategy
+    ///
+    /// # Arguments
+    /// * `pallet` - The pallet name
+    /// * `call` - The call name
+    /// * `args` - The call arguments
+    /// * `from` - The sender wallet
+    /// * `strategy` - The fee strategy to use
+    ///
+    /// Returns a detailed fee estimate with breakdown
+    pub async fn estimate_fee_with_strategy(
+        &self,
+        pallet: &str,
+        call: &str,
+        args: Vec<subxt::dynamic::Value>,
+        _from: &Wallet,
+        strategy: crate::fee_estimator::FeeStrategy,
+    ) -> Result<crate::fee_estimator::FeeEstimate> {
+        let tx = subxt::dynamic::tx(pallet, call, args);
+
+        let payload = self
+            .client
+            .tx()
+            .create_unsigned(&tx)
+            .map_err(|e| Error::Transaction(format!("Failed to create unsigned tx: {}", e)))?;
+
+        let encoded = payload.encoded();
+
+        let estimator = self.dynamic_fee_estimator();
+        estimator.estimate_fee(encoded, strategy).await
+    }
+
+    /// Estimate transfer fee with enhanced fee estimator
+    ///
+    /// # Arguments
+    /// * `to` - Recipient address
+    /// * `amount` - Transfer amount
+    /// * `from` - Sender wallet
+    /// * `strategy` - Fee strategy to use
+    ///
+    /// Returns a detailed fee estimate
+    pub async fn estimate_transfer_fee_with_strategy(
+        &self,
+        to: &str,
+        amount: u128,
+        from: &Wallet,
+        strategy: crate::fee_estimator::FeeStrategy,
+    ) -> Result<crate::fee_estimator::FeeEstimate> {
+        use sp_core::crypto::{AccountId32, Ss58Codec};
+        use subxt::dynamic::Value;
+
+        let to_account = AccountId32::from_ss58check(to)
+            .map_err(|e| Error::Transaction(format!("Invalid recipient address: {}", e)))?;
+
+        let to_bytes: &[u8] = to_account.as_ref();
+        let dest_value = Value::unnamed_variant("Id", vec![Value::from_bytes(to_bytes)]);
+
+        self.estimate_fee_with_strategy(
+            "Balances",
+            "transfer_keep_alive",
+            vec![dest_value, Value::u128(amount)],
+            from,
+            strategy,
+        )
+        .await
+    }
 }
 
 #[async_trait]
