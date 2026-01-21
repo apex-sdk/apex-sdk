@@ -16,14 +16,17 @@ use apex_sdk_core::{
 };
 use apex_sdk_types::{Address, TransactionStatus, TxStatus};
 use async_trait::async_trait;
+use std::sync::Arc;
 use subxt::{OnlineClient, PolkadotConfig};
 use thiserror::Error;
+use tokio::sync::OnceCell;
 use tracing::{debug, info};
 
 pub mod block;
 pub mod cache;
 pub mod contracts;
 pub mod metrics;
+pub mod monitor;
 pub mod nonce_manager;
 pub mod pool;
 pub mod signer;
@@ -196,6 +199,8 @@ pub struct SubstrateAdapter {
     connected: bool,
     /// Metrics collector
     metrics: Metrics,
+    /// Transaction monitor for subscription-based monitoring (lazy-initialized)
+    monitor: Arc<OnceCell<Arc<monitor::TransactionMonitor>>>,
 }
 
 impl SubstrateAdapter {
@@ -223,6 +228,7 @@ impl SubstrateAdapter {
             config,
             connected: true,
             metrics: Metrics::new(),
+            monitor: Arc::new(OnceCell::new()),
         })
     }
 
@@ -249,6 +255,21 @@ impl SubstrateAdapter {
     /// Get metrics snapshot
     pub fn metrics(&self) -> MetricsSnapshot {
         self.metrics.snapshot()
+    }
+
+    /// Get or initialize the transaction monitor
+    async fn get_monitor(&self) -> Result<Arc<monitor::TransactionMonitor>> {
+        self.monitor
+            .get_or_try_init(|| async {
+                monitor::TransactionMonitor::new(
+                    self.client.clone(),
+                    Arc::new(self.metrics.clone()),
+                )
+                .await
+                .map(Arc::new)
+            })
+            .await
+            .cloned()
     }
 
     /// Get block by hash
@@ -414,6 +435,75 @@ impl SubstrateAdapter {
 
         // Transaction not found in recent blocks
         Ok(TransactionStatus::unknown(tx_hash.to_string()))
+    }
+
+    /// Fallback polling implementation with exponential backoff
+    async fn wait_for_receipt_polling(
+        &self,
+        tx_hash: &str,
+        strategy: &ConfirmationStrategy,
+    ) -> std::result::Result<TransactionStatus, SdkError> {
+        let start = std::time::Instant::now();
+        let timeout = match strategy {
+            ConfirmationStrategy::BlockConfirmations { timeout_secs, .. } => {
+                std::time::Duration::from_secs(*timeout_secs)
+            }
+            ConfirmationStrategy::Finalized { timeout_secs } => {
+                std::time::Duration::from_secs(*timeout_secs)
+            }
+            ConfirmationStrategy::Immediate => std::time::Duration::from_secs(30),
+        };
+
+        let mut poll_interval = std::time::Duration::from_millis(500); // Start at 500ms
+        let max_poll_interval = std::time::Duration::from_secs(5); // Max 5 seconds
+
+        while start.elapsed() < timeout {
+            match self.get_transaction_status(tx_hash).await {
+                Ok(status) => {
+                    // Check if the strategy conditions are met
+                    let is_satisfied = match strategy {
+                        ConfirmationStrategy::Immediate => {
+                            // Any status other than pending/unknown is sufficient
+                            status.status != TxStatus::Pending && status.status != TxStatus::Unknown
+                        }
+                        ConfirmationStrategy::Finalized { .. } => {
+                            // Wait for finalized status
+                            status.status == TxStatus::Finalized
+                                || status.status == TxStatus::Confirmed
+                                || status.status == TxStatus::Failed
+                        }
+                        ConfirmationStrategy::BlockConfirmations {
+                            confirmations: required,
+                            ..
+                        } => {
+                            // Check if we have enough confirmations
+                            if let Some(confirmations) = status.confirmations {
+                                confirmations >= *required
+                            } else {
+                                status.status == TxStatus::Failed
+                            }
+                        }
+                    };
+
+                    if is_satisfied {
+                        debug!("Transaction {} satisfied strategy via polling", tx_hash);
+                        return Ok(status);
+                    }
+                }
+                Err(e) => {
+                    debug!("Error checking transaction status: {}", e);
+                }
+            }
+
+            // Exponential backoff: double the interval up to the max
+            tokio::time::sleep(poll_interval).await;
+            poll_interval = std::cmp::min(poll_interval * 2, max_poll_interval);
+        }
+
+        Err(SdkError::NetworkError(format!(
+            "Timeout waiting for transaction {} after {:?}",
+            tx_hash, timeout
+        )))
     }
 
     /// Validate a Substrate address (SS58 format)
@@ -728,38 +818,66 @@ impl ReceiptWatcher for SubstrateAdapter {
         &self,
         tx_hash: &str,
     ) -> std::result::Result<TransactionStatus, SdkError> {
-        // Simple polling implementation
-        // In a real implementation, we might want to use the retry/backoff logic or subscriptions
-        let start = std::time::Instant::now();
-        let timeout = std::time::Duration::from_secs(60); // 60s timeout from plan
-
-        while start.elapsed() < timeout {
-            let status = self
-                .get_transaction_status(tx_hash)
-                .await
-                .map_err(|e| SdkError::NetworkError(e.to_string()))?;
-            // Check if status represents finalized or confirmed
-            if status.status == TxStatus::Confirmed || status.status == TxStatus::Finalized {
-                return Ok(status);
-            }
-            // For Substrate, we default to finalized head confirmation policy
-            tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
-        }
-
-        Err(SdkError::NetworkError(
-            "Timeout waiting for receipt".to_string(),
-        ))
+        // Use default finalized strategy
+        let strategy = ConfirmationStrategy::Finalized { timeout_secs: 60 };
+        self.wait_for_receipt_with_strategy(tx_hash, &strategy)
+            .await
     }
 
     async fn wait_for_receipt_with_strategy(
         &self,
         tx_hash: &str,
-        _strategy: &ConfirmationStrategy,
+        strategy: &ConfirmationStrategy,
     ) -> std::result::Result<TransactionStatus, SdkError> {
-        // For now, use the basic wait implementation regardless of strategy
-        self.wait_for_receipt(tx_hash)
-            .await
-            .map_err(|e| SdkError::NetworkError(e.to_string()))
+        debug!("Waiting for receipt with strategy: {:?}", strategy);
+
+        // Try subscription-based monitoring first
+        match self.get_monitor().await {
+            Ok(monitor) => {
+                debug!("Using subscription-based monitoring for {}", tx_hash);
+
+                let rx = monitor
+                    .watch_transaction(tx_hash.to_string(), strategy.clone())
+                    .await;
+
+                // Wait for the result with timeout
+                let timeout = match strategy {
+                    ConfirmationStrategy::BlockConfirmations { timeout_secs, .. } => {
+                        std::time::Duration::from_secs(*timeout_secs)
+                    }
+                    ConfirmationStrategy::Finalized { timeout_secs } => {
+                        std::time::Duration::from_secs(*timeout_secs)
+                    }
+                    ConfirmationStrategy::Immediate => {
+                        // For immediate, still wait a bit for the transaction to be included
+                        std::time::Duration::from_secs(30)
+                    }
+                };
+
+                match tokio::time::timeout(timeout, rx).await {
+                    Ok(Ok(status)) => {
+                        debug!("Subscription monitoring completed for {}", tx_hash);
+                        return Ok(status);
+                    }
+                    Ok(Err(_)) => {
+                        debug!("Subscription channel closed, falling back to polling");
+                    }
+                    Err(_) => {
+                        debug!("Subscription monitoring timed out, falling back to polling");
+                    }
+                }
+            }
+            Err(e) => {
+                debug!(
+                    "Failed to initialize monitor: {}, falling back to polling",
+                    e
+                );
+            }
+        }
+
+        // Fallback to polling with exponential backoff
+        info!("Using polling fallback for {}", tx_hash);
+        self.wait_for_receipt_polling(tx_hash, strategy).await
     }
 
     async fn get_receipt_status(
