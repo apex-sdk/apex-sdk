@@ -26,6 +26,7 @@ use sp_core::{ed25519, sr25519, Pair as PairTrait};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tracing::{debug, info};
+use zeroize::Zeroize;
 
 /// Supported key pair types
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -178,7 +179,7 @@ impl Wallet {
         let mut seed_array = [0u8; 32];
         seed_array.copy_from_slice(seed);
 
-        match key_type {
+        let result = match key_type {
             KeyPairType::Sr25519 => {
                 let pair = sr25519::Pair::from_seed(&seed_array);
                 Ok(Self {
@@ -197,20 +198,26 @@ impl Wallet {
                     ss58_format: Ss58AddressFormat::custom(42),
                 })
             }
-        }
+        };
+
+        seed_array.zeroize();
+        result
     }
 
     /// Generate a new mnemonic phrase
-    pub fn generate_mnemonic() -> String {
+    pub fn generate_mnemonic() -> Result<String> {
         use bip39::{Language, Mnemonic};
         use rand::RngCore;
 
         let mut entropy = [0u8; 32];
         rand::rng().fill_bytes(&mut entropy);
 
-        Mnemonic::from_entropy_in(Language::English, &entropy)
-            .expect("Failed to generate mnemonic")
-            .to_string()
+        let result = Mnemonic::from_entropy_in(Language::English, &entropy)
+            .map(|m| m.to_string())
+            .map_err(|e| Error::Wallet(format!("Failed to generate mnemonic: {}", e)));
+
+        entropy.zeroize();
+        result
     }
 
     /// Set the SS58 address format (network prefix)
@@ -222,8 +229,20 @@ impl Wallet {
     /// Get the public key as bytes
     pub fn public_key(&self) -> Vec<u8> {
         match self.key_type {
-            KeyPairType::Sr25519 => self.sr25519_pair.as_ref().unwrap().public().0.to_vec(),
-            KeyPairType::Ed25519 => self.ed25519_pair.as_ref().unwrap().public().0.to_vec(),
+            KeyPairType::Sr25519 => self
+                .sr25519_pair
+                .as_ref()
+                .expect("SR25519 pair must exist for SR25519 key type")
+                .public()
+                .0
+                .to_vec(),
+            KeyPairType::Ed25519 => self
+                .ed25519_pair
+                .as_ref()
+                .expect("ED25519 pair must exist for ED25519 key type")
+                .public()
+                .0
+                .to_vec(),
         }
     }
 
@@ -231,11 +250,19 @@ impl Wallet {
     pub fn address(&self) -> String {
         match self.key_type {
             KeyPairType::Sr25519 => {
-                let public = self.sr25519_pair.as_ref().unwrap().public();
+                let public = self
+                    .sr25519_pair
+                    .as_ref()
+                    .expect("SR25519 pair must exist for SR25519 key type")
+                    .public();
                 public.to_ss58check_with_version(self.ss58_format)
             }
             KeyPairType::Ed25519 => {
-                let public = self.ed25519_pair.as_ref().unwrap().public();
+                let public = self
+                    .ed25519_pair
+                    .as_ref()
+                    .expect("ED25519 pair must exist for ED25519 key type")
+                    .public();
                 public.to_ss58check_with_version(self.ss58_format)
             }
         }
@@ -250,11 +277,17 @@ impl Wallet {
     pub fn sign(&self, message: &[u8]) -> Vec<u8> {
         match self.key_type {
             KeyPairType::Sr25519 => {
-                let pair = self.sr25519_pair.as_ref().unwrap();
+                let pair = self
+                    .sr25519_pair
+                    .as_ref()
+                    .expect("SR25519 pair must exist for SR25519 key type");
                 pair.sign(message).0.to_vec()
             }
             KeyPairType::Ed25519 => {
-                let pair = self.ed25519_pair.as_ref().unwrap();
+                let pair = self
+                    .ed25519_pair
+                    .as_ref()
+                    .expect("ED25519 pair must exist for ED25519 key type");
                 pair.sign(message).0.to_vec()
             }
         }
@@ -270,7 +303,11 @@ impl Wallet {
                 let mut sig_array = [0u8; 64];
                 sig_array.copy_from_slice(signature);
                 let sig = sr25519::Signature::from_raw(sig_array);
-                let public = self.sr25519_pair.as_ref().unwrap().public();
+                let public = self
+                    .sr25519_pair
+                    .as_ref()
+                    .expect("SR25519 pair must exist for SR25519 key type")
+                    .public();
                 sr25519::Pair::verify(&sig, message, &public)
             }
             KeyPairType::Ed25519 => {
@@ -280,7 +317,11 @@ impl Wallet {
                 let mut sig_array = [0u8; 64];
                 sig_array.copy_from_slice(signature);
                 let sig = ed25519::Signature::from_raw(sig_array);
-                let public = self.ed25519_pair.as_ref().unwrap().public();
+                let public = self
+                    .ed25519_pair
+                    .as_ref()
+                    .expect("ED25519 pair must exist for ED25519 key type")
+                    .public();
                 ed25519::Pair::verify(&sig, message, &public)
             }
         }
@@ -455,10 +496,9 @@ mod tests {
 
     #[test]
     fn test_generate_mnemonic() {
-        let mnemonic = Wallet::generate_mnemonic();
+        let mnemonic = Wallet::generate_mnemonic().unwrap();
         assert!(!mnemonic.is_empty());
 
-        // Should be able to create a wallet from it
         let wallet = Wallet::from_mnemonic(&mnemonic, KeyPairType::Sr25519);
         assert!(wallet.is_ok());
     }
@@ -525,8 +565,105 @@ mod tests {
         let sr25519_wallet = Wallet::from_seed(&seed, KeyPairType::Sr25519).unwrap();
         let ed25519_wallet = Wallet::from_seed(&seed, KeyPairType::Ed25519).unwrap();
 
-        // Different cryptographic algorithms (SR25519 vs ED25519) interpret the same seed differently,
-        // resulting in distinct key pairs and thus different addresses.
         assert_ne!(sr25519_wallet.address(), ed25519_wallet.address());
+    }
+
+    #[test]
+    fn test_invalid_mnemonic() {
+        let invalid_mnemonic = "invalid mnemonic phrase that should fail";
+        let result = Wallet::from_mnemonic(invalid_mnemonic, KeyPairType::Sr25519);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("Invalid mnemonic"));
+    }
+
+    #[test]
+    fn test_invalid_seed_length() {
+        let short_seed = [42u8; 16];
+        let result = Wallet::from_seed(&short_seed, KeyPairType::Sr25519);
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Seed must be 32 bytes"));
+
+        let long_seed = [42u8; 64];
+        let result = Wallet::from_seed(&long_seed, KeyPairType::Ed25519);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_verify_with_invalid_signature_length() {
+        let wallet = Wallet::new_random();
+        let message = b"Test message";
+
+        let short_signature = [0u8; 32];
+        assert!(!wallet.verify(message, &short_signature));
+
+        let long_signature = [0u8; 128];
+        assert!(!wallet.verify(message, &long_signature));
+    }
+
+    #[test]
+    fn test_verify_with_tampered_signature() {
+        let wallet = Wallet::new_random();
+        let message = b"Original message";
+
+        let mut signature = wallet.sign(message);
+        signature[0] ^= 0xFF;
+
+        assert!(!wallet.verify(message, &signature));
+    }
+
+    #[test]
+    fn test_mnemonic_generation_produces_valid_mnemonic() {
+        for _ in 0..10 {
+            let mnemonic = Wallet::generate_mnemonic().unwrap();
+            let words: Vec<&str> = mnemonic.split_whitespace().collect();
+            assert!(
+                words.len() == 12 || words.len() == 15 || words.len() == 18 || words.len() == 24,
+                "Expected valid mnemonic word count, got {}",
+                words.len()
+            );
+
+            let wallet = Wallet::from_mnemonic(&mnemonic, KeyPairType::Sr25519);
+            assert!(
+                wallet.is_ok(),
+                "Generated mnemonic should be valid: {}",
+                mnemonic
+            );
+        }
+    }
+
+    #[test]
+    fn test_wallet_from_mnemonic_with_path() {
+        let mnemonic = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
+
+        let wallet1 =
+            Wallet::from_mnemonic_with_path(mnemonic, Some("//Alice"), KeyPairType::Sr25519)
+                .unwrap();
+        let wallet2 =
+            Wallet::from_mnemonic_with_path(mnemonic, Some("//Bob"), KeyPairType::Sr25519).unwrap();
+
+        assert_ne!(wallet1.address(), wallet2.address());
+
+        let wallet_no_path = Wallet::from_mnemonic(mnemonic, KeyPairType::Sr25519).unwrap();
+        let wallet_empty_path =
+            Wallet::from_mnemonic_with_path(mnemonic, None, KeyPairType::Sr25519).unwrap();
+        assert_eq!(wallet_no_path.address(), wallet_empty_path.address());
+    }
+
+    #[test]
+    fn test_both_key_types_sign_and_verify() {
+        let sr25519_wallet = Wallet::new_random_with_type(KeyPairType::Sr25519);
+        let ed25519_wallet = Wallet::new_random_with_type(KeyPairType::Ed25519);
+        let message = b"Test message for both key types";
+
+        let sr25519_sig = sr25519_wallet.sign(message);
+        assert!(sr25519_wallet.verify(message, &sr25519_sig));
+        assert_eq!(sr25519_sig.len(), 64);
+
+        let ed25519_sig = ed25519_wallet.sign(message);
+        assert!(ed25519_wallet.verify(message, &ed25519_sig));
+        assert_eq!(ed25519_sig.len(), 64);
     }
 }
