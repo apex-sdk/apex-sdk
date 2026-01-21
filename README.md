@@ -13,7 +13,7 @@
 
 ---
 
-**[Apex SDK]()** is a A unified Rust SDK for building cross-chain applications across Substrate and EVM ecosystems. Apex SDK provides a single, type-safe API to interact with multiple blockchain protocols—enabling developers to build multichain applications without managing different client libraries, RPC interfaces, or type systems for each chain.
+**[Apex SDK](https://apexsdk.dev)** is a A unified Rust SDK for building cross-chain applications across Substrate and EVM ecosystems. Apex SDK provides a single, type-safe API to interact with multiple blockchain protocols—enabling developers to build multichain applications without managing different client libraries, RPC interfaces, or type systems for each chain.
 
 ## Installation & Usage
 
