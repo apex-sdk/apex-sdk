@@ -25,6 +25,7 @@ use tracing::{debug, info};
 pub mod block;
 pub mod cache;
 pub mod contracts;
+pub mod fee_estimator;
 pub mod metrics;
 pub mod monitor;
 pub mod nonce_manager;
@@ -43,6 +44,10 @@ pub use cache::{Cache, CacheConfig};
 pub use contracts::{
     parse_metadata, ContractCallBuilder, ContractClient, ContractMetadata, GasLimit,
     StorageDepositLimit,
+};
+pub use fee_estimator::{
+    CongestionLevel, DynamicFeeEstimator, FeeAccuracyMetric, FeeAccuracyStats, FeeEstimate,
+    FeeStrategy, NetworkCongestion, Weight,
 };
 pub use metrics::{Metrics, MetricsSnapshot};
 pub use nonce_manager::SubstrateNonceManager;
@@ -609,6 +614,15 @@ impl SubstrateAdapter {
     /// Create a transaction executor
     pub fn transaction_executor(&self) -> TransactionExecutor {
         TransactionExecutor::new(self.client.clone(), self.metrics.clone())
+    }
+
+    /// This provides advanced fee estimation capabilities including:
+    /// - Weight-based dynamic calculations
+    /// - Network congestion monitoring
+    /// - Multiple fee strategies (Fast, Normal, Slow)
+    /// - Fee estimation accuracy metrics
+    pub fn fee_estimator(&self) -> DynamicFeeEstimator {
+        DynamicFeeEstimator::new(self.client.clone())
     }
 
     /// Get runtime version
