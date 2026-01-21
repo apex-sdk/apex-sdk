@@ -1,0 +1,12 @@
+[package]
+name = "substrate-fees"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+apex-sdk-substrate = { path = "../../apex-sdk-substrate" }
+tokio = { version = "1.45", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
