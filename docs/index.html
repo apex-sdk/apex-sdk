@@ -47,8 +47,8 @@
       "programmingLanguage": "Rust",
       "author": {
         "@type": "Organization",
-        "name": "Carbobit",
-        "url": "https://carbobit.com"
+        "name": "Eschon Technologies",
+        "url": "https://eschon.io"
       },
       "url": "https://apexsdk.dev",
       "softwareVersion": "0.1.5",
@@ -669,14 +669,14 @@
                     </ul>
                 </div>
 
-                <!-- Company Column -->
+                <!-- Community Column -->
                 <div class="footer-links">
-                    <h4>Company</h4>
+                    <h4>Community</h4>
                     <ul>
-                        <li><a href="https://carbobit.com" target="_blank" rel="noopener">Carbobit</a></li>
                         <li><a href="https://github.com/apex-sdk/apex-sdk" target="_blank" rel="noopener">GitHub</a></li>
                         <li><a href="https://discord.gg/zCDFsBaZJN" target="_blank" rel="noopener">Discord</a></li>
                         <li><a href="/viewer.html?doc=CONTRIBUTING.md">Contributing</a></li>
+                        <li><a href="/viewer.html?doc=ROADMAP.md">Roadmap</a></li>
                         <li><a href="https://github.com/apex-sdk/apex-sdk/blob/main/LICENSE">License</a></li>
                     </ul>
                 </div>
@@ -684,7 +684,7 @@
 
             <!-- Footer Bottom -->
             <div class="footer-bottom">
-                <p>&copy; 2025 Apex SDK Protocol by <a href="https://carbobit.com" target="_blank" rel="noopener">Carbobit</a>. Apache-2.0 Licensed.</p>
+                <p>&copy; <span id="footer-year"></span> Apex SDK Protocol. Apache-2.0 Licensed.</p>
             </div>
         </div>
     </footer>
@@ -695,6 +695,15 @@
     <script src="js/utils/performance.js" defer></script>
     
     <!-- Main application script -->
-    <script src="js/main-browser.js" defer></script>
+        <script src="js/main-browser.js" defer></script>
+        <script>
+            // Dynamically set the footer year
+            document.addEventListener('DOMContentLoaded', function() {
+                var yearSpan = document.getElementById('footer-year');
+                if (yearSpan) {
+                    yearSpan.textContent = new Date().getFullYear();
+                }
+            });
+        </script>
 </body>
 </html>
