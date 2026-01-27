@@ -24,17 +24,13 @@ async-trait = { workspace = true }
 # Web server for metrics endpoint
 axum = "0.8.1"
 tower = "0.5"
-tower-http = { version = "0.6", features = ["trace", "cors"] }
 
 # Metrics and observability
 prometheus = "0.14"
 opentelemetry = { version = "0.28", features = ["trace", "metrics"] }
 opentelemetry_sdk = { version = "0.28", features = ["trace", "metrics", "rt-tokio"] }
-opentelemetry-prometheus = "0.29"
-opentelemetry-otlp = { version = "0.28", features = ["trace", "metrics", "grpc-tonic"], optional = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter", "json"] }
-tracing-opentelemetry = "0.29"
 
 # Serialization
 serde = { workspace = true }
@@ -42,7 +38,6 @@ serde_json = { workspace = true }
 
 # Error handling
 thiserror = { workspace = true }
-anyhow = { workspace = true }
 
 # Time utilities
 chrono = { workspace = true }
@@ -60,4 +55,3 @@ reqwest = { workspace = true }
 default = ["prometheus", "opentelemetry"]
 prometheus = []
 opentelemetry = []
-jaeger = ["opentelemetry-otlp"]
