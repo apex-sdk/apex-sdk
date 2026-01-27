@@ -1,0 +1,152 @@
+{
+  "dashboard": {
+    "title": "Apex SDK - Performance Deep Dive",
+    "tags": ["apex-sdk", "performance", "profiling"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "30s",
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Operation Duration Distribution (All Operations)",
+        "type": "heatmap",
+        "gridPos": {"x": 0, "y": 0, "w": 24, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(apex_sdk_transaction_duration_seconds_bucket[5m])) by (le)",
+            "format": "heatmap",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "calculate": true,
+          "calculation": {},
+          "cellGap": 2,
+          "cellRadius": 0,
+          "cellValues": {},
+          "color": {
+            "mode": "scheme",
+            "scheme": "Spectral"
+          },
+          "yAxis": {
+            "axisLabel": "Duration (seconds)",
+            "unit": "s"
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "RPC Call Performance by Operation",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(apex_sdk_rpc_duration_seconds_bucket[5m])) by (operation, le))",
+            "legendFormat": "{{operation}} - P95",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Duration"},
+          {"format": "short"}
+        ],
+        "legend": {"show": true}
+      },
+      {
+        "id": 3,
+        "title": "Operation Throughput",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum by (operation) (rate(apex_sdk_rpc_duration_seconds_count[5m]))",
+            "legendFormat": "{{operation}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Operations/sec"},
+          {"format": "short"}
+        ],
+        "legend": {"show": true}
+      },
+      {
+        "id": 4,
+        "title": "Transaction Confirmation Time",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 16, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(apex_sdk_transaction_duration_seconds_bucket{operation=\"transaction_confirm\"}[5m]))",
+            "legendFormat": "{{chain}} - P50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(apex_sdk_transaction_duration_seconds_bucket{operation=\"transaction_confirm\"}[5m]))",
+            "legendFormat": "{{chain}} - P95",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Duration"},
+          {"format": "short"}
+        ],
+        "legend": {"show": true}
+      },
+      {
+        "id": 5,
+        "title": "Gas Efficiency Trend",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 16, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "avg_over_time(apex_sdk_gas_used[5m]) / avg_over_time(apex_sdk_gas_used[5m] offset 1h) * 100",
+            "legendFormat": "{{chain}} - Efficiency Change %",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "Change"},
+          {"format": "short"}
+        ],
+        "legend": {"show": true}
+      },
+      {
+        "id": 6,
+        "title": "Slow Operations (>1s)",
+        "type": "table",
+        "gridPos": {"x": 0, "y": 24, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "topk(20, sum by (chain, operation) (rate(apex_sdk_transaction_duration_seconds_bucket{le=\"1.0\"}[5m]) - rate(apex_sdk_transaction_duration_seconds_bucket{le=\"0.5\"}[5m])))",
+            "format": "table",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Success Rate by Operation",
+        "type": "bargauge",
+        "gridPos": {"x": 12, "y": 24, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "apex_sdk_success_rate",
+            "legendFormat": "{{operation}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "displayMode": "gradient",
+          "orientation": "horizontal",
+          "showUnfilled": true
+        }
+      }
+    ]
+  }
+}

@@ -5,6 +5,7 @@ members = [
     "apex-sdk-substrate",
     "apex-sdk-evm",
     "apex-sdk-types",
+    "apex-sdk-metrics",
     "cli",
     "integration-tests",
 ]
