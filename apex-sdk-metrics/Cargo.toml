@@ -1,0 +1,57 @@
+[package]
+name = "apex-sdk-metrics"
+version.workspace = true
+edition.workspace = true
+description = "Comprehensive metrics, observability, and monitoring for Apex SDK"
+authors.workspace = true
+rust-version.workspace = true
+readme = "../README.md"
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+documentation.workspace = true
+categories.workspace = true
+
+[dependencies]
+# Internal dependencies
+apex-sdk-core = { workspace = true }
+
+# Async runtime
+tokio = { workspace = true, features = ["full"] }
+async-trait = { workspace = true }
+
+# Web server for metrics endpoint
+axum = "0.8.1"
+tower = "0.5"
+
+# Metrics and observability
+prometheus = "0.14"
+opentelemetry = { version = "0.28", features = ["trace", "metrics"] }
+opentelemetry_sdk = { version = "0.28", features = ["trace", "metrics", "rt-tokio"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter", "json"] }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Error handling
+thiserror = { workspace = true }
+
+# Time utilities
+chrono = { workspace = true }
+
+# UUID generation
+uuid = { version = "1.11", features = ["v4", "serde"] }
+
+# System metrics
+sysinfo = "0.33"
+
+[dev-dependencies]
+reqwest = { workspace = true }
+
+[features]
+default = ["prometheus", "opentelemetry"]
+prometheus = []
+opentelemetry = []

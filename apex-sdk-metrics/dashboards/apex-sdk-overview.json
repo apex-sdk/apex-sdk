@@ -1,0 +1,183 @@
+{
+  "dashboard": {
+    "title": "Apex SDK - Overview",
+    "tags": ["apex-sdk", "blockchain", "observability"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Transaction Success Rate",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(apex_sdk_transactions_total{status=\"success\"}[5m]) / (rate(apex_sdk_transactions_total[5m]) > 0) * 100",
+            "legendFormat": "{{chain}} - Success Rate",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "Success Rate"},
+          {"format": "short"}
+        ],
+        "legend": {"show": true},
+        "tooltip": {"shared": true}
+      },
+      {
+        "id": 2,
+        "title": "Transaction Latency (P95)",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(apex_sdk_transaction_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{chain}} - P95",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Duration"},
+          {"format": "short"}
+        ],
+        "legend": {"show": true},
+        "tooltip": {"shared": true}
+      },
+      {
+        "id": 3,
+        "title": "Total Transactions per Chain",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 8, "w": 8, "h": 4},
+        "targets": [
+          {
+            "expr": "sum by (chain) (apex_sdk_transactions_total)",
+            "legendFormat": "{{chain}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 4,
+        "title": "Gas Usage by Chain",
+        "type": "graph",
+        "gridPos": {"x": 8, "y": 8, "w": 8, "h": 8},
+        "targets": [
+          {
+            "expr": "apex_sdk_gas_used",
+            "legendFormat": "{{chain}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Gas Used"},
+          {"format": "short"}
+        ],
+        "legend": {"show": true}
+      },
+      {
+        "id": 5,
+        "title": "Error Rate by Category",
+        "type": "graph",
+        "gridPos": {"x": 16, "y": 8, "w": 8, "h": 8},
+        "targets": [
+          {
+            "expr": "sum by (category) (rate(apex_sdk_errors_total[5m]))",
+            "legendFormat": "{{category}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Errors/sec"},
+          {"format": "short"}
+        ],
+        "legend": {"show": true}
+      },
+      {
+        "id": 6,
+        "title": "RPC Response Time (P50, P95, P99)",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 16, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(apex_sdk_rpc_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{chain}} - P50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(apex_sdk_rpc_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{chain}} - P95",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(apex_sdk_rpc_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{chain}} - P99",
+            "refId": "C"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Duration"},
+          {"format": "short"}
+        ],
+        "legend": {"show": true}
+      },
+      {
+        "id": 7,
+        "title": "Error Distribution by Severity",
+        "type": "piechart",
+        "gridPos": {"x": 12, "y": 16, "w": 6, "h": 8},
+        "targets": [
+          {
+            "expr": "sum by (severity) (apex_sdk_errors_total)",
+            "legendFormat": "{{severity}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "list", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 8,
+        "title": "Top Error Types",
+        "type": "table",
+        "gridPos": {"x": 18, "y": 16, "w": 6, "h": 8},
+        "targets": [
+          {
+            "expr": "topk(10, sum by (error_type, category) (increase(apex_sdk_errors_total[1h])))",
+            "format": "table",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Transaction Volume by Chain (Rate)",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 24, "w": 24, "h": 8},
+        "targets": [
+          {
+            "expr": "sum by (chain) (rate(apex_sdk_transactions_total[5m]))",
+            "legendFormat": "{{chain}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Transactions/sec"},
+          {"format": "short"}
+        ],
+        "legend": {"show": true},
+        "stack": false
+      }
+    ]
+  }
+}
