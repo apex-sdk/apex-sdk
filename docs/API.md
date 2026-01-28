@@ -1,6 +1,12 @@
 # API Reference
 
-Comprehensive API reference for Apex SDK Protocol v0.1.5 - Your guide to building cross-chain blockchain applications.
+Comprehensive API reference for Apex SDK Protocol v0.1.6 - Your guide to building cross-chain blockchain applications.
+...
+apex-sdk-substrate = { version = "0.1.6", features = ["typed-polkadot"] }
+...
+apex-sdk-evm = { version = "0.1.6" }
+...
+apex-sdk-core = { version = "0.1.6", features = ["mocks"] }
 
 ## Core Modules
 
@@ -22,17 +28,17 @@ let sdk = ApexSDK::builder()
 ### Substrate Adapter
 
 ```toml
-apex-sdk-substrate = { version = "0.1.5", features = ["typed-polkadot"] }
+apex-sdk-substrate = { version = "0.1.6", features = ["typed-polkadot"] }
 ```
 
 ### EVM Adapter
 
 ```toml
-apex-sdk-evm = { version = "0.1.5" }
+apex-sdk-evm = { version = "0.1.6" }
 ```
 
 ## Testing
 
 ```toml
-apex-sdk-core = { version = "0.1.5", features = ["mocks"] }
+apex-sdk-core = { version = "0.1.6", features = ["mocks"] }
 ```

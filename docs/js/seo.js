@@ -8,7 +8,7 @@ function updateStructuredData() {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "Apex SDK Protocol",
-        "softwareVersion": "0.1.5",
+        "softwareVersion": "0.1.6",
         "applicationCategory": "DeveloperApplication",
         "operatingSystem": "Cross-platform",
         "description": "Unified Rust SDK for Substrate & EVM blockchain development.",

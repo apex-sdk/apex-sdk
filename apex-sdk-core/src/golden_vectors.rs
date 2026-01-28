@@ -104,7 +104,7 @@ pub struct GoldenVectorSet {
 impl GoldenVectorSet {
     pub fn new() -> Self {
         Self {
-            version: "0.1.5".to_string(),
+            version: "0.1.6".to_string(),
             vectors: Vec::new(),
         }
     }

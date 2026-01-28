@@ -2,7 +2,7 @@
 
 > Strategic plan for evolving Apex SDK into the industry-standard cross-chain development toolkit
 
-## Current Status (v0.1.5)
+## Current Status (v0.1.6)
 
 ### Completed Features
 - Core SDK architecture with Substrate and EVM adapters

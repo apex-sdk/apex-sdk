@@ -26,5 +26,5 @@ All examples depend on the `apex-sdk` crate. Ensure you have the latest version:
 
 ```toml
 [dependencies]
-apex-sdk = "0.1.5"
+apex-sdk = "0.1.6"
 ```

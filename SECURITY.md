@@ -77,8 +77,8 @@ Apex SDK implements several security measures:
 
 ## Contact
 
-- **Primary Security Contact**: kherld@duck.com
-- **Backup Contact**: contact@carbobit.com
+- **Primary Security Contact**: security@apexsdk.dev
+- **Backup Contact**: partnerships@apexsdk.dev
 - **Security Advisories**: https://github.com/apex-sdk/apex-sdk/security/advisories
 
 For more information on securing Apex SDK social media and community channels, see [SOCIAL_MEDIA_SECURITY.md](./SOCIAL_MEDIA_SECURITY.md).

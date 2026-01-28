@@ -4,11 +4,12 @@
     top: 0;
     left: 0;
     right: 0;
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-bottom: var(--glass-border);
     z-index: 1000;
-    transition: var(--transition);
+    transition: var(--transition-slow);
     height: var(--header-height);
 }
 
@@ -17,8 +18,8 @@
 }
 
 .navbar.scrolled {
-    background: rgba(255, 255, 255, 0.95);
-    box-shadow: var(--shadow-lg);
+    background: var(--bg-glass);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
 }
 
 [data-theme="dark"] .navbar.scrolled {

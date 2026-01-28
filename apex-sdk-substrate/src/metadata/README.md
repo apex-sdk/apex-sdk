@@ -7,5 +7,5 @@ These are used for type-safe interaction with the chains.
 
 ```toml
 [dependencies]
-apex-sdk-substrate = { version = "0.1.5", features = ["typed-westend"] }
+apex-sdk-substrate = { version = "0.1.6", features = ["typed-westend"] }
 ```
