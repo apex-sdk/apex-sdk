@@ -1,13 +1,13 @@
 [package]
 name = "apex-sdk-core"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 description = "Core traits and types for Apex SDK"
 license = "Apache-2.0"
 repository = "https://github.com/apex-sdk/apex-sdk"
 
 [dependencies]
-apex-sdk-types = { path = "../apex-sdk-types", version = "0.1.5" }
+apex-sdk-types = { path = "../apex-sdk-types", version = "0.1.6" }
 async-trait = "0.1.80"
 thiserror = "1.0.61"
 serde = { version = "1.0.203", features = ["derive"] }

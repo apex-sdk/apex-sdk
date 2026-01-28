@@ -230,7 +230,7 @@ impl MetricsCollector {
         output.push_str(&format!(
             "# HELP apex_sdk_info Apex SDK information\n\
              # TYPE apex_sdk_info gauge\n\
-             apex_sdk_info{{version=\"0.1.5\",uptime_seconds=\"{}\"}} 1\n\n",
+             apex_sdk_info{{version=\"0.1.6\",uptime_seconds=\"{}\"}} 1\n\n",
             self.uptime().as_secs()
         ));
 

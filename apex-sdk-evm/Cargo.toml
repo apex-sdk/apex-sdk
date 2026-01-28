@@ -1,14 +1,14 @@
 [package]
 name = "apex-sdk-evm"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 description = "EVM adapter for Apex SDK"
 license = "Apache-2.0"
 repository = "https://github.com/apex-sdk/apex-sdk"
 
 [dependencies]
-apex-sdk-core = { path = "../apex-sdk-core", version = "0.1.5" }
-apex-sdk-types = { path = "../apex-sdk-types", version = "0.1.5" }
+apex-sdk-core = { path = "../apex-sdk-core", version = "0.1.6" }
+apex-sdk-types = { path = "../apex-sdk-types", version = "0.1.6" }
 alloy = { workspace = true }
 alloy-signer-local = { workspace = true }
 alloy-eips = { workspace = true }
