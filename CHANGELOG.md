@@ -5,7 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.6] - 2026-01-28
+
+### Added
+- **Major Metrics Overhaul**: Significant cleanup and modernization of the `apex-sdk-metrics` crate.
+- **Release Notes**: Added comprehensive `release-notes.md` for better release visibility.
+
+### Changed
+- **Dependency Cleanup**: Removed unused dependencies (`anyhow`, `opentelemetry-otlp`, `opentelemetry-prometheus`, `tower-http`, `tracing-opentelemetry`) from `apex-sdk-metrics`.
+- **Feature Optimization**: Removed the `jaeger` feature from `apex-sdk-metrics`.
+- **Workspace Sync**: Updated all crates, examples, and documentation to version `v0.1.6`.
+
+### Fixed
+- **CI Stability**: Resolved build failures caused by unused dependencies in the metrics crate.
 
 ## [0.1.5] - 2026-01-12
 
