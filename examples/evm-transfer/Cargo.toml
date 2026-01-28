@@ -1,11 +1,11 @@
 [package]
 name = "evm-transfer"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 publish = false
 
 [dependencies]
-apex-sdk = { path = "../../apex-sdk", version = "0.1.5", features = ["evm"] }
+apex-sdk = { path = "../../apex-sdk", version = "0.1.6", features = ["evm"] }
 tokio = { version = "1.38.0", features = ["full"] }
 anyhow = "1.0.86"
 tracing = "0.1.40"

@@ -8,7 +8,7 @@ https://www.apexsdk.dev/* https://apexsdk.dev/:splat 301!
 /index.html / 301!
 
 # Redirect old GitHub Pages URLs
-https://carbobit.github.io/apex-sdk/* https://apexsdk.dev/:splat 301!
+https://apex-sdk.github.io/apex-sdk/* https://apexsdk.dev/:splat 301!
 
 # Subdomain routing - render markdown files with viewer
 https://start.apexsdk.dev/* https://apexsdk.dev/viewer.html?doc=QUICK_START.md 301!

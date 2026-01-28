@@ -1,16 +1,18 @@
 /* Card Components */
 .card {
-    background: var(--bg-card);
+    background: var(--bg-glass-card);
     border-radius: var(--radius-lg);
-    border: 1px solid var(--border-color);
-    backdrop-filter: blur(10px);
-    transition: var(--transition);
+    border: var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    transition: var(--transition-slow);
     overflow: hidden;
+    box-shadow: var(--shadow-sm);
 }
 
 .card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
     border-color: var(--primary-color);
 }
 
@@ -29,13 +31,16 @@
 /* Feature Cards */
 .feature-card {
     background: var(--bg-glass-card);
-    border: 1px solid var(--border-color);
+    border: var(--glass-border);
     border-radius: var(--radius-lg);
-    padding: 2rem;
-    transition: var(--transition);
+    padding: 2.25rem 2rem;
+    transition: var(--transition-slow);
     position: relative;
     overflow: hidden;
-    backdrop-filter: blur(10px);
+    backdrop-filter: var(--glass-blur);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .feature-card::before {
@@ -44,9 +49,9 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 3px;
+    height: 4px;
     background: var(--gradient-primary);
-    opacity: 0;
+    opacity: 0.15;
     transition: opacity var(--transition);
 }
 
@@ -55,8 +60,8 @@
 }
 
 .feature-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
     border-color: var(--primary-color);
 }
 
@@ -88,17 +93,18 @@
 .chain-card {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1.5rem;
+    gap: 1.25rem;
+    padding: 1.75rem;
     background: var(--bg-glass-card);
-    border: 1px solid var(--border-color);
+    border: var(--glass-border);
     border-radius: var(--radius-lg);
-    transition: var(--transition);
+    transition: var(--transition-slow);
     text-decoration: none;
     color: inherit;
-    backdrop-filter: blur(10px);
+    backdrop-filter: var(--glass-blur);
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow-sm);
 }
 
 .chain-card::before {
@@ -117,9 +123,9 @@
 }
 
 .chain-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-6px) scale(1.02);
     border-color: var(--primary-color);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
 }
 
 .chain-logo {
@@ -193,18 +199,19 @@
 /* Network Card */
 .network-card {
     background: var(--bg-glass-card);
-    border: 1px solid var(--border-color);
+    border: var(--glass-border);
     border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    transition: var(--transition);
-    backdrop-filter: blur(10px);
+    padding: 2rem;
+    transition: var(--transition-slow);
+    backdrop-filter: var(--glass-blur);
     text-align: center;
+    box-shadow: var(--shadow-sm);
 }
 
 .network-card:hover {
-    transform: translateY(-4px) scale(1.02);
+    transform: translateY(-8px) scale(1.05);
     border-color: var(--primary-color);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
 }
 
 .network-logo {

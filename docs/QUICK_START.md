@@ -6,7 +6,7 @@ Add `apex-sdk` to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-apex-sdk = "0.1.5"
+apex-sdk = "0.1.6"
 ```
 
 ## Basic Usage

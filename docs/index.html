@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>Apex SDK - Rust Blockchain SDK for Multi-Chain Development</title>
-    <meta name="description" content="Apex SDK: Enterprise Rust blockchain SDK for building cross-chain dApps on Ethereum, Polkadot & 15+ networks. Type-safe, fast & production-ready. Start now!">
-    <meta name="keywords" content="Apex SDK, Rust blockchain SDK, Substrate SDK, EVM SDK, cross-chain development, Polkadot SDK, Ethereum SDK, blockchain development, Web3 Rust, compile-time safety, multi-chain SDK">
-    <meta name="author" content="Apex SDK Team">
+    <title>Apex SDK | The Definitive Rust Framework for Multichain Development</title>
+    <meta name="description" content="Build secure, high-performance multichain applications with Apex SDK. The definitive Rust framework for EVM and Substrate ecosystems. Enterprise-grade, type-safe, and production-ready.">
+    <meta name="keywords" content="Apex SDK, Rust blockchain framework, multichain development, Substrate SDK, EVM SDK, cross-chain, Web3 Rust, blockchain SDK, Polkadot, Ethereum, type-safe blockchain">
+    <meta name="author" content="Apex SDK Protocol">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://apexsdk.dev/">
 
     <!-- Open Graph & Twitter Cards -->
-    <meta property="og:title" content="Apex SDK - Unified Rust SDK for Cross-Chain Development">
-    <meta property="og:description" content="Build secure, high-performance, and cross-chain applications with Apex SDK, the unified Rust framework for Substrate and EVM ecosystems.">
+    <meta property="og:title" content="Apex SDK | The Definitive Rust Framework for Multichain Development">
+    <meta property="og:description" content="Unified Rust framework for building enterprise-grade blockchain applications across EVM and Substrate ecosystems.">
     <meta property="og:image" content="https://apexsdk.dev/assets/og-image.png">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Apex SDK | Multichain Rust Framework">
+    <meta name="twitter:description" content="The definitive Rust framework for multichain blockchain development. Unified API for Ethereum, Polkadot, and more.">
 
     <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,10 +37,10 @@
     {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      "name": "Apex SDK",
+      "name": "Apex SDK Protocol",
       "applicationCategory": "DeveloperApplication",
       "operatingSystem": "Linux, macOS, Windows",
-      "description": "Enterprise Rust blockchain SDK for building cross-chain dApps on Ethereum, Polkadot and 15+ networks",
+      "description": "The definitive Rust framework for multichain blockchain development across EVM and Substrate ecosystems.",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -51,7 +53,7 @@
         "url": "https://eschon.io"
       },
       "url": "https://apexsdk.dev",
-      "softwareVersion": "0.1.5",
+      "softwareVersion": "0.1.6",
       "license": "https://github.com/apex-sdk/apex-sdk/blob/main/LICENSE",
       "downloadUrl": "https://crates.io/crates/apex-sdk",
       "documentation": "https://apexsdk.dev/api",
@@ -72,21 +74,22 @@
     <!-- Header -->
     <header id="navbar" class="navbar">
         <div class="nav-container">
-            <a href="index.html" class="nav-logo">
-                <img src="assets/apex_logo.png" alt="Apex SDK Logo" width="32" height="32" loading="lazy">
-                <span>Apex SDK</span>
+            <a href="index.html" class="nav-logo hover-scale">
+                <img src="assets/apex_logo.png" alt="Apex SDK Logo" width="34" height="34" loading="lazy">
+                <span class="gradient-text" style="font-size: 1.5rem; font-weight: 800;">Apex SDK</span>
             </a>
-
+ 
             <nav class="nav-menu" id="navMenu">
                 <ul class="nav-links">
                     <li><a href="#features" class="nav-link">Features</a></li>
-                    <li><a href="#networks" class="nav-link">Networks</a></li>
+                    <li><a href="#architecture" class="nav-link">Architecture</a></li>
+                    <li><a href="#networks" class="nav-link">Ecosystem</a></li>
                     <li><a href="viewer.html" class="nav-link">Docs</a></li>
                 </ul>
             </nav>
-
+ 
             <div class="nav-actions">
-                <a href="https://github.com/apex-sdk/apex-sdk" target="_blank" rel="noopener" class="btn btn-secondary nav-cta">
+                <a href="https://github.com/apex-sdk/apex-sdk" target="_blank" rel="noopener" class="btn btn-secondary nav-cta shimmer">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;"><path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.51 2.87 8.33 6.84 9.68.5.09.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.61-3.37-1.37-3.37-1.37-.45-1.18-1.1-1.5-1.1-1.5-.9-.63.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.55-1.14-4.55-5.09 0-1.13.39-2.05 1.03-2.78-.1-.26-.45-1.32.1-2.75 0 0 .84-.27 2.75 1.06A9.3 9.3 0 0 1 12 7.05c.85 0 1.71.12 2.51.35 1.9-1.33 2.74-1.06 2.74-1.06.55 1.43.21 2.49.11 2.75.64.73 1.02 1.65 1.02 2.78 0 3.96-2.34 4.83-4.57 5.09.36.32.68.95.68 1.92 0 1.38-.01 2.49-.01 2.83 0 .27.18.59.69.49A10.04 10.04 0 0 0 22 12.26C22 6.58 17.52 2 12 2z"/></svg>
                     GitHub
                 </a>
@@ -111,13 +114,13 @@
                 <div class="hero-grid"></div>
             </div>
             <div class="container hero-content">
-                <div class="hero-badge fade-in-up">
+                <div class="hero-badge fade-in-up soft-float">
                     <span class="badge-dot"></span>
-                    <span>v0.1.5 - Alpha Release</span>
+                    <span>v0.1.6 - Alpha Release</span>
                 </div>
                 <h1 class="hero-title fade-in-up delay-1">
-                    Build Cross-Chain dApps with
-                    <span class="gradient-text">Type-Safe Rust</span>
+                    The definitive Rust framework for
+                    <span class="gradient-text">Multichain Development</span>
                 </h1>
                 <p class="hero-subtitle fade-in-up delay-2">
                     Apex SDK is the enterprise-grade Rust framework for building production-ready blockchain applications across <strong>15+ networks</strong>. One unified API for EVM and Substrate ecosystems.
@@ -135,11 +138,11 @@
                 <div class="hero-stats fade-in-up delay-4">
                     <div class="stat-item">
                         <div class="stat-value">15+</div>
-                        <div class="stat-label">Blockchain Networks</div>
+                        <div class="stat-label">Networks</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-value">100%</div>
-                        <div class="stat-label">Type Safe</div>
+                        <div class="stat-label">Rust Native</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-value">1</div>
@@ -149,449 +152,449 @@
             </div>
         </section>
 
-        <!-- Features Section -->
+        <!-- Features Section: The Bento Redesign -->
         <section id="features" class="features-section">
             <div class="container">
                 <div class="section-header scroll-reveal">
-                    <span class="section-badge">Why Apex SDK</span>
-                    <h2 class="section-title">Production-Ready Cross-Chain Development</h2>
+                    <span class="section-badge">Capabilities</span>
+                    <h2 class="section-title">The Definitive Toolkit</h2>
                     <p class="section-description">
-                        Build faster, safer, and smarter with enterprise-grade tools designed for modern blockchain development.
+                        Engineered for developers who demand absolute type-safety, performance, and cross-chain agility.
                     </p>
                 </div>
-                <div class="features-grid">
-                    <div class="feature-card scroll-reveal">
-                        <div class="feature-icon primary">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                            </svg>
+                
+                <div class="bento-grid">
+                    <!-- Large Feature: Type Safety -->
+                    <div class="bento-item large scroll-reveal">
+                        <div class="feature-icon primary soft-float">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
                         </div>
-                        <h3>Compile-Time Safety</h3>
-                        <p>Catch bugs before deployment. Rust's type system ensures your cross-chain transactions are validated at compile time, not runtime.</p>
-                        <a href="/viewer.html?doc=API.md#type-safety" class="feature-link">Learn more →</a>
+                        <h3 class="gradient-text">Absolute Type Safety</h3>
+                        <p>Rust's legendary type system, extended to every chain. Catch ABI mismatches and RPC errors at compile time.</p>
+                        <div class="tech-spec">
+                            <span class="spec-tag">Zero-Alloc</span>
+                            <span class="spec-tag">Static Dispatch</span>
+                        </div>
+                        <div class="code-preview">
+<pre><code class="language-rust">#[apex_contract]
+pub struct CrossChainApp {
+    // Verified across EVM & Substrate
+    pub provider: TypeSafeProvider,
+}</code></pre>
+                        </div>
                     </div>
 
-                    <div class="feature-card scroll-reveal">
-                        <div class="feature-icon accent">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"></polygon>
-                            </svg>
+                    <!-- Medium Feature: Transaction Pipeline -->
+                    <div class="bento-item medium scroll-reveal">
+                        <div class="feature-icon accent soft-float">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"></polygon></svg>
                         </div>
-                        <h3>Unified Transaction Pipeline</h3>
-                        <p>Built-in retry logic, fee estimation, nonce management, and confirmation tracking. Handle complex workflows with ease.</p>
-                        <a href="/viewer.html?doc=API.md#transaction-pipeline" class="feature-link">Explore pipeline →</a>
+                        <h3 class="gradient-text">Unified Pipeline</h3>
+                        <p>Write once. Our pipeline handles nonce, fees, and finality tracking across 15+ networks.</p>
+                        <div class="code-preview" style="background: transparent; border: none; padding-left: 0; margin-top: 1rem;">
+<pre><code class="language-rust">sdk.execute(tx)
+   .with_retry(3)
+   .await?;</code></pre>
+                        </div>
                     </div>
 
-                    <div class="feature-card scroll-reveal">
-                        <div class="feature-icon primary">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="2" y1="12" x2="22" y2="12"></line>
-                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                            </svg>
+                    <!-- Small Features -->
+                    <div class="bento-item small scroll-reveal">
+                        <div class="feature-icon primary soft-float">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
                         </div>
-                        <h3>Multi-Chain by Default</h3>
-                        <p>Write once, deploy everywhere. Seamlessly switch between Ethereum, Polkadot, BSC, Arbitrum, and 11+ more networks.</p>
-                        <a href="#networks" class="feature-link">View all networks →</a>
+                        <h3>Global Interop</h3>
+                        <p>Native XCM & EVM bridge support built directly into the core runtime.</p>
                     </div>
 
-                    <div class="feature-card scroll-reveal">
-                        <div class="feature-icon accent">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                <line x1="9" y1="9" x2="15" y2="9"></line>
-                                <line x1="9" y1="15" x2="15" y2="15"></line>
-                            </svg>
+                    <div class="bento-item small scroll-reveal">
+                        <div class="feature-icon accent soft-float">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
                         </div>
-                        <h3>Smart Contract Interactions</h3>
-                        <p>Type-safe contract calls with automatic ABI encoding/decoding. Deploy, read, and write with full compile-time guarantees.</p>
-                        <a href="/viewer.html?doc=API.md#contracts" class="feature-link">View examples →</a>
-                    </div>
-
-                    <div class="feature-card scroll-reveal">
-                        <div class="feature-icon primary">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                            </svg>
-                        </div>
-                        <h3>XCM Cross-Chain Messaging</h3>
-                        <p>Native support for Polkadot's XCM protocol. Transfer assets and execute calls across parachains with type-safe abstractions.</p>
-                        <a href="/viewer.html?doc=API.md#xcm" class="feature-link">XCM guide →</a>
-                    </div>
-
-                    <div class="feature-card scroll-reveal">
-                        <div class="feature-icon accent">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="16 18 22 12 16 6"></polyline>
-                                <polyline points="8 6 2 12 8 18"></polyline>
-                            </svg>
-                        </div>
-                        <h3>Developer Experience</h3>
-                        <p>Intuitive CLI, comprehensive documentation, and production-tested examples. Get from zero to deployed in under 10 minutes.</p>
-                        <a href="/viewer.html?doc=CLI.md" class="feature-link">CLI guide →</a>
+                        <h3>Pro Tooling</h3>
+                        <p>Advanced CLI for contract transpilation, local testing, and multi-signature orchestration.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Supported Networks Section -->
+        <!-- Architecture Section: The Engineering Schematic -->
+        <section id="architecture" class="architecture-section">
+            <div class="container">
+                <div class="section-header scroll-reveal">
+                    <span class="section-badge">Protocol Specification</span>
+                    <h2 class="section-title">Technical Architecture</h2>
+                    <p class="section-description">
+                        A high-fidelity schematic of the Apex SDK core. Engineered for deterministic performance and cross-chain scale.
+                    </p>
+                </div>
+                
+                <div class="architecture-grid">
+                    <div class="architecture-visual scroll-reveal">
+                        <div class="diagram-frame">
+                            <!-- High-Fidelity Technical SVG Schematic -->
+                            <svg viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity: 0.8;">
+                                <!-- Schematic Grid -->
+                                <path d="M0 50H400M0 100H400M0 150H400M0 200H400M0 250H400" stroke="var(--border-color)" stroke-width="0.5" stroke-dasharray="2 2"/>
+                                <path d="M50 0V300M100 0V300M150 0V300M200 0V300M250 0V300M300 0V300M350 0V300" stroke="var(--border-color)" stroke-width="0.5" stroke-dasharray="2 2"/>
+                                
+                                <!-- Core Protocol Stack -->
+                                <rect x="120" y="40" width="160" height="220" fill="var(--bg-secondary)" stroke="var(--primary-color)" stroke-width="1.5"/>
+                                <text x="200" y="65" text-anchor="middle" fill="var(--text-primary)" font-family="JetBrains Mono" font-size="10" font-weight="800">APEX CORE STACK</text>
+                                
+                                <!-- Layer Sub-schematics -->
+                                <rect x="135" y="85" width="130" height="40" stroke="var(--text-tertiary)" stroke-width="1" stroke-dasharray="4 2"/>
+                                <text x="200" y="110" text-anchor="middle" fill="var(--text-secondary)" font-family="JetBrains Mono" font-size="8">ORCHESTRATION</text>
+                                
+                                <rect x="135" y="135" width="130" height="40" stroke="var(--text-tertiary)" stroke-width="1" stroke-dasharray="4 2"/>
+                                <text x="200" y="160" text-anchor="middle" fill="var(--text-secondary)" font-family="JetBrains Mono" font-size="8">ADAPTER SERVICES</text>
+                                
+                                <rect x="135" y="185" width="130" height="40" stroke="var(--text-tertiary)" stroke-width="1" stroke-dasharray="4 2"/>
+                                <text x="200" y="210" text-anchor="middle" fill="var(--text-secondary)" font-family="JetBrains Mono" font-size="8">TRANSPORT LAYER</text>
+                                
+                                <!-- Connection Lines -->
+                                <path d="M50 110H120" stroke="var(--text-tertiary)" stroke-width="1"/>
+                                <path d="M280 110H350" stroke="var(--text-tertiary)" stroke-width="1"/>
+                            </svg>
+                        </div>
+                        
+                        <!-- Precise Metrics Grid -->
+                        <div class="spec-dashboard">
+                            <div class="perf-metric">
+                                <span class="metric-value">100ms</span>
+                                <span class="metric-label">Init Target</span>
+                            </div>
+                            <div class="perf-metric">
+                                <span class="metric-value">50ms</span>
+                                <span class="metric-label">Sign Target</span>
+                            </div>
+                            <div class="perf-metric">
+                                <span class="metric-value">10MB</span>
+                                <span class="metric-label">Per Connection</span>
+                            </div>
+                            <div class="perf-metric">
+                                <span class="metric-value">Stateless</span>
+                                <span class="metric-label">Scaling Mode</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="architecture-content scroll-reveal">
+                        <div class="architecture-card">
+                            <div class="stat-label">MODULE: APEX-SDK</div>
+                            <h4 class="gradient-text">Deterministic Orchestration</h4>
+                            <p>High-concurrency transaction pipeline with guaranteed atomic commitment via <code>tokio</code>.</p>
+                        </div>
+
+                        <div class="architecture-card">
+                            <div class="stat-label">MODULE: ADAPTERS</div>
+                            <h4 class="gradient-text">Native Translation</h4>
+                            <p>Zero-overhead serialization for Substrate (SCALE) and EVM (RLP) protocols.</p>
+                        </div>
+
+                        <div class="architecture-card">
+                            <div class="stat-label">MODULE: TRANSPORT</div>
+                            <h4 class="gradient-text">Asynchronous I/O</h4>
+                            <p>Non-blocking connection pooling with intelligent failover and circuit breaking.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Supported Networks Section: The Multichain Cloud -->
         <section id="networks" class="networks-section">
             <div class="container">
                 <div class="section-header scroll-reveal">
-                    <span class="section-badge">Growing Ecosystem</span>
-                    <h2 class="section-title">15+ Networks, One Unified SDK</h2>
+                    <span class="section-badge">Expansive Ecosystem</span>
+                    <h2 class="section-title">One SDK. 15+ Networks.</h2>
                     <p class="section-description">
-                        Build once, deploy everywhere. From Ethereum's robust ecosystem to Polkadot's interoperable parachains—unified under a single, type-safe API that's constantly expanding.
+                        Seamlessly navigate the fragmented multichain landscape. Apex SDK provides the unified gateway to the industry's most powerful blockchains.
                     </p>
                 </div>
 
-                <!-- Interactive Network Explorer -->
+                <!-- Interactive Network Explorer 2.0 -->
                 <div class="network-explorer scroll-reveal">
-                    <div class="explorer-tabs">
-                        <button class="explorer-tab active" data-ecosystem="evm">
-                            <div class="tab-icon">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M11.944 17.97L4.58 13.62 11.943 24l7.37-10.38-7.372 4.35h.003zM12.056 0L4.69 12.223l7.365 4.354 7.365-4.35L12.056 0z"/>
-                                </svg>
-                            </div>
-                            <div class="tab-content">
-                                <h4>EVM Ecosystem</h4>
-                                <p>7 Networks</p>
-                            </div>
-                        </button>
-                        <button class="explorer-tab" data-ecosystem="substrate">
-                            <div class="tab-icon">
-                                <svg width="24" height="24" viewBox="0 0 256 256" fill="currentColor">
-                                    <path d="M31.0155 57.7181C14.6547 76.7768 14.2233 103.306 30.0862 116.92C45.9492 130.566 72.0667 126.15 88.4607 107.058C104.821 87.9995 105.253 61.4701 89.3899 47.8567C83.1841 42.511 75.3522 39.9543 67.1884 39.9543C54.5113 39.9543 40.9713 46.1302 31.0155 57.7181Z"/>
-                                    <path d="M26.2694 156.332C13.9574 170.941 19.3003 195.744 38.2164 211.715C57.1326 227.686 82.4868 228.815 94.7989 214.205C107.111 199.596 101.768 174.793 82.8518 158.822C72.8296 150.355 61.0153 146.072 50.2962 146.072C40.7718 146.072 32.077 149.459 26.3026 156.332"/>
-                                    <path d="M137.343 209.789C115.142 216.795 99.8429 231.072 103.161 241.664C106.513 252.256 127.221 255.178 149.423 248.139C171.625 241.133 186.923 226.856 183.605 216.264C181.481 209.59 172.454 205.938 160.507 205.938C153.505 205.938 145.54 207.166 137.343 209.756"/>
-                                    <path d="M102.597 18.5365C98.0176 31.7514 112.553 48.8179 135.12 56.6871C157.686 64.5562 179.689 60.2066 184.268 46.9917C188.848 33.7768 174.313 16.7103 151.746 8.84109C144.146 6.18482 136.58 4.9231 129.744 4.9231C116.303 4.9231 105.617 9.77078 102.597 18.5365Z"/>
-                                    <path d="M204.048 45.169C197.51 47.7921 199.07 66.884 207.499 87.7357C215.928 108.621 228.041 123.396 234.579 120.773C241.083 118.15 239.557 99.0912 231.128 78.2063C223.362 58.9484 212.444 44.8702 205.674 44.8702C205.11 44.8702 204.579 44.9698 204.048 45.169Z"/>
-                                    <path d="M209.058 172.038C199.766 192.192 196.547 210.553 201.89 213.01C207.233 215.468 219.114 201.124 228.406 180.969C237.731 160.815 240.917 142.453 235.607 139.996C235.209 139.797 234.778 139.731 234.28 139.731C228.472 139.731 217.654 153.411 209.058 172.038Z"/>
-                                </svg>
-                            </div>
-                            <div class="tab-content">
-                                <h4>Substrate Ecosystem</h4>
-                                <p>6 Networks</p>
-                            </div>
-                        </button>
-                        <button class="explorer-tab" data-ecosystem="testnets">
-                            <div class="tab-icon">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                                </svg>
-                            </div>
-                            <div class="tab-content">
-                                <h4>Test Networks</h4>
-                                <p>2 Networks</p>
-                            </div>
-                        </button>
+                    <div class="explorer-tabs-container">
+                        <div class="explorer-tabs">
+                            <button class="explorer-tab active" data-ecosystem="evm">EVM Systems</button>
+                            <button class="explorer-tab" data-ecosystem="substrate">Substrate Native</button>
+                            <button class="explorer-tab" data-ecosystem="testnets">Testnets</button>
+                        </div>
                     </div>
 
-                    <!-- EVM Networks Grid -->
+                    <!-- EVM Networks Panel -->
                     <div class="ecosystem-panel active" data-panel="evm">
-                        <div class="panel-header">
-                            <h3>Ethereum & EVM-Compatible Networks</h3>
-                            <p>Deploy your smart contracts across the most popular EVM-compatible chains with identical APIs and consistent performance.</p>
-                        </div>
-                        <div class="advanced-networks-grid">
-                            <div class="network-card featured" data-network="ethereum">
-                                <div class="network-header">
-                                    <div class="network-icon ethereum">
-                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M11.944 17.97L4.58 13.62 11.943 24l7.37-10.38-7.372 4.35h.003zM12.056 0L4.69 12.223l7.365 4.354 7.365-4.35L12.056 0z"/>
-                                        </svg>
+                        <div class="network-matrix-grid">
+                            <!-- Ethereum -->
+                            <div class="matrix-tile" data-network="ethereum">
+                                <div class="tile-header">
+                                    <div class="tile-brand">
+                                        <div class="tile-icon">
+                                            <img src="assets/logos/ethereum.svg" alt="Ethereum" loading="lazy">
+                                        </div>
+                                        <span class="tile-name">Ethereum</span>
                                     </div>
-                                    <div class="network-info">
-                                        <h4>Ethereum</h4>
-                                        <span class="network-type mainnet">Mainnet</span>
+                                    <div class="tile-status"><span class="pulse-dot"></span> Verified</div>
+                                </div>
+                                <div class="tile-meta">
+                                    <div class="meta-item">
+                                        <span class="meta-label">Virtual Machine</span>
+                                        <span class="meta-value">EVM Standard</span>
                                     </div>
-                                    <div class="network-status">
-                                        <div class="status-dot ready"></div>
-                                        <span>Stable</span>
+                                    <div class="meta-item">
+                                        <span class="meta-label">Finality</span>
+                                        <span class="meta-value">Probabilistic</span>
                                     </div>
                                 </div>
-                                <p class="network-description">The world's leading programmable blockchain with the largest developer ecosystem and DeFi liquidity.</p>
-                                <div class="network-features">
-                                    <span class="feature-tag">Smart Contracts</span>
-                                    <span class="feature-tag">DeFi Hub</span>
-                                    <span class="feature-tag">NFTs</span>
-                                </div>
-                            </div>
-
-                            <div class="network-card" data-network="arbitrum">
-                                <div class="network-header">
-                                    <div class="network-icon arbitrum">
-                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M12 2L4 8v8l8 6 8-6V8l-8-6zm0 2.5l6 4.5v6l-6 4.5L6 15V9.5l6-4.5z"/>
-                                            <path d="M12 7l-3 2v4l3 2 3-2V9l-3-2z" opacity="0.7"/>
-                                        </svg>
-                                    </div>
-                                    <div class="network-info">
-                                        <h4>Arbitrum</h4>
-                                        <span class="network-type layer2">Layer 2</span>
-                                    </div>
-                                    <div class="network-status">
-                                        <div class="status-dot beta"></div>
-                                        <span>Beta</span>
-                                    </div>
-                                </div>
-                                <p class="network-description">High-performance Layer 2 solution with 10x lower fees and Ethereum-grade security guarantees.</p>
-                                <div class="network-features">
-                                    <span class="feature-tag">Low Fees</span>
-                                    <span class="feature-tag">Fast</span>
-                                    <span class="feature-tag">Optimistic Rollup</span>
+                                <div class="tile-footer">
+                                    <span class="adapter-label">apex-evm-base</span>
+                                    <a href="#" class="tile-link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg></a>
                                 </div>
                             </div>
 
-                            <div class="network-card" data-network="polygon">
-                                <div class="network-header">
-                                    <div class="network-icon polygon">
-                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M16.5 8.5L12 6L7.5 8.5L3 6v12l4.5-2.5L12 18l4.5-2.5L21 18V6l-4.5 2.5z"/>
-                                            <path d="M7.5 8.5v7L12 13v-7l-4.5 2.5z" opacity="0.7"/>
-                                        </svg>
+                            <!-- Arbitrum -->
+                            <div class="matrix-tile" data-network="arbitrum">
+                                <div class="tile-header">
+                                    <div class="tile-brand">
+                                        <div class="tile-icon">
+                                            <img src="assets/logos/arbitrum.svg" alt="Arbitrum" loading="lazy">
+                                        </div>
+                                        <span class="tile-name">Arbitrum One</span>
                                     </div>
-                                    <div class="network-info">
-                                        <h4>Polygon</h4>
-                                        <span class="network-type sidechain">Sidechain</span>
+                                    <div class="tile-status"><span class="pulse-dot"></span> Active</div>
+                                </div>
+                                <div class="tile-meta">
+                                    <div class="meta-item">
+                                        <span class="meta-label">Type</span>
+                                        <span class="meta-value">Optimistic L2</span>
                                     </div>
-                                    <div class="network-status">
-                                        <div class="status-dot active"></div>
-                                        <span>Ready</span>
+                                    <div class="meta-item">
+                                        <span class="meta-label">Finality</span>
+                                        <span class="meta-value">Deterministic</span>
                                     </div>
                                 </div>
-                                <p class="network-description">Multi-chain scaling platform enabling instant, low-cost transactions with enterprise adoption.</p>
-                                <div class="network-features">
-                                    <span class="feature-tag">Enterprise</span>
-                                    <span class="feature-tag">Gaming</span>
-                                    <span class="feature-tag">Scaling</span>
+                                <div class="tile-footer">
+                                    <span class="adapter-label">apex-nitro-rs</span>
+                                    <a href="#" class="tile-link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg></a>
                                 </div>
                             </div>
 
-                            <div class="network-card" data-network="base">
-                                <div class="network-header">
-                                    <div class="network-icon base">
-                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
-                                            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
-                                            <path d="M8 12h8v8a8 8 0 0 1-8-8z"/>
-                                        </svg>
+                            <!-- Base -->
+                            <div class="matrix-tile" data-network="base">
+                                <div class="tile-header">
+                                    <div class="tile-brand">
+                                        <div class="tile-icon">
+                                            <img src="assets/logos/base.svg" alt="Base" loading="lazy">
+                                        </div>
+                                        <span class="tile-name">Base</span>
                                     </div>
-                                    <div class="network-info">
-                                        <h4>Base</h4>
-                                        <span class="network-type layer2">Layer 2</span>
+                                    <div class="tile-status"><span class="pulse-dot"></span> Verified</div>
+                                </div>
+                                <div class="tile-meta">
+                                    <div class="meta-item">
+                                        <span class="meta-label">Stack</span>
+                                        <span class="meta-value">OP Stack</span>
                                     </div>
-                                    <div class="network-status">
-                                        <div class="status-dot active"></div>
-                                        <span>Ready</span>
+                                    <div class="meta-item">
+                                        <span class="meta-label">Finality</span>
+                                        <span class="meta-value">Deterministic</span>
                                     </div>
                                 </div>
-                                <p class="network-description">Coinbase's Layer 2 solution bringing millions of users onchain with seamless Web2 integration.</p>
-                                <div class="network-features">
-                                    <span class="feature-tag">Coinbase</span>
-                                    <span class="feature-tag">Onramp</span>
-                                    <span class="feature-tag">Consumer Apps</span>
+                                <div class="tile-footer">
+                                    <span class="adapter-label">apex-op-base</span>
+                                    <a href="#" class="tile-link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg></a>
                                 </div>
                             </div>
 
-                            <div class="network-card compact" data-network="optimism">
-                                <div class="network-icon optimism">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                        <circle cx="8" cy="12" r="4" opacity="0.8"/>
-                                        <circle cx="16" cy="12" r="4" opacity="0.8"/>
-                                        <path d="M4 12a4 4 0 0 1 8 0 4 4 0 0 1 8 0" stroke="currentColor" stroke-width="2" fill="none"/>
-                                    </svg>
+                            <!-- Polygon -->
+                            <div class="matrix-tile" data-network="polygon">
+                                <div class="tile-header">
+                                    <div class="tile-brand">
+                                        <div class="tile-icon">
+                                            <img src="assets/logos/polygon.svg" alt="Polygon" loading="lazy">
+                                        </div>
+                                        <span class="tile-name">Polygon PoS</span>
+                                    </div>
+                                    <div class="tile-status"><span class="pulse-dot"></span> Active</div>
                                 </div>
-                                <h5>Optimism</h5>
-                                <span class="network-type layer2">Layer 2</span>
-                            </div>
-
-                            <div class="network-card compact" data-network="bsc">
-                                <div class="network-icon bsc">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M12 2L8 6h8l-4-4zm0 4L8 10h8l-4-4zm-4 4l-4 4 4 4V10zm8 0v8l4-4-4-4zm-4 4l-4 4h8l-4-4z"/>
-                                    </svg>
+                                <div class="tile-meta">
+                                    <div class="meta-item">
+                                        <span class="meta-label">VM</span>
+                                        <span class="meta-value">EVM Proof-of-Stake</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="meta-label">Finality</span>
+                                        <span class="meta-value">Checkpoint</span>
+                                    </div>
                                 </div>
-                                <h5>BNB Chain</h5>
-                                <span class="network-type mainnet">Mainnet</span>
-                            </div>
-
-                            <div class="network-card compact" data-network="avalanche">
-                                <div class="network-icon avalanche">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M12 3L6 15h12L12 3z"/>
-                                        <path d="M8 17h8l-4 4-4-4z"/>
-                                    </svg>
+                                <div class="tile-footer">
+                                    <span class="adapter-label">apex-bor-client</span>
+                                    <a href="#" class="tile-link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg></a>
                                 </div>
-                                <h5>Avalanche</h5>
-                                <span class="network-type mainnet">Mainnet</span>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Substrate Networks Grid -->
+                    
+                    <!-- Substrate Networks Panel -->
                     <div class="ecosystem-panel" data-panel="substrate">
-                        <div class="panel-header">
-                            <h3>Polkadot & Substrate Parachains</h3>
-                            <p>Leverage the interoperable Web3 foundation with specialized parachains for DeFi, NFTs, and next-generation dApps.</p>
-                        </div>
-                        <div class="advanced-networks-grid">
-                            <div class="network-card featured" data-network="polkadot">
-                                <div class="network-header">
-                                    <div class="network-icon polkadot">
-                                        <svg width="40" height="40" viewBox="0 0 256 256" fill="currentColor">
-                                            <path d="M31.0155 57.7181C14.6547 76.7768 14.2233 103.306 30.0862 116.92C45.9492 130.566 72.0667 126.15 88.4607 107.058C104.821 87.9995 105.253 61.4701 89.3899 47.8567C83.1841 42.511 75.3522 39.9543 67.1884 39.9543C54.5113 39.9543 40.9713 46.1302 31.0155 57.7181Z"/>
-                                            <path d="M26.2694 156.332C13.9574 170.941 19.3003 195.744 38.2164 211.715C57.1326 227.686 82.4868 228.815 94.7989 214.205C107.111 199.596 101.768 174.793 82.8518 158.822C72.8296 150.355 61.0153 146.072 50.2962 146.072C40.7718 146.072 32.077 149.459 26.3026 156.332"/>
-                                            <path d="M137.343 209.789C115.142 216.795 99.8429 231.072 103.161 241.664C106.513 252.256 127.221 255.178 149.423 248.139C171.625 241.133 186.923 226.856 183.605 216.264C181.481 209.59 172.454 205.938 160.507 205.938C153.505 205.938 145.54 207.166 137.343 209.756"/>
-                                            <path d="M102.597 18.5365C98.0176 31.7514 112.553 48.8179 135.12 56.6871C157.686 64.5562 179.689 60.2066 184.268 46.9917C188.848 33.7768 174.313 16.7103 151.746 8.84109C144.146 6.18482 136.58 4.9231 129.744 4.9231C116.303 4.9231 105.617 9.77078 102.597 18.5365Z"/>
-                                            <path d="M204.048 45.169C197.51 47.7921 199.07 66.884 207.499 87.7357C215.928 108.621 228.041 123.396 234.579 120.773C241.083 118.15 239.557 99.0912 231.128 78.2063C223.362 58.9484 212.444 44.8702 205.674 44.8702C205.11 44.8702 204.579 44.9698 204.048 45.169Z"/>
-                                            <path d="M209.058 172.038C199.766 192.192 196.547 210.553 201.89 213.01C207.233 215.468 219.114 201.124 228.406 180.969C237.731 160.815 240.917 142.453 235.607 139.996C235.209 139.797 234.778 139.731 234.28 139.731C228.472 139.731 217.654 153.411 209.058 172.038Z"/>
-                                        </svg>
+                        <div class="network-matrix-grid">
+                            <!-- Polkadot -->
+                            <div class="matrix-tile" data-network="polkadot">
+                                <div class="tile-header">
+                                    <div class="tile-brand">
+                                        <div class="tile-icon">
+                                            <img src="assets/logos/polkadot.svg" alt="Polkadot" loading="lazy">
+                                        </div>
+                                        <span class="tile-name">Polkadot Relay</span>
                                     </div>
-                                    <div class="network-info">
-                                        <h4>Polkadot</h4>
-                                        <span class="network-type relay">Relay Chain</span>
+                                    <div class="tile-status"><span class="pulse-dot"></span> Verified</div>
+                                </div>
+                                <div class="tile-meta">
+                                    <div class="meta-item">
+                                        <span class="meta-label">VM</span>
+                                        <span class="meta-value">RISC-V / Wasm</span>
                                     </div>
-                                    <div class="network-status">
-                                        <div class="status-dot beta"></div>
-                                        <span>Beta</span>
+                                    <div class="meta-item">
+                                        <span class="meta-label">Finality</span>
+                                        <span class="meta-value">GRANDPA (Det)</span>
                                     </div>
                                 </div>
-                                <p class="network-description">The foundation of interoperable blockchain networks enabling true cross-chain communication and shared security.</p>
-                                <div class="network-features">
-                                    <span class="feature-tag">Interoperability</span>
-                                    <span class="feature-tag">Shared Security</span>
-                                    <span class="feature-tag">Governance</span>
+                                <div class="tile-footer">
+                                    <span class="adapter-label">apex-sub-core</span>
+                                    <a href="#" class="tile-link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg></a>
                                 </div>
                             </div>
 
-                            <div class="network-card" data-network="moonbeam">
-                                <div class="network-header">
-                                    <div class="network-icon moonbeam">
-                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
-                                            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
-                                            <circle cx="12" cy="12" r="6" opacity="0.6"/>
-                                            <circle cx="12" cy="12" r="3" opacity="0.8"/>
-                                        </svg>
+                            <!-- Moonbeam -->
+                            <div class="matrix-tile" data-network="moonbeam">
+                                <div class="tile-header">
+                                    <div class="tile-brand">
+                                        <div class="tile-icon">
+                                            <img src="assets/logos/moonbeam.svg" alt="Moonbeam" loading="lazy">
+                                        </div>
+                                        <span class="tile-name">Moonbeam</span>
                                     </div>
-                                    <div class="network-info">
-                                        <h4>Moonbeam</h4>
-                                        <span class="network-type parachain">Parachain</span>
+                                    <div class="tile-status"><span class="pulse-dot"></span> Active</div>
+                                </div>
+                                <div class="tile-meta">
+                                    <div class="meta-item">
+                                        <span class="meta-label">VM</span>
+                                        <span class="meta-value">Frontier EVM</span>
                                     </div>
-                                    <div class="network-status">
-                                        <div class="status-dot alpha"></div>
-                                        <span>Alpha</span>
+                                    <div class="meta-item">
+                                        <span class="meta-label">Interop</span>
+                                        <span class="meta-value">XCM Native</span>
                                     </div>
                                 </div>
-                                <p class="network-description">Ethereum-compatible smart contract parachain combining the best of both Ethereum and Polkadot ecosystems.</p>
-                                <div class="network-features">
-                                    <span class="feature-tag">EVM Compatible</span>
-                                    <span class="feature-tag">Cross-Chain</span>
-                                    <span class="feature-tag">Smart Contracts</span>
+                                <div class="tile-footer">
+                                    <span class="adapter-label">apex-frontier-rs</span>
+                                    <a href="#" class="tile-link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg></a>
                                 </div>
                             </div>
 
-                            <div class="network-card compact" data-network="acala">
-                                <div class="network-icon acala">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M12 2L2 12l10 10 10-10L12 2z"/>
-                                    </svg>
+                            <!-- Astar -->
+                            <div class="matrix-tile" data-network="astar">
+                                <div class="tile-header">
+                                    <div class="tile-brand">
+                                        <div class="tile-icon">
+                                            <img src="assets/logos/astar.svg" alt="Astar" loading="lazy">
+                                        </div>
+                                        <span class="tile-name">Astar</span>
+                                    </div>
+                                    <div class="tile-status"><span class="pulse-dot"></span> Active</div>
                                 </div>
-                                <h5>Acala</h5>
-                                <span class="network-type parachain">DeFi Hub</span>
+                                <div class="tile-meta">
+                                    <div class="meta-item">
+                                        <span class="meta-label">VM</span>
+                                        <span class="meta-value">Wasm / EVM</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="meta-label">Protocol</span>
+                                        <span class="meta-value">Substrate v14</span>
+                                    </div>
+                                </div>
+                                <div class="tile-footer">
+                                    <span class="adapter-label">apex-astar-sdk</span>
+                                    <a href="#" class="tile-link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg></a>
+                                </div>
                             </div>
 
-                            <div class="network-card compact" data-network="astar">
-                                <div class="network-icon astar">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M12 2l3 9h9l-7 5 3 9-8-6-8 6 3-9-7-5h9z"/>
-                                    </svg>
+                            <!-- Acala -->
+                            <div class="matrix-tile" data-network="acala">
+                                <div class="tile-header">
+                                    <div class="tile-brand">
+                                        <div class="tile-icon">
+                                            <img src="assets/logos/acala.svg" alt="Acala" loading="lazy">
+                                        </div>
+                                        <span class="tile-name">Acala</span>
+                                    </div>
+                                    <div class="tile-status"><span class="pulse-dot"></span> Verified</div>
                                 </div>
-                                <h5>Astar</h5>
-                                <span class="network-type parachain">dApp Hub</span>
-                            </div>
-
-                            <div class="network-card compact" data-network="kusama">
-                                <div class="network-icon kusama">
-                                    <svg width="24" height="24" viewBox="0 0 256 256" fill="currentColor">
-                                        <path d="M31.0155 57.7181C14.6547 76.7768 14.2233 103.306 30.0862 116.92C45.9492 130.566 72.0667 126.15 88.4607 107.058C104.821 87.9995 105.253 61.4701 89.3899 47.8567C83.1841 42.511 75.3522 39.9543 67.1884 39.9543C54.5113 39.9543 40.9713 46.1302 31.0155 57.7181Z"/>
-                                        <path d="M26.2694 156.332C13.9574 170.941 19.3003 195.744 38.2164 211.715C57.1326 227.686 82.4868 228.815 94.7989 214.205C107.111 199.596 101.768 174.793 82.8518 158.822C72.8296 150.355 61.0153 146.072 50.2962 146.072C40.7718 146.072 32.077 149.459 26.3026 156.332"/>
-                                        <path d="M137.343 209.789C115.142 216.795 99.8429 231.072 103.161 241.664C106.513 252.256 127.221 255.178 149.423 248.139C171.625 241.133 186.923 226.856 183.605 216.264C181.481 209.59 172.454 205.938 160.507 205.938C153.505 205.938 145.54 207.166 137.343 209.756"/>
-                                        <path d="M102.597 18.5365C98.0176 31.7514 112.553 48.8179 135.12 56.6871C157.686 64.5562 179.689 60.2066 184.268 46.9917C188.848 33.7768 174.313 16.7103 151.746 8.84109C144.146 6.18482 136.58 4.9231 129.744 4.9231C116.303 4.9231 105.617 9.77078 102.597 18.5365Z"/>
-                                        <path d="M204.048 45.169C197.51 47.7921 199.07 66.884 207.499 87.7357C215.928 108.621 228.041 123.396 234.579 120.773C241.083 118.15 239.557 99.0912 231.128 78.2063C223.362 58.9484 212.444 44.8702 205.674 44.8702C205.11 44.8702 204.579 44.9698 204.048 45.169Z"/>
-                                        <path d="M209.058 172.038C199.766 192.192 196.547 210.553 201.89 213.01C207.233 215.468 219.114 201.124 228.406 180.969C237.731 160.815 240.917 142.453 235.607 139.996C235.209 139.797 234.778 139.731 234.28 139.731C228.472 139.731 217.654 153.411 209.058 172.038Z"/>
-                                    </svg>
+                                <div class="tile-meta">
+                                    <div class="meta-item">
+                                        <span class="meta-label">VM</span>
+                                        <span class="meta-value">Substrate / EVM+</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="meta-label">Finality</span>
+                                        <span class="meta-value">Deterministic</span>
+                                    </div>
                                 </div>
-                                <h5>Kusama</h5>
-                                <span class="network-type relay">Canary Network</span>
-                            </div>
-
-                            <div class="network-card compact" data-network="westend">
-                                <div class="network-icon westend">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                        <rect x="4" y="4" width="16" height="16" rx="2"/>
-                                    </svg>
+                                <div class="tile-footer">
+                                    <span class="adapter-label">apex-acala-rs</span>
+                                    <a href="#" class="tile-link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg></a>
                                 </div>
-                                <h5>Westend</h5>
-                                <span class="network-type testnet">Testnet</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Test Networks -->
+                    <!-- Testnets Panel -->
                     <div class="ecosystem-panel" data-panel="testnets">
-                        <div class="panel-header">
-                            <h3>Development & Test Networks</h3>
-                            <p>Perfect your applications with cost-free testing on networks that mirror production environments.</p>
-                        </div>
-                        <div class="advanced-networks-grid">
-                            <div class="network-card" data-network="sepolia">
-                                <div class="network-header">
-                                    <div class="network-icon sepolia">
-                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M12 2L4 7l8 5 8-5-8-5z"/><path opacity="0.6" d="M4 12l8 5 8-5-8-5-8 5z"/><path opacity="0.3" d="M4 17l8 5 8-5-8-5-8 5z"/>
-                                        </svg>
+                        <div class="network-matrix-grid">
+                            <div class="matrix-tile" data-network="sepolia">
+                                <div class="tile-header">
+                                    <div class="tile-brand">
+                                        <div class="tile-icon"><img src="assets/logos/sepolia.svg" alt="Sepolia" loading="lazy"></div>
+                                        <span class="tile-name">Sepolia</span>
                                     </div>
-                                    <div class="network-info">
-                                        <h4>Sepolia</h4>
-                                        <span class="network-type testnet">Ethereum Testnet</span>
+                                    <div class="tile-status">Sandbox</div>
+                                </div>
+                                <div class="tile-meta">
+                                    <div class="meta-item">
+                                        <span class="meta-label">VM</span>
+                                        <span class="meta-value">EVM Sandbox</span>
                                     </div>
-                                    <div class="network-status">
-                                        <div class="status-dot active"></div>
-                                        <span>Ready</span>
+                                    <div class="meta-item">
+                                        <span class="meta-label">Faucets</span>
+                                        <span class="meta-value">Integrated</span>
                                     </div>
                                 </div>
-                                <p class="network-description">Primary Ethereum testnet for application development and testing with reliable faucets and stable operation.</p>
-                                <div class="network-features">
-                                    <span class="feature-tag">Free Testing</span>
-                                    <span class="feature-tag">EVM Compatible</span>
-                                    <span class="feature-tag">Stable</span>
+                                <div class="tile-footer">
+                                    <span class="adapter-label">apex-test-evm</span>
                                 </div>
                             </div>
 
-                            <div class="network-card" data-network="paseo">
-                                <div class="network-header">
-                                    <div class="network-icon paseo">
-                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
-                                            <circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" opacity="0.3"/>
-                                        </svg>
+                            <div class="matrix-tile" data-network="westend">
+                                <div class="tile-header">
+                                    <div class="tile-brand">
+                                        <div class="tile-icon"><img src="assets/logos/westend.svg" alt="Westend" loading="lazy"></div>
+                                        <span class="tile-name">Westend</span>
                                     </div>
-                                    <div class="network-info">
-                                        <h4>Paseo</h4>
-                                        <span class="network-type testnet">Polkadot Testnet</span>
+                                    <div class="tile-status">Sandbox</div>
+                                </div>
+                                <div class="tile-meta">
+                                    <div class="meta-item">
+                                        <span class="meta-label">VM</span>
+                                        <span class="meta-value">Substrate Dev</span>
                                     </div>
-                                    <div class="network-status">
-                                        <div class="status-dot active"></div>
-                                        <span>Ready</span>
+                                    <div class="meta-item">
+                                        <span class="meta-label">XCM</span>
+                                        <span class="meta-value">Full Mock</span>
                                     </div>
                                 </div>
-                                <p class="network-description">Community-driven Polkadot testnet providing a stable environment for parachain and cross-chain development.</p>
-                                <div class="network-features">
-                                    <span class="feature-tag">Cross-Chain Testing</span>
-                                    <span class="feature-tag">Community</span>
-                                    <span class="feature-tag">Parachain Ready</span>
+                                <div class="tile-footer">
+                                    <span class="adapter-label">apex-test-sub</span>
                                 </div>
                             </div>
                         </div>
@@ -625,24 +628,46 @@
     <!-- Footer -->
     <footer class="modern-footer">
         <div class="container">
-            <div class="footer-grid">
-                <!-- Brand Column -->
+            <div class="footer-main-grid">
+                <!-- Brand & Terminal Section -->
                 <div class="footer-brand">
-                    <div class="footer-logo">
-                        <img src="assets/apex_logo.png" alt="Apex SDK" width="40" height="40" loading="lazy">
+                    <div class="footer-logo-wrap">
+                        <img src="assets/apex_logo.png" alt="Apex SDK" width="48" height="48" loading="lazy">
                         <span>Apex SDK</span>
                     </div>
-                    <p class="footer-tagline">The unified Rust framework for cross-chain blockchain development.</p>
-                    <div class="footer-social">
-                        <a href="https://github.com/apex-sdk/apex-sdk" target="_blank" rel="noopener" aria-label="GitHub" class="social-link">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.51 2.87 8.33 6.84 9.68.5.09.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.61-3.37-1.37-3.37-1.37-.45-1.18-1.1-1.5-1.1-1.5-.9-.63.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.55-1.14-4.55-5.09 0-1.13.39-2.05 1.03-2.78-.1-.26-.45-1.32.1-2.75 0 0 .84-.27 2.75 1.06A9.3 9.3 0 0 1 12 7.05c.85 0 1.71.12 2.51.35 1.9-1.33 2.74-1.06 2.74-1.06.55 1.43.21 2.49.11 2.75.64.73 1.02 1.65 1.02 2.78 0 3.96-2.34 4.83-4.57 5.09.36.32.68.95.68 1.92 0 1.38-.01 2.49-.01 2.83 0 .27.18.59.69.49A10.04 10.04 0 0 0 22 12.26C22 6.58 17.52 2 12 2z"/></svg>
-                        </a>
-                        <a href="https://x.com/apexsdk" target="_blank" rel="noopener" aria-label="X (Twitter)" class="social-link">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                        </a>
-                        <a href="https://discord.gg/zCDFsBaZJN" target="_blank" rel="noopener" aria-label="Discord" class="social-link">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.369A19.791 19.791 0 0 0 16.558 3c-.2.36-.43.85-.589 1.232a18.27 18.27 0 0 0-4-.003A12.3 12.3 0 0 0 11.379 3 19.736 19.736 0 0 0 7.62 4.369C3.693 9.478 2.89 14.46 3.247 19.385a19.9 19.9 0 0 0 4.963 1.615c.401-.553.758-1.138 1.065-1.748-.583-.22-1.14-.494-1.665-.816.14-.101.277-.206.41-.313 3.212 1.499 6.695 1.499 9.862 0 .134.107.271.212.41.313-.525.322-1.082.596-1.665.816.307.61.664 1.195 1.065 1.748a19.9 19.9 0 0 0 4.963-1.615c.406-5.52-.692-10.463-3.963-15.016zM9.7 15.408c-.965 0-1.753-.89-1.753-1.98 0-1.09.778-1.98 1.753-1.98.984 0 1.772.89 1.753 1.98 0 1.09-.769 1.98-1.753 1.98zm4.6 0c-.965 0-1.753-.89-1.753-1.98 0-1.09.778-1.98 1.753-1.98.984 0 1.772.89 1.753 1.98 0 1.09-.769 1.98-1.753 1.98z"/></svg>
-                        </a>
+                    <p class="footer-tagline">
+                        The high-performance Rust framework for universal blockchain orchestration. Built for density, speed, and safety.
+                    </p>
+                    
+                    <!-- Quick Command Terminal -->
+                    <div class="footer-terminal">
+                        <div class="terminal-header">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                        </div>
+                        <div class="terminal-body">
+                            <span class="terminal-prompt">$</span>
+                            <span class="terminal-command" id="install-command">cargo add apex-sdk</span>
+                            <button class="copy-btn" id="copy-install-btn" title="Copy to clipboard">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- System Heartbeat -->
+                    <div class="system-heartbeat">
+                        <div class="heartbeat-item">
+                            <span class="item-label">Network Status</span>
+                            <div class="item-status">
+                                <span class="status-indicator online"></span>
+                                Fully Operational
+                            </div>
+                        </div>
+                        <div class="heartbeat-item">
+                            <span class="item-label">Latest Version</span>
+                            <div class="item-status">v0.1.5 (Alpha)</div>
+                        </div>
                     </div>
                 </div>
 
@@ -650,41 +675,53 @@
                 <div class="footer-links">
                     <h4>Resources</h4>
                     <ul>
-                        <li><a href="/viewer.html?doc=QUICK_START.md">Quick Start</a></li>
-                        <li><a href="/viewer.html?doc=API.md">API Reference</a></li>
-                        <li><a href="/viewer.html?doc=CLI.md">CLI Guide</a></li>
+                        <li><a href="viewer.html?doc=QUICK_START.md">Quick Start</a></li>
+                        <li><a href="viewer.html?doc=API.md">API Reference</a></li>
+                        <li><a href="viewer.html?doc=CLI.md">CLI Guide</a></li>
                         <li><a href="https://github.com/apex-sdk/apex-sdk/tree/main/examples">Examples</a></li>
-                        <li><a href="/viewer.html?doc=ROADMAP.md">Roadmap</a></li>
                     </ul>
                 </div>
 
                 <!-- Contact Column -->
                 <div class="footer-links">
-                    <h4>Contact</h4>
+                    <h4>Core Support</h4>
                     <ul>
-                        <li><a href="mailto:support@apexsdk.dev">Support</a></li>
-                        <li><a href="mailto:security@apexsdk.dev">Security</a></li>
-                        <li><a href="mailto:partnerships@apexsdk.dev">Partnerships</a></li>
-                        <li><a href="mailto:research@apexsdk.dev">Research</a></li>
+                        <li><a href="mailto:support@apexsdk.dev">Technical Support</a></li>
+                        <li><a href="mailto:security@apexsdk.dev">Security Hub</a></li>
+                        <li><a href="mailto:partnerships@apexsdk.dev">Ecosystem</a></li>
+                        <li><a href="mailto:research@apexsdk.dev">Protocol Research</a></li>
                     </ul>
                 </div>
 
                 <!-- Community Column -->
                 <div class="footer-links">
-                    <h4>Community</h4>
+                    <h4>Ecosystem</h4>
                     <ul>
-                        <li><a href="https://github.com/apex-sdk/apex-sdk" target="_blank" rel="noopener">GitHub</a></li>
-                        <li><a href="https://discord.gg/zCDFsBaZJN" target="_blank" rel="noopener">Discord</a></li>
-                        <li><a href="/viewer.html?doc=CONTRIBUTING.md">Contributing</a></li>
-                        <li><a href="/viewer.html?doc=ROADMAP.md">Roadmap</a></li>
-                        <li><a href="https://github.com/apex-sdk/apex-sdk/blob/main/LICENSE">License</a></li>
+                        <li><a href="https://github.com/apex-sdk/apex-sdk" target="_blank" rel="noopener">GitHub Source</a></li>
+                        <li><a href="https://discord.gg/zCDFsBaZJN" target="_blank" rel="noopener">Discord Devs</a></li>
+                        <li><a href="https://x.com/apexsdk" target="_blank" rel="noopener">X / Twitter</a></li>
+                        <li><a href="viewer.html?doc=ROADMAP.md">Public Roadmap</a></li>
                     </ul>
                 </div>
             </div>
 
             <!-- Footer Bottom -->
             <div class="footer-bottom">
-                <p>&copy; <span id="footer-year"></span> Apex SDK Protocol. Apache-2.0 Licensed.</p>
+                <div class="footer-copyright">
+                    &copy; <span id="footer-year"></span> Apex SDK Protocol. Released under Apache-2.0.
+                </div>
+                
+                <div class="footer-meta-badges">
+                    <span class="meta-badge">Runtime: Rust/Tokio</span>
+                    <span class="meta-badge">Region: Global</span>
+                    <span class="meta-badge">SLO: 99.9%</span>
+                </div>
+
+                <div class="footer-social-minimal">
+                    <a href="https://github.com/apex-sdk/apex-sdk" class="social-icon-link" aria-label="GitHub">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.51 2.87 8.33 6.84 9.68.5.09.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.61-3.37-1.37-3.37-1.37-.45-1.18-1.1-1.5-1.1-1.5-.9-.63.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.55-1.14-4.55-5.09 0-1.13.39-2.05 1.03-2.78-.1-.26-.45-1.32.1-2.75 0 0 .84-.27 2.75 1.06A9.3 9.3 0 0 1 12 7.05c.85 0 1.71.12 2.51.35 1.9-1.33 2.74-1.06 2.74-1.06.55 1.43.21 2.49.11 2.75.64.73 1.02 1.65 1.02 2.78 0 3.96-2.34 4.83-4.57 5.09.36.32.68.95.68 1.92 0 1.38-.01 2.49-.01 2.83 0 .27.18.59.69.49A10.04 10.04 0 0 0 22 12.26C22 6.58 17.52 2 12 2z"/></svg>
+                    </a>
+                </div>
             </div>
         </div>
     </footer>
@@ -697,6 +734,46 @@
     <!-- Main application script -->
         <script src="js/main-browser.js" defer></script>
         <script>
+            // Ultra-Smooth Scroll Logic
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        const headerOffset = 100;
+                        const elementPosition = target.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: "smooth"
+                        });
+                        
+                        // Update active state in URL without jump
+                        history.pushState(null, null, this.getAttribute('href'));
+                    }
+                });
+            });
+
+            // Ecosystem Tab Switching
+            document.querySelectorAll('.explorer-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const ecosystem = tab.dataset.ecosystem;
+                    
+                    // Update tabs
+                    document.querySelectorAll('.explorer-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Update panels
+                    document.querySelectorAll('.ecosystem-panel').forEach(panel => {
+                        panel.classList.remove('active');
+                        if (panel.dataset.panel === ecosystem) {
+                            panel.classList.add('active');
+                        }
+                    });
+                });
+            });
+
             // Dynamically set the footer year
             document.addEventListener('DOMContentLoaded', function() {
                 var yearSpan = document.getElementById('footer-year');

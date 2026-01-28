@@ -15,4 +15,4 @@ Please report vulnerabilities to security@apexsdk.dev.
 - **Issue #123**: Minor issue with fee estimation on some EVM chains.
    - **Severity:** Low
    - **Status:** In Progress
-   - **Timeline:** Next patch (0.1.5)
+   - **Timeline:** Next patch (0.1.6)

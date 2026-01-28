@@ -1,0 +1,135 @@
+<svg width="900" height="500" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <!-- Enhanced shadow filter -->
+        <filter id="shadow">
+            <feDropShadow dx="3" dy="3" stdDeviation="4" flood-opacity="0.15"/>
+        </filter>
+        <!-- Gradient definitions -->
+        <linearGradient id="appGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#e8f4fd;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#d1e7dd;stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="sdkGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#000000;stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="blockchainGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#f8f9fa;stop-opacity:1" />
+        </linearGradient>
+        <!-- Arrow marker -->
+        <marker id="arrowhead" markerWidth="12" markerHeight="8" refX="12" refY="4" orient="auto">
+            <polygon points="0 0, 12 4, 0 8" fill="#2563eb"/>
+        </marker>
+    </defs>
+    
+    <!-- Background with subtle pattern -->
+    <rect width="900" height="500" fill="#fafbfc"/>
+    
+    <!-- Title with improved typography -->
+    <text x="450" y="35" font-family="Inter, system-ui, sans-serif" font-size="24" font-weight="600" text-anchor="middle" fill="#1f2937">
+        Apex SDK Architecture
+    </text>
+    <text x="450" y="55" font-family="Inter, system-ui, sans-serif" font-size="14" text-anchor="middle" fill="#6b7280">
+        Unified cross-chain development platform
+    </text>
+    
+    <!-- Application Layer -->
+    <g filter="url(#shadow)">
+        <rect x="75" y="80" width="200" height="70" rx="12" fill="url(#appGradient)" stroke="#10b981" stroke-width="2"/>
+        <text x="175" y="105" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1f2937">DeFi Applications</text>
+        <text x="175" y="125" font-family="Inter, system-ui, sans-serif" font-size="11" text-anchor="middle" fill="#4b5563">DEX • Lending • Staking</text>
+        <text x="175" y="140" font-family="Inter, system-ui, sans-serif" font-size="11" text-anchor="middle" fill="#4b5563">Yield Farming</text>
+    </g>
+    
+    <g filter="url(#shadow)">
+        <rect x="350" y="80" width="200" height="70" rx="12" fill="url(#appGradient)" stroke="#3b82f6" stroke-width="2"/>
+        <text x="450" y="105" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1f2937">Infrastructure</text>
+        <text x="450" y="125" font-family="Inter, system-ui, sans-serif" font-size="11" text-anchor="middle" fill="#4b5563">Cross-chain Bridges</text>
+        <text x="450" y="140" font-family="Inter, system-ui, sans-serif" font-size="11" text-anchor="middle" fill="#4b5563">Oracles • Indexers</text>
+    </g>
+    
+    <g filter="url(#shadow)">
+        <rect x="625" y="80" width="200" height="70" rx="12" fill="url(#appGradient)" stroke="#8b5cf6" stroke-width="2"/>
+        <text x="725" y="105" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1f2937">Consumer Apps</text>
+        <text x="725" y="125" font-family="Inter, system-ui, sans-serif" font-size="11" text-anchor="middle" fill="#4b5563">Gaming • NFTs</text>
+        <text x="725" y="140" font-family="Inter, system-ui, sans-serif" font-size="11" text-anchor="middle" fill="#4b5563">Social • Analytics</text>
+    </g>
+    
+    <!-- Enhanced arrows -->
+    <path d="M 175 160 L 175 185" stroke="#2563eb" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+    <path d="M 450 160 L 450 185" stroke="#2563eb" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+    <path d="M 725 160 L 725 185" stroke="#2563eb" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+    
+    <!-- Apex SDK Unified API with enhanced design -->
+    <g filter="url(#shadow)">
+        <rect x="75" y="195" width="750" height="65" rx="15" fill="url(#sdkGradient)" stroke="#1f2937" stroke-width="2"/>
+        <text x="450" y="220" font-family="Inter, system-ui, sans-serif" font-size="20" font-weight="700" text-anchor="middle" fill="#ffffff">
+            Apex SDK Unified API
+        </text>
+        <text x="200" y="240" font-family="Inter, system-ui, sans-serif" font-size="12" text-anchor="middle" fill="#d1d5db">Type-safe</text>
+        <text x="350" y="240" font-family="Inter, system-ui, sans-serif" font-size="12" text-anchor="middle" fill="#d1d5db">Cross-chain</text>
+        <text x="550" y="240" font-family="Inter, system-ui, sans-serif" font-size="12" text-anchor="middle" fill="#d1d5db">Zero-cost abstractions</text>
+        <text x="700" y="240" font-family="Inter, system-ui, sans-serif" font-size="12" text-anchor="middle" fill="#d1d5db">Developer-first</text>
+        <text x="450" y="255" font-family="Inter, system-ui, sans-serif" font-size="11" text-anchor="middle" fill="#9ca3af">One API to rule them all</text>
+    </g>
+    
+    <!-- Enhanced arrows to blockchains -->
+    <path d="M 225 270 L 225 295" stroke="#2563eb" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+    <path d="M 450 270 L 450 295" stroke="#2563eb" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+    <path d="M 675 270 L 675 295" stroke="#2563eb" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+    
+    <!-- Enhanced Blockchain Ecosystems -->
+    <!-- Substrate -->
+    <g filter="url(#shadow)">
+        <rect x="75" y="305" width="225" height="140" rx="15" fill="url(#blockchainGradient)" stroke="#e11d48" stroke-width="2"/>
+        <text x="187.5" y="330" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" text-anchor="middle" fill="#1f2937">Substrate Ecosystem</text>
+        <circle cx="95" cy="350" r="3" fill="#10b981"/>
+        <text x="105" y="355" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">Polkadot relay chain</text>
+        <circle cx="95" cy="370" r="3" fill="#10b981"/>
+        <text x="105" y="375" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">Kusama canary network</text>
+        <circle cx="95" cy="390" r="3" fill="#10b981"/>
+        <text x="105" y="395" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">Parachain ecosystem</text>
+        <circle cx="95" cy="410" r="3" fill="#10b981"/>
+        <text x="105" y="415" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">Custom runtimes</text>
+        <circle cx="95" cy="430" r="3" fill="#10b981"/>
+        <text x="105" y="435" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">WASM execution</text>
+    </g>
+    
+    <!-- EVM -->
+    <g filter="url(#shadow)">
+        <rect x="337.5" y="305" width="225" height="140" rx="15" fill="url(#blockchainGradient)" stroke="#3b82f6" stroke-width="2"/>
+        <text x="450" y="330" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" text-anchor="middle" fill="#1f2937">EVM Ecosystem</text>
+        <circle cx="357.5" cy="350" r="3" fill="#3b82f6"/>
+        <text x="367.5" y="355" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">Ethereum mainnet</text>
+        <circle cx="357.5" cy="370" r="3" fill="#3b82f6"/>
+        <text x="367.5" y="375" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">Layer 2 solutions</text>
+        <circle cx="357.5" cy="390" r="3" fill="#3b82f6"/>
+        <text x="367.5" y="395" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">Polygon • Arbitrum</text>
+        <circle cx="357.5" cy="410" r="3" fill="#3b82f6"/>
+        <text x="367.5" y="415" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">Optimism • Base</text>
+        <circle cx="357.5" cy="430" r="3" fill="#3b82f6"/>
+        <text x="367.5" y="435" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">BSC & sidechains</text>
+    </g>
+    
+    <!-- Hybrid -->
+    <g filter="url(#shadow)">
+        <rect x="600" y="305" width="225" height="140" rx="15" fill="url(#blockchainGradient)" stroke="#8b5cf6" stroke-width="2"/>
+        <text x="712.5" y="330" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="600" text-anchor="middle" fill="#1f2937">Hybrid Chains</text>
+        <circle cx="620" cy="350" r="3" fill="#8b5cf6"/>
+        <text x="630" y="355" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">Moonbeam network</text>
+        <circle cx="620" cy="370" r="3" fill="#8b5cf6"/>
+        <text x="630" y="375" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">Astar ecosystem</text>
+        <circle cx="620" cy="390" r="3" fill="#8b5cf6"/>
+        <text x="630" y="395" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">Acala DeFi hub</text>
+        <circle cx="620" cy="410" r="3" fill="#8b5cf6"/>
+        <text x="630" y="415" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">Substrate + EVM</text>
+        <circle cx="620" cy="430" r="3" fill="#8b5cf6"/>
+        <text x="630" y="435" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#374151">Interoperability first</text>
+    </g>
+    
+    <!-- Footer text -->
+    <text x="450" y="480" font-family="Inter, system-ui, sans-serif" font-size="12" text-anchor="middle" fill="#9ca3af">
+        Build once, deploy everywhere • Seamless cross-chain development
+    </text>
+</svg>

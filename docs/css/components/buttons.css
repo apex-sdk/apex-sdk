@@ -3,18 +3,19 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.75rem 1.5rem;
+    padding: 0.85rem 1.75rem;
     border-radius: var(--radius-md);
-    font-weight: 500;
-    font-size: 0.875rem;
+    font-weight: 600;
+    font-size: 0.925rem;
     text-decoration: none;
     border: none;
     cursor: pointer;
-    transition: var(--transition);
+    transition: var(--transition-slow);
     position: relative;
     overflow: hidden;
     white-space: nowrap;
     user-select: none;
+    box-shadow: var(--shadow-sm);
 }
 
 .btn::before {
@@ -38,13 +39,12 @@
 .btn-primary {
     background: var(--gradient-primary);
     color: white;
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 4px 15px rgba(33, 118, 255, 0.3);
 }
 
 .btn-primary:hover {
-    background: var(--gradient-hover);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-glow);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(33, 118, 255, 0.4), var(--shadow-glow);
 }
 
 .btn-primary:hover::before {
@@ -52,17 +52,18 @@
 }
 
 .btn-secondary {
-    background: var(--bg-card);
+    background: var(--bg-glass-card);
     color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    backdrop-filter: blur(10px);
+    border: var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .btn-secondary:hover {
     background: var(--bg-glass);
     border-color: var(--primary-color);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-glow);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
 }
 
 .btn-secondary:hover::before {
