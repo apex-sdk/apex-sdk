@@ -17,7 +17,7 @@ resolver = "2"
 #   and will be fixed upstream. See: https://github.com/paritytech/trie/issues
 
 [workspace.package]
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 description = "Compile-time safe, unified Rust SDK for cross-chain blockchain development across Substrate and EVM ecosystems"
 authors = ["Khalid Hussein <kherld.hussein@gmail.com>"]
@@ -83,10 +83,10 @@ criterion = "0.8.1"
 mockall = "0.14.0"
 
 # Internal workspace dependencies
-apex-sdk-core = { path = "apex-sdk-core", version = "0.1.5" }
-apex-sdk-substrate = { path = "apex-sdk-substrate", version = "0.1.5" }
-apex-sdk-evm = { path = "apex-sdk-evm", version = "0.1.5" }
-apex-sdk-types = { path = "apex-sdk-types", version = "0.1.5" }
+apex-sdk-core = { path = "apex-sdk-core", version = "0.1.6" }
+apex-sdk-substrate = { path = "apex-sdk-substrate", version = "0.1.6" }
+apex-sdk-evm = { path = "apex-sdk-evm", version = "0.1.6" }
+apex-sdk-types = { path = "apex-sdk-types", version = "0.1.6" }
 
 # Development profile - fast compilation, minimal optimizations
 [profile.dev]

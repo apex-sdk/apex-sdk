@@ -1,4 +1,4 @@
-//! Integration tests for Apex SDK v0.1.5 transaction pipeline
+//! Integration tests for Apex SDK v0.1.6 transaction pipeline
 //! 
 //! These tests verify that the core transaction pipeline architecture is working
 //! correctly with both EVM and Substrate adapters.
@@ -160,7 +160,7 @@ fn test_error_types() {
 // Integration test for the overall architecture
 #[tokio::test]
 async fn test_v0_1_5_architecture() {
-    println!("\n🚀 Testing Apex SDK v0.1.5 Transaction Pipeline Architecture");
+    println!("\n🚀 Testing Apex SDK v0.1.6 Transaction Pipeline Architecture");
     println!("=============================================================");
     
     // Test 1: Core types compile and work
@@ -185,5 +185,5 @@ async fn test_v0_1_5_architecture() {
     test_error_types();
     
     println!("\n✅ All architecture tests passed!");
-    println!("🎯 Ready for v0.1.5 deployment and testing");
+    println!("🎯 Ready for v0.1.6 deployment and testing");
 }
