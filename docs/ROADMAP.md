@@ -1,39 +1,36 @@
-# Apex SDK Protocol Development Roadmap
 
-> Strategic plan for evolving Apex SDK into the industry-standard cross-chain development toolkit
+# Apex SDK Roadmap: System Chain Standard
+
+> Strategic plan for Apex SDK as the canonical library for Polkadot Asset Hub and Revive (PolkaVM/Solidity)
+
 
 ## Current Status (v0.1.6)
 
 ### Completed Features
-- Core SDK architecture with Substrate and EVM adapters
-- Basic transaction building and execution
-- Connection pooling and caching
-- Error recovery and retry logic
-- CLI scaffolding tool with templates
+- Asset Hub high-level API (`AssetManager`, `NftManager`)
+- Revive (PolkaVM/Solidity) Rust-native client (`ReviveAdapter`, `ContractManager`)
+- Pre-bundled metadata for Paseo/Polkadot Asset Hubs
+- CLI for asset/nft/contract management
+- Canonical pattern library (atomic workflows)
 - Comprehensive documentation
 - Security audit framework
-- Testing infrastructure
 - CI/CD pipelines
 
 ### Recent Improvements (Latest)
-- Fixed CI failures (formatting, metadata, audit warnings)
-- Enhanced error messages with contextual guidance
-- Improved CLI UX with clear status messages
-- Added progress indicators for long operations
-- Comprehensive UX documentation
+- System Chain Standard refactor: Asset Hub/Revive specialization
+- CLI: Asset/NFT/Revive/Workflow commands
+- Docs: Canonical patterns and quick start
 
 ### Known Limitations
-- Account management not fully implemented
-- Contract deployment via CLI not implemented
-- Balance checking via CLI not functional
-- Configuration management commands missing
-- Interactive mode incomplete
-- Limited parachain support
+- XCM primitives in progress
+- Pattern library expansion (RWA Vault, Atomic Swap, etc.)
+- Full PolkaVM ABI tooling integration
 
 ---
 
-## Phase 1: Foundation Stabilization (Near-term Priority)
-**Goal:** Make v0.1.x production-ready for early adopters
+
+## Phase 1: System Chain Standardization (Near-term Priority)
+**Goal:** Deliver the canonical SDK for Asset Hub and Revive
 
 ### 1.1 Core CLI Implementation
 **Priority:** Critical

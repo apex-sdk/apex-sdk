@@ -145,12 +145,15 @@
         top: 100%;
         left: 0;
         right: 0;
-        background: var(--bg-primary);
+        background: var(--bg-primary); /* Ensure solid background */
         border-bottom: 1px solid var(--border-color);
         transform: translateY(-100%);
         opacity: 0;
         visibility: hidden;
         transition: all var(--transition);
+        z-index: -1; /* Slide from behind the navbar */
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5); /* Add shadow for depth */
+        padding-bottom: 1rem; /* Add padding at bottom */
     }
     
     .nav-menu.active {

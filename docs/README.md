@@ -1,13 +1,15 @@
-# Apex SDK Protocol Documentation
+
+# Apex SDK: System Chain Standard Library
 
 [![Docs](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://apexsdk.dev/)
 [![Discord](https://img.shields.io/discord/1234567890?label=discord)](https://discord.gg/zCDFsBaZJN)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../LICENSE)
 [![GitHub Stars](https://img.shields.io/github/stars/apex-sdk/apex-sdk?style=social)](https://github.com/apex-sdk/apex-sdk)
 
-Welcome to Apex SDK! Build cross-chain applications with confidence using Rust's type safety and performance.
 
-> **New here?** Start with the [**Quick Start Guide**](QUICK_START.md) to build your first cross-chain app in 5 minutes!
+Welcome to Apex SDK—the canonical Rust SDK for Polkadot System Chains. Build next-generation dApps for Asset Hub and Revive (PolkaVM/Solidity) with type safety and performance.
+
+> **New here?** Start with the [**Quick Start Guide**](QUICK_START.md) to build your first Asset Hub or Revive workflow in minutes!
 
 ## Quick Navigation
 
@@ -29,14 +31,16 @@ Welcome to Apex SDK! Build cross-chain applications with confidence using Rust's
 
 ---
 
+
 ## What is Apex SDK?
 
-Apex SDK is the industry's first unified Rust SDK for Substrate and EVM blockchain development. It provides:
+Apex SDK is the official System Chain Standard Library for Polkadot Hub and Revive:
 
-- **Unified Interface** - Single API for both Substrate and EVM blockchains
-- **Compile-Time Safety** - Catch errors before deployment with Rust's type system
-- **Native Performance** - Up to 6x faster than JavaScript alternatives
-- **Cross-Chain Ready** - Built-in support for cross-chain communication
+- **Asset Hub Primitives**: High-level Rust APIs for `pallet-assets` and `pallet-nfts` (see `AssetManager`, `NftManager`).
+- **Revive (PolkaVM/Solidity) Support**: Native Rust client for `pallet-revive`—compile, deploy, and call Solidity contracts with zero JS dependencies.
+- **Atomic Orchestrator**: Compose cross-pallet and cross-chain workflows in a single transaction.
+- **Pre-bundled Metadata**: Out-of-the-box support for Paseo and Polkadot Asset Hubs with pre-generated `subxt` types.
+- **CLI for Canonical Patterns**: Compile and deploy Solidity contracts, orchestrate Asset Hub/Revive flows, and access production-ready templates.
 
 ## Quick Example
 
