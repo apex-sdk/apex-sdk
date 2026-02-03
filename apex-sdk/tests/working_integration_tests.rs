@@ -8,7 +8,6 @@ use tokio::time;
 async fn test_sdk_builder_configuration() {
     let _builder = ApexSDK::builder()
         .with_substrate_endpoint("wss://westend-rpc.polkadot.io")
-        .with_evm_endpoint("https://eth.llamarpc.com")
         .with_timeout(Duration::from_secs(30));
 
     // Test that builder configuration works (fields are private)
@@ -20,7 +19,7 @@ async fn test_sdk_builder_configuration() {
 async fn test_transaction_builder_functionality() {
     use apex_sdk_types::Address;
 
-    let from_addr = Address::evm("0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed");
+    let from_addr = Address::substrate("15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5");
     let to_addr = Address::substrate("15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5");
 
     let transaction = TransactionBuilder::new()
@@ -45,10 +44,6 @@ async fn test_chain_type_detection() {
     assert_eq!(Chain::Polkadot.chain_type(), ChainType::Substrate);
     assert_eq!(Chain::Kusama.chain_type(), ChainType::Substrate);
     assert_eq!(Chain::Westend.chain_type(), ChainType::Substrate);
-
-    // Test EVM chains
-    assert_eq!(Chain::Ethereum.chain_type(), ChainType::Evm);
-    assert_eq!(Chain::Polygon.chain_type(), ChainType::Evm);
 
     // Test hybrid chains
     assert_eq!(Chain::Moonbeam.chain_type(), ChainType::Hybrid);
@@ -112,19 +107,7 @@ async fn test_error_recovery_mechanisms() {
 async fn test_cross_chain_transaction_validation() {
     use apex_sdk_types::Address;
 
-    let eth_addr = Address::evm("0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed");
     let dot_addr = Address::substrate("15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5");
-
-    // Test cross-chain transaction building (cross-chain detection now implemented)
-    let cross_chain_tx = TransactionBuilder::new()
-        .from(eth_addr)
-        .to(dot_addr.clone())
-        .amount(1_000_000)
-        .build()
-        .expect("Should build cross-chain transaction");
-
-    // Verify transaction properties instead of cross-chain detection
-    assert_eq!(cross_chain_tx.amount, 1_000_000);
 
     // Test same-chain transaction
     let same_chain_tx = TransactionBuilder::new()
@@ -173,18 +156,11 @@ async fn test_address_validation_comprehensive() {
     use apex_sdk_types::Address;
 
     // Test valid addresses - direct constructors don't return Result
-    let _evm_addr = Address::evm("0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed");
     let _substrate_addr = Address::substrate("15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5");
 
     // Test validation using checked constructors
-    assert!(Address::evm_checked("0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed").is_ok());
     assert!(Address::substrate_checked("15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5").is_ok());
 
     // Test invalid addresses
-    assert!(Address::evm_checked("invalid_address").is_err());
     assert!(Address::substrate_checked("invalid_address").is_err());
-
-    // Test validate method
-    let addr = Address::evm("0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed");
-    assert!(addr.validate().is_ok());
 }

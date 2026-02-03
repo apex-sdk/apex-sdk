@@ -43,7 +43,7 @@ alloy-primitives = { workspace = true, optional = true }
 # Internal workspace dependencies
 apex-sdk-core.workspace = true
 apex-sdk-substrate = { workspace = true, optional = true }
-apex-sdk-evm = { workspace = true, optional = true }
+apex-sdk-revive = { workspace = true, optional = true }
 apex-sdk-types.workspace = true
 
 [dev-dependencies]
@@ -56,9 +56,9 @@ mockall.workspace = true
 criterion.workspace = true
 
 [features]
-default = ["substrate", "evm"]
+default = ["substrate", "revive"]
 substrate = ["apex-sdk-substrate", "sp-core"]
-evm = ["apex-sdk-evm", "alloy-primitives"]
+revive = ["apex-sdk-revive", "alloy-primitives"]
 mocks = ["apex-sdk-core/mocks"]
 
 [package.metadata.cargo-udeps.ignore]

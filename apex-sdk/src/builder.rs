@@ -9,8 +9,8 @@ use std::time::Duration;
 #[cfg(feature = "substrate")]
 use apex_sdk_substrate::SubstrateAdapter;
 
-#[cfg(feature = "evm")]
-use apex_sdk_evm::EvmAdapter;
+#[cfg(feature = "revive")]
+use apex_sdk_revive::ReviveAdapter;
 
 /// Builder for creating an ApexSDK instance with configuration.
 ///
@@ -24,7 +24,7 @@ use apex_sdk_evm::EvmAdapter;
 /// async fn main() -> anyhow::Result<()> {
 ///     let sdk = ApexSDKBuilder::new()
 ///         .with_substrate_endpoint("wss://polkadot.api.onfinality.io/public-ws")
-///         .with_evm_endpoint("https://mainnet.infura.io/v3/YOUR_KEY")
+///         .with_revive_endpoint("wss://paseo-asset-hub-pub.dwellir.com")
 ///         .with_timeout(Duration::from_secs(60))
 ///         .build()
 ///         .await?;
@@ -40,11 +40,8 @@ pub struct ApexSDKBuilder {
     #[cfg(feature = "substrate")]
     substrate_wallet: Option<apex_sdk_substrate::Wallet>,
 
-    #[cfg(feature = "evm")]
-    evm_endpoint: Option<String>,
-
-    #[cfg(feature = "evm")]
-    evm_wallet: Option<apex_sdk_evm::wallet::Wallet>,
+    #[cfg(feature = "revive")]
+    revive_endpoint: Option<String>,
 
     timeout: Option<Duration>,
     config: Option<crate::sdk::SdkConfig>,
@@ -80,7 +77,7 @@ impl ApexSDKBuilder {
         self
     }
 
-    /// Configure the EVM HTTP/WebSocket endpoint.
+    /// Configure the Revive (pallet-revive) endpoint.
     ///
     /// # Example
     ///
@@ -88,11 +85,11 @@ impl ApexSDKBuilder {
     /// use apex_sdk::ApexSDKBuilder;
     ///
     /// let builder = ApexSDKBuilder::new()
-    ///     .with_evm_endpoint("https://mainnet.infura.io/v3/YOUR_KEY");
+    ///     .with_revive_endpoint("wss://paseo-asset-hub-pub.dwellir.com");
     /// ```
-    #[cfg(feature = "evm")]
-    pub fn with_evm_endpoint(mut self, endpoint: impl Into<String>) -> Self {
-        self.evm_endpoint = Some(endpoint.into());
+    #[cfg(feature = "revive")]
+    pub fn with_revive_endpoint(mut self, endpoint: impl Into<String>) -> Self {
+        self.revive_endpoint = Some(endpoint.into());
         self
     }
 
@@ -120,29 +117,6 @@ impl ApexSDKBuilder {
         self
     }
 
-    /// Configure an EVM wallet for signing transactions.
-    ///
-    /// # Example
-    ///
-    /// ```rust,no_run
-    /// use apex_sdk::ApexSDKBuilder;
-    /// use apex_sdk_evm::wallet::Wallet;
-    ///
-    /// # #[tokio::main]
-    /// # async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    /// let wallet = Wallet::from_private_key("your_private_key_here")?;
-    /// let builder = ApexSDKBuilder::new()
-    ///     .with_evm_endpoint("https://mainnet.infura.io/v3/YOUR_KEY")
-    ///     .with_evm_wallet(wallet);
-    /// # Ok(())
-    /// # }
-    /// ```
-    #[cfg(feature = "evm")]
-    pub fn with_evm_wallet(mut self, wallet: apex_sdk_evm::wallet::Wallet) -> Self {
-        self.evm_wallet = Some(wallet);
-        self
-    }
-
     /// Set the timeout for operations.
     ///
     /// # Example
@@ -158,6 +132,7 @@ impl ApexSDKBuilder {
         self.timeout = Some(timeout);
         self
     }
+
     /// Configure the SDK settings.
     ///
     /// # Example
@@ -232,10 +207,10 @@ impl ApexSDKBuilder {
             None
         };
 
-        #[cfg(feature = "evm")]
-        let evm_adapter = if let Some(endpoint) = self.evm_endpoint {
+        #[cfg(feature = "revive")]
+        let revive_adapter = if let Some(endpoint) = self.revive_endpoint {
             Some(
-                EvmAdapter::connect(&endpoint)
+                ReviveAdapter::connect(&endpoint)
                     .await
                     .map_err(|e| Error::Connection(e.to_string()))?,
             )
@@ -243,29 +218,31 @@ impl ApexSDKBuilder {
             None
         };
 
-        #[cfg(all(feature = "substrate", feature = "evm"))]
+        #[cfg(all(feature = "substrate", feature = "revive"))]
         {
-            if substrate_adapter.is_none() && evm_adapter.is_none() {
+            if substrate_adapter.is_none() && revive_adapter.is_none() {
                 return Err(Error::Config(
                     "At least one blockchain adapter must be configured".to_string(),
                 ));
             }
         }
 
-        #[cfg(all(feature = "substrate", not(feature = "evm")))]
+        #[cfg(all(feature = "substrate", not(feature = "revive")))]
         {
             if substrate_adapter.is_none() {
                 return Err(Error::Config(
-                    "Substrate adapter must be configured when EVM feature is disabled".to_string(),
+                    "Substrate adapter must be configured when Revive feature is disabled"
+                        .to_string(),
                 ));
             }
         }
 
-        #[cfg(all(not(feature = "substrate"), feature = "evm"))]
+        #[cfg(all(not(feature = "substrate"), feature = "revive"))]
         {
-            if evm_adapter.is_none() {
+            if revive_adapter.is_none() {
                 return Err(Error::Config(
-                    "EVM adapter must be configured when Substrate feature is disabled".to_string(),
+                    "Revive adapter must be configured when Substrate feature is disabled"
+                        .to_string(),
                 ));
             }
         }
@@ -275,10 +252,8 @@ impl ApexSDKBuilder {
             substrate_adapter,
             #[cfg(feature = "substrate")]
             self.substrate_wallet,
-            #[cfg(feature = "evm")]
-            evm_adapter,
-            #[cfg(feature = "evm")]
-            self.evm_wallet,
+            #[cfg(feature = "revive")]
+            revive_adapter,
             timeout,
             self.config.unwrap_or_default(),
         )
@@ -297,8 +272,8 @@ mod tests {
         #[cfg(feature = "substrate")]
         assert!(builder.substrate_endpoint.is_none());
 
-        #[cfg(feature = "evm")]
-        assert!(builder.evm_endpoint.is_none());
+        #[cfg(feature = "revive")]
+        assert!(builder.revive_endpoint.is_none());
     }
 
     #[test]
@@ -323,13 +298,13 @@ mod tests {
         assert_eq!(builder.substrate_endpoint, Some(endpoint.to_string()));
     }
 
-    #[cfg(feature = "evm")]
+    #[cfg(feature = "revive")]
     #[test]
-    fn test_builder_with_evm_endpoint() {
-        let endpoint = "https://mainnet.infura.io/v3/YOUR_KEY";
-        let builder = ApexSDKBuilder::new().with_evm_endpoint(endpoint);
+    fn test_builder_with_revive_endpoint() {
+        let endpoint = "wss://paseo-asset-hub-pub.dwellir.com";
+        let builder = ApexSDKBuilder::new().with_revive_endpoint(endpoint);
 
-        assert_eq!(builder.evm_endpoint, Some(endpoint.to_string()));
+        assert_eq!(builder.revive_endpoint, Some(endpoint.to_string()));
     }
 
     #[test]

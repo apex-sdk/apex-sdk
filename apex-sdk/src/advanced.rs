@@ -25,13 +25,12 @@ impl BlockSubscription {
     pub fn new() -> (broadcast::Sender<BlockInfo>, CancellationToken, Self) {
         let (sender, receiver) = broadcast::channel(100);
         let cancellation_token = CancellationToken::new();
-        let token_clone = cancellation_token.clone();
         (
             sender,
-            cancellation_token,
+            cancellation_token.clone(),
             Self {
                 receiver,
-                cancellation_token: token_clone,
+                cancellation_token: cancellation_token.clone(),
             },
         )
     }
@@ -575,19 +574,14 @@ mod tests {
     }
 
     #[test]
-    #[cfg(not(all(feature = "substrate", feature = "evm")))]
     fn test_parallel_executor_concurrency_limit() {
         let sdk = std::sync::Arc::new(
             crate::sdk::ApexSDK::new(
-                #[cfg(feature = "substrate")]
                 None,
-                #[cfg(feature = "substrate")]
                 None,
-                #[cfg(feature = "evm")]
-                None,
-                #[cfg(feature = "evm")]
                 None,
                 std::time::Duration::from_secs(30),
+                crate::sdk::SdkConfig::default(),
             )
             .unwrap(),
         );
@@ -600,19 +594,14 @@ mod tests {
     }
 
     #[tokio::test]
-    #[cfg(not(all(feature = "substrate", feature = "evm")))]
     async fn test_parallel_executor_empty_batch() {
         let sdk = std::sync::Arc::new(
             crate::sdk::ApexSDK::new(
-                #[cfg(feature = "substrate")]
                 None,
-                #[cfg(feature = "substrate")]
                 None,
-                #[cfg(feature = "evm")]
-                None,
-                #[cfg(feature = "evm")]
                 None,
                 std::time::Duration::from_secs(30),
+                crate::sdk::SdkConfig::default(),
             )
             .unwrap(),
         );
@@ -630,19 +619,14 @@ mod tests {
     }
 
     #[tokio::test]
-    #[cfg(not(all(feature = "substrate", feature = "evm")))]
     async fn test_parallel_executor_metrics() {
         let sdk = std::sync::Arc::new(
             crate::sdk::ApexSDK::new(
-                #[cfg(feature = "substrate")]
                 None,
-                #[cfg(feature = "substrate")]
                 None,
-                #[cfg(feature = "evm")]
-                None,
-                #[cfg(feature = "evm")]
                 None,
                 std::time::Duration::from_secs(30),
+                crate::sdk::SdkConfig::default(),
             )
             .unwrap(),
         );
