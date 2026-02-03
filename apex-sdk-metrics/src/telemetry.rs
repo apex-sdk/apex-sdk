@@ -155,7 +155,7 @@ impl TelemetryLayer {
 /// Initialize telemetry and observability
 pub fn init_telemetry(config: ObservabilityConfig) -> Result<TelemetryLayer> {
     let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| {
-        EnvFilter::new(format!("apex_sdk={},apex_sdk_core={},apex_sdk_substrate={},apex_sdk_evm={},apex_sdk_metrics={}",
+        EnvFilter::new(format!("apex_sdk={},apex_sdk_core={},apex_sdk_substrate={},apex_sdk_revive={},apex_sdk_metrics={}",
             config.log_level, config.log_level, config.log_level, config.log_level, config.log_level))
     });
 
