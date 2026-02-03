@@ -11,9 +11,9 @@ use crate::keystore::{AccountType, Keystore};
 pub fn generate_account(account_type: &str, name: Option<String>) -> Result<()> {
     match account_type.to_lowercase().as_str() {
         "substrate" | "sub" => generate_substrate_account(name),
-        "evm" | "ethereum" | "eth" => generate_evm_account(name),
+        "revive" => generate_revive_account(name),
         _ => anyhow::bail!(
-            "Invalid account type '{}'. Supported types: substrate, evm",
+            "Invalid account type '{}'. Supported types: substrate, revive",
             account_type
         ),
     }
@@ -70,8 +70,8 @@ fn generate_substrate_account(name: Option<String>) -> Result<()> {
     Ok(())
 }
 
-/// Generate an EVM account
-fn generate_evm_account(name: Option<String>) -> Result<()> {
+/// Generate a Revive account
+fn generate_revive_account(name: Option<String>) -> Result<()> {
     use ::rand::RngCore;
     use alloy_signer_local::{coins_bip39::English, MnemonicBuilder};
 
@@ -92,7 +92,7 @@ fn generate_evm_account(name: Option<String>) -> Result<()> {
     let address = format!("{:?}", wallet.address());
 
     // Display the account information
-    println!("\n{}", "EVM Account Generated".green().bold());
+    println!("\n{}", "Revive Account Generated".green().bold());
     println!("{}", "═══════════════════════════════════════".dimmed());
     println!("\n{}: {}", "Address".cyan().bold(), address);
     println!("\n{}: {}", "Mnemonic".yellow().bold(), mnemonic_phrase);
@@ -105,7 +105,7 @@ fn generate_evm_account(name: Option<String>) -> Result<()> {
 
     // Ask if user wants to save the account
     if let Some(account_name) = name {
-        save_account_interactive(account_name, AccountType::Evm, address, &mnemonic_phrase)?;
+        save_account_interactive(account_name, AccountType::Revive, address, &mnemonic_phrase)?;
     } else {
         println!("\n{}", "Tip:".cyan());
         println!(
@@ -133,17 +133,17 @@ pub fn import_account(mnemonic: &str, account_type: &str, name: String) -> Resul
 
             save_account_interactive(name, AccountType::Substrate, address, mnemonic)?;
         }
-        "evm" | "ethereum" | "eth" => {
+        "revive" => {
             let wallet = MnemonicBuilder::<English>::default()
                 .phrase(mnemonic)
                 .build()
                 .context("Failed to build wallet from mnemonic")?;
             let address = format!("{:?}", wallet.address());
 
-            save_account_interactive(name, AccountType::Evm, address, mnemonic)?;
+            save_account_interactive(name, AccountType::Revive, address, mnemonic)?;
         }
         _ => anyhow::bail!(
-            "Invalid account type '{}'. Supported types: substrate, evm",
+            "Invalid account type '{}'. Supported types: substrate, revive",
             account_type
         ),
     }
