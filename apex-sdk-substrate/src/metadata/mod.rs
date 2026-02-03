@@ -88,7 +88,7 @@ pub mod dynamic {
         pallet: &str,
         call_name: &str,
         args: Vec<Value>,
-    ) -> subxt::dynamic::tx::DynamicPayload {
+    ) -> subxt::tx::DynamicPayload {
         tx(pallet, call_name, args)
     }
 

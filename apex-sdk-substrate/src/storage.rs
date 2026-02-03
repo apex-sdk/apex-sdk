@@ -342,6 +342,17 @@ pub struct StorageQuery {
 }
 
 impl StorageQuery {
+    /// Parse an SS58 address into a subxt Value for use in storage queries
+    pub fn parse_address(address: &str) -> Result<subxt::dynamic::Value> {
+        use sp_core::crypto::{AccountId32, Ss58Codec};
+
+        let account_id = AccountId32::from_ss58check(address)
+            .map_err(|e| Error::Storage(format!("Invalid SS58 address: {}", e)))?;
+
+        let account_bytes: &[u8] = account_id.as_ref();
+        Ok(subxt::dynamic::Value::from_bytes(account_bytes))
+    }
+
     /// Create a new storage query
     pub fn new(pallet: impl Into<String>, item: impl Into<String>) -> Self {
         Self {
