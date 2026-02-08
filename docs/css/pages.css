@@ -721,31 +721,69 @@
 /* Footer styles moved to components/footer.css */
 
 /* Responsive Design */
+@media (max-width: 1024px) {
+    .bento-item.large { grid-column: span 12; }
+    .bento-item.medium { grid-column: span 12; } /* Full width for code clarity */
+    .bento-item.small { grid-column: span 6; }
+    
+    .architecture-grid {
+        gap: 2rem;
+    }
+}
+
 @media (max-width: 768px) {
     .hero {
-        padding: 120px 0 80px;
-        min-height: 100vh;
+        padding: 120px 0 60px;
+        min-height: auto;
     }
     
     .hero-title {
-        font-size: 2.5rem;
+        font-size: 2.25rem;
+        margin-bottom: 1.5rem;
     }
     
     .hero-subtitle {
-        font-size: 1.1rem;
+        font-size: 1rem;
+        margin-bottom: 2rem;
     }
     
     .hero-stats {
-        gap: 1.5rem;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+        width: 100%;
+        max-width: 100%;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+    
+    .stat-item {
+        width: 100%;
+        padding: 1rem;
+        text-align: center;
+        border-radius: var(--radius-md);
+        background: var(--bg-glass-card);
+        border: 1px solid var(--border-color);
     }
     
     .stat-value {
-        font-size: 1.5rem;
+        font-size: 2rem;
+    }
+    
+    .architecture-grid {
+        grid-template-columns: 1fr;
+        gap: 3rem;
     }
     
     .architecture-content {
         grid-template-columns: 1fr;
-        gap: 2rem;
+        gap: 1.5rem;
+        order: 2; /* Put text after visual on mobile */
+    }
+    
+    .architecture-visual {
+        order: 1; /* Visual first */
     }
     
     .doc-container {
@@ -755,20 +793,36 @@
     .sidebar {
         width: 100%;
         height: auto;
+        max-height: 50vh;
         position: relative;
         top: 0;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 2rem;
     }
     
     .main-content {
-        padding: 1rem;
+        padding: 0;
     }
     
     .hero-cta {
         flex-direction: column;
-        align-items: stretch;
+        gap: 1rem;
+        margin: 2.5rem 0;
+        width: 100%;
     }
     
     .hero-cta .btn {
+        width: 100%;
         justify-content: center;
+    }
+    
+    .section-title {
+        font-size: 2.5rem;
+    }
+    
+    .bento-item.medium, 
+    .bento-item.small { 
+        grid-column: span 12; 
     }
 }

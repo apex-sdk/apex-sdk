@@ -39,10 +39,7 @@ fn test_phase5_unit_tests_status() {
     assert_eq!(vector.chain_type, ChainType::Ethereum);
 
     let duration = start.elapsed();
-    println!(
-        "✅ Phase 5 unit test verification completed in {:?}",
-        duration
-    );
+    println!("Phase 5 unit test verification completed in {:?}", duration);
 }
 
 #[test]
@@ -84,7 +81,7 @@ fn test_phase5_integration_tests_status() {
 
     let duration = start.elapsed();
     println!(
-        "✅ Phase 5 integration tests verification completed in {:?}",
+        "Phase 5 integration tests verification completed in {:?}",
         duration
     );
 }
@@ -132,7 +129,7 @@ fn test_phase5_metrics_collection_integration() {
 
     let duration = start.elapsed();
     println!(
-        "✅ Phase 5 metrics collection integration completed in {:?}",
+        "Phase 5 metrics collection integration completed in {:?}",
         duration
     );
     println!("   Collected {} metrics", performance_metrics.len());
@@ -183,15 +180,12 @@ fn test_phase5_completion_verification() {
 
     let duration = start.elapsed();
 
-    println!(
-        "🎉 Phase 5 completion verification PASSED in {:?}",
-        duration
-    );
-    println!("   ✅ Golden vectors system: FUNCTIONAL");
-    println!("   ✅ Metrics collection: FUNCTIONAL");
-    println!("   ✅ Serialization: FUNCTIONAL");
-    println!("   ✅ Integration tests: PASSING");
-    println!("   ✅ Performance: ACCEPTABLE");
+    println!("Phase 5 completion verification PASSED in {:?}", duration);
+    println!("   Golden vectors system: FUNCTIONAL");
+    println!("   Metrics collection: FUNCTIONAL");
+    println!("   Serialization: FUNCTIONAL");
+    println!("   Integration tests: PASSING");
+    println!("   Performance: ACCEPTABLE");
 
     // Final assertion
     assert!(

@@ -74,14 +74,14 @@ pub struct EncryptedAccount {
 #[serde(rename_all = "lowercase")]
 pub enum AccountType {
     Substrate,
-    Evm,
+    Revive,
 }
 
 impl std::fmt::Display for AccountType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AccountType::Substrate => write!(f, "substrate"),
-            AccountType::Evm => write!(f, "evm"),
+            AccountType::Revive => write!(f, "revive"),
         }
     }
 }
@@ -495,7 +495,7 @@ mod tests {
 
         let result = keystore.add_account(
             "test".to_string(),
-            AccountType::Evm,
+            AccountType::Revive,
             "addr2".to_string(),
             b"data2",
             password,

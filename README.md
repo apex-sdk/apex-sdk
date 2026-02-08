@@ -3,34 +3,44 @@
 ![Apex SDK](./docs/assets/apex-banner.jpg)
 
 
-**The definitive Rust framework for multichain blockchain development**
-
-[![Crates.io](https://img.shields.io/crates/v/apex-sdk?style=flat-square&logo=rust)](https://crates.io/crates/apex-sdk) [![Build](https://img.shields.io/github/actions/workflow/status/apex-sdk/apex-sdk/ci.yml?style=flat-square&logo=github)](https://github.com/apex-sdk/apex-sdk/actions) [![License](https://img.shields.io/badge/license-Apache%202.0-blue?style=flat-square)](LICENSE)
-
-[**Documentation**](https://apexsdk.dev) • [**Examples**](./examples) • [**Discord**](https://discord.gg/zCDFsBaZJN)
-
 </div>
 
----
 
-**[Apex SDK](https://apexsdk.dev)** is a A unified Rust SDK for building cross-chain applications across Substrate and EVM ecosystems. Apex SDK provides a single, type-safe API to interact with multiple blockchain protocols—enabling developers to build multichain applications without managing different client libraries, RPC interfaces, or type systems for each chain.
+# System Chain Standard Library for Polkadot Hub & Revive
+
+**[Apex SDK](https://apexsdk.dev)** is the canonical Rust toolkit for Polkadot System Chains, specializing in high-performance, type-safe orchestration of Asset Hub primitives and the new pallet-revive (PolkaVM/Solidity) execution environment.
+
+
+## System Chain Standard Features
+
+- **Asset Hub Primitives**: High-level, type-safe Rust APIs for `pallet-assets` and `pallet-nfts` (see `AssetManager`, `NftManager`).
+- **Revive (PolkaVM/Solidity) Support**: Native Rust client for `pallet-revive`—compile, deploy, and call Solidity contracts with zero JS dependencies.
+- **Atomic Orchestrator**: Compose cross-pallet and cross-chain workflows (e.g., mint asset → deposit to contract) in a single transaction.
+- **Pre-bundled Metadata**: Out-of-the-box support for Paseo and Polkadot Asset Hubs with pre-generated `subxt` types.
+- **CLI for Canonical Patterns**: Compile and deploy Solidity contracts, orchestrate Asset Hub/Revive flows, and access production-ready templates.
+
 
 ## Installation & Usage
 
 ```toml
 [dependencies]
-apex-sdk = "0.1"
+apex-sdk = { version = "0.1", features = ["substrate", "revive"] }
 ```
 
 ```bash
 cargo install apex-sdk-cli
-apex new multichain-dapp --substrate --evm
-cd multichain-dapp && apex run
+apex compile MyContract.sol --target polkavm
+apex deploy --asset-hub --revive
 ```
+
+---
+
+
+**Apex SDK** is the official System Chain Standard Library for Polkadot Hub and Revive. It enables developers to build the next generation of canonical dApps, combining native Asset Hub assets and PolkaVM smart contracts in atomic, type-safe workflows.
 
 <div align="center">
 
-**[Start Building](./docs/QUICK_START.md)** • **[Join Discord](https://discord.gg/zCDFsBaZJN)** • **[Read Docs](https://apexsdk.dev)**
 
+**[Start Building](./docs/QUICK_START.md)** • **[Join Discord](https://discord.gg/zCDFsBaZJN)** • **[Read Docs](https://apexsdk.dev)**
 
 </div>

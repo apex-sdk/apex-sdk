@@ -18,7 +18,7 @@
 //! async fn main() -> anyhow::Result<()> {
 //!     let sdk = ApexSDK::builder()
 //!         .with_substrate_endpoint("wss://polkadot.api.onfinality.io/public-ws")
-//!         .with_evm_endpoint("https://mainnet.infura.io/v3/YOUR_KEY")
+//!         .with_revive_endpoint("https://mainnet.infura.io/v3/YOUR_KEY")
 //!         .build()
 //!         .await?;
 //!     
@@ -35,7 +35,7 @@ pub mod sdk;
 pub mod transaction;
 
 pub use apex_sdk_core as core;
-pub use apex_sdk_evm as evm;
+pub use apex_sdk_revive as revive;
 pub use apex_sdk_substrate as substrate;
 pub use apex_sdk_types as types;
 
@@ -64,6 +64,6 @@ pub mod prelude {
     #[cfg(feature = "substrate")]
     pub use crate::substrate::{SubstrateAdapter, Wallet as SubstrateWallet};
 
-    #[cfg(feature = "evm")]
-    pub use crate::evm::{wallet::Wallet as EvmWallet, EvmAdapter};
+    #[cfg(feature = "revive")]
+    pub use crate::revive::ReviveAdapter;
 }

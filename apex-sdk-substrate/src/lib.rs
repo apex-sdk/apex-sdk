@@ -22,12 +22,14 @@ use thiserror::Error;
 use tokio::sync::OnceCell;
 use tracing::{debug, info};
 
+pub mod assets;
 pub mod block;
 pub mod cache;
 pub mod contracts;
 pub mod fee_estimator;
 pub mod metrics;
 pub mod monitor;
+pub mod nft;
 pub mod nonce_manager;
 pub mod pool;
 pub mod signer;
@@ -39,6 +41,7 @@ pub mod xcm;
 #[cfg(feature = "typed")]
 pub mod metadata;
 
+pub use assets::AssetManager;
 pub use block::BlockQuery;
 pub use cache::{Cache, CacheConfig};
 pub use contracts::{
@@ -50,6 +53,7 @@ pub use fee_estimator::{
     FeeStrategy, NetworkCongestion, Weight,
 };
 pub use metrics::{Metrics, MetricsSnapshot};
+pub use nft::NftManager;
 pub use nonce_manager::SubstrateNonceManager;
 pub use pool::{ConnectionPool, PoolConfig};
 pub use signer::{ApexSigner, Ed25519Signer, Sr25519Signer};
@@ -614,6 +618,11 @@ impl SubstrateAdapter {
     /// Create a transaction executor
     pub fn transaction_executor(&self) -> TransactionExecutor {
         TransactionExecutor::new(self.client.clone(), self.metrics.clone())
+    }
+
+    /// Get an asset manager for interacting with pallet-assets
+    pub fn assets(&self) -> AssetManager<'_> {
+        AssetManager::new(self)
     }
 
     /// This provides advanced fee estimation capabilities including:

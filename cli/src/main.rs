@@ -99,8 +99,8 @@ enum Commands {
 enum AccountCommands {
     /// Generate a new account
     Generate {
-        /// Account type (substrate, evm)
-        #[arg(short = 't', long)]
+        /// Account type (substrate, revive)
+        #[arg(short = 't', long, default_value = "substrate")]
         account_type: String,
         /// Account name (optional, will prompt to save if provided)
         #[arg(short, long)]
@@ -110,8 +110,8 @@ enum AccountCommands {
     Import {
         /// Mnemonic phrase
         mnemonic: String,
-        /// Account type (substrate, evm)
-        #[arg(short = 't', long)]
+        /// Account type (substrate, revive)
+        #[arg(short = 't', long, default_value = "substrate")]
         account_type: String,
         /// Account name
         #[arg(short, long)]

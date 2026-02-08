@@ -1,0 +1,29 @@
+[package]
+name = "apex-sdk-revive"
+version = "0.1.6"
+edition = "2021"
+description = "Pallet-Revive (PolkaVM) adapter for Apex SDK"
+license = "Apache-2.0"
+repository = "https://github.com/apex-sdk/apex-sdk"
+
+[dependencies]
+apex-sdk-core = { workspace = true }
+apex-sdk-types = { workspace = true }
+subxt = { workspace = true }
+tokio = { workspace = true }
+async-trait = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+url = { workspace = true }
+hex = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+## apex-sdk-substrate removed: not used in src or tests
+
+# PolkaVM and Revive specific dependencies will be added here
+# sp-core = { workspace = true }
+# sp-runtime = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full", "test-util"] }
+mockall = { workspace = true }

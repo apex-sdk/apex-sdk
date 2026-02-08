@@ -9,7 +9,6 @@ use apex_sdk_core::ChainAdapter;
 use apex_sdk_types::TxStatus;
 use std::{sync::Arc, time::Duration};
 
-#[cfg(feature = "evm")]
 /// Transaction confirmation strategy
 #[derive(Debug, Clone, PartialEq)]
 pub enum ConfirmationStrategy {
@@ -45,8 +44,8 @@ impl Default for SdkConfig {
 #[cfg(feature = "substrate")]
 use apex_sdk_substrate::SubstrateAdapter;
 
-#[cfg(feature = "evm")]
-use apex_sdk_evm::EvmAdapter;
+#[cfg(feature = "revive")]
+use apex_sdk_revive::ReviveAdapter;
 
 /// The main Apex SDK providing unified access to multiple blockchain types.
 ///
@@ -60,13 +59,11 @@ use apex_sdk_evm::EvmAdapter;
 /// async fn main() -> anyhow::Result<()> {
 ///     let sdk = ApexSDK::builder()
 ///         .with_substrate_endpoint("wss://polkadot.api.onfinality.io/public-ws")
-///         .with_evm_endpoint("https://mainnet.infura.io/v3/YOUR_KEY")
 ///         .build()
 ///         .await?;
 ///
 ///     // Check if a chain is supported
 ///     println!("Polkadot supported: {}", sdk.is_chain_supported(&Chain::Polkadot));
-///     println!("Ethereum supported: {}", sdk.is_chain_supported(&Chain::Ethereum));
 ///
 ///     Ok(())
 /// }
@@ -78,11 +75,8 @@ pub struct ApexSDK {
     #[cfg(feature = "substrate")]
     substrate_wallet: Option<Arc<apex_sdk_substrate::Wallet>>,
 
-    #[cfg(feature = "evm")]
-    evm_adapter: Option<Arc<EvmAdapter>>,
-
-    #[cfg(feature = "evm")]
-    evm_wallet: Option<Arc<apex_sdk_evm::wallet::Wallet>>,
+    #[cfg(feature = "revive")]
+    revive_adapter: Option<Arc<ReviveAdapter>>,
 
     timeout: Duration,
     config: SdkConfig,
@@ -100,21 +94,21 @@ impl ApexSDK {
     pub fn new(
         #[cfg(feature = "substrate")] substrate_adapter: Option<SubstrateAdapter>,
         #[cfg(feature = "substrate")] substrate_wallet: Option<apex_sdk_substrate::Wallet>,
-        #[cfg(feature = "evm")] evm_adapter: Option<EvmAdapter>,
-        #[cfg(feature = "evm")] evm_wallet: Option<apex_sdk_evm::wallet::Wallet>,
+        #[cfg(feature = "revive")] revive_adapter: Option<ReviveAdapter>,
         timeout: Duration,
         config: SdkConfig,
     ) -> Result<Self> {
-        #[cfg(not(any(feature = "substrate", feature = "evm")))]
+        #[cfg(not(any(feature = "substrate", feature = "revive")))]
         {
             return Err(Error::Config(
-                "No blockchain adapters enabled. Enable 'substrate' or 'evm' features.".to_string(),
+                "No blockchain adapters enabled. Enable 'substrate' or 'revive' features."
+                    .to_string(),
             ));
         }
 
-        #[cfg(all(feature = "substrate", feature = "evm"))]
+        #[cfg(all(feature = "substrate", feature = "revive"))]
         {
-            if substrate_adapter.is_none() && evm_adapter.is_none() {
+            if substrate_adapter.is_none() && revive_adapter.is_none() {
                 return Err(Error::Config(
                     "At least one adapter must be configured".to_string(),
                 ));
@@ -128,11 +122,8 @@ impl ApexSDK {
             #[cfg(feature = "substrate")]
             substrate_wallet: substrate_wallet.map(Arc::new),
 
-            #[cfg(feature = "evm")]
-            evm_adapter: evm_adapter.map(Arc::new),
-
-            #[cfg(feature = "evm")]
-            evm_wallet: evm_wallet.map(Arc::new),
+            #[cfg(feature = "revive")]
+            revive_adapter: revive_adapter.map(Arc::new),
 
             timeout,
             config,
@@ -155,16 +146,16 @@ impl ApexSDK {
                     .await
             }
 
-            #[cfg(feature = "evm")]
+            #[cfg(feature = "revive")]
             chain if chain.chain_type() == apex_sdk_types::ChainType::Evm => {
-                let adapter = self.evm_adapter.as_ref().ok_or_else(|| {
+                let adapter = self.revive_adapter.as_ref().ok_or_else(|| {
                     Error::UnsupportedChain(format!(
-                        "EVM adapter not configured for {}",
+                        "Revive adapter not configured for {}",
                         chain.name()
                     ))
                 })?;
 
-                self.execute_evm_transaction(adapter, transaction).await
+                self.execute_revive_transaction(adapter, transaction).await
             }
 
             chain => Err(Error::UnsupportedChain(format!(
@@ -196,11 +187,11 @@ impl ApexSDK {
                     .map_err(|e| Error::Transaction(e.to_string()))
             }
 
-            #[cfg(feature = "evm")]
+            #[cfg(feature = "revive")]
             apex_sdk_types::ChainType::Evm => {
-                let adapter = self.evm_adapter.as_ref().ok_or_else(|| {
+                let adapter = self.revive_adapter.as_ref().ok_or_else(|| {
                     Error::UnsupportedChain(format!(
-                        "EVM adapter not configured for {}",
+                        "Revive adapter not configured for {}",
                         chain.name()
                     ))
                 })?;
@@ -211,26 +202,17 @@ impl ApexSDK {
                     .map_err(|e| Error::Transaction(e.to_string()))
             }
 
-            #[cfg(feature = "substrate")]
+            #[cfg(all(feature = "substrate", feature = "revive"))]
             apex_sdk_types::ChainType::Hybrid => {
+                // For hybrid chains, try substrate first, then revive
                 if let Some(adapter) = &self.substrate_adapter {
-                    match adapter.get_transaction_status(tx_hash).await {
-                        Ok(status) => Ok(status),
-                        Err(_) => {
-                            if let Some(evm_adapter) = &self.evm_adapter {
-                                evm_adapter
-                                    .get_transaction_status(tx_hash)
-                                    .await
-                                    .map_err(|e| Error::Transaction(e.to_string()))
-                            } else {
-                                Err(Error::Transaction(
-                                    "No EVM adapter available for hybrid chain".to_string(),
-                                ))
-                            }
-                        }
-                    }
-                } else if let Some(evm_adapter) = &self.evm_adapter {
-                    evm_adapter
+                    adapter
+                        .get_transaction_status(tx_hash)
+                        .await
+                        .map_err(|e| Error::Transaction(e.to_string()))
+                } else if let Some(revive_adapter) = &self.revive_adapter {
+                    // Use revive_adapter for hybrid if substrate is not present
+                    revive_adapter
                         .get_transaction_status(tx_hash)
                         .await
                         .map_err(|e| Error::Transaction(e.to_string()))
@@ -242,20 +224,26 @@ impl ApexSDK {
                 }
             }
 
-            #[cfg(not(feature = "substrate"))]
+            #[cfg(all(feature = "substrate", not(feature = "revive")))]
             apex_sdk_types::ChainType::Hybrid => {
-                if let Some(evm_adapter) = &self.evm_adapter {
-                    evm_adapter
+                if let Some(adapter) = &self.substrate_adapter {
+                    adapter
                         .get_transaction_status(tx_hash)
                         .await
-                        .map_err(Error::Transaction)
+                        .map_err(|e| Error::Transaction(e.to_string()))
                 } else {
                     Err(Error::UnsupportedChain(format!(
-                        "No EVM adapter configured for hybrid chain {}",
+                        "No adapter configured for hybrid chain {}",
                         chain.name()
                     )))
                 }
             }
+
+            #[cfg(all(not(feature = "substrate"), feature = "revive"))]
+            apex_sdk_types::ChainType::Hybrid => Err(Error::UnsupportedChain(format!(
+                "Revive-only hybrid chain {} not yet supported",
+                chain.name()
+            ))),
         }
     }
 
@@ -265,21 +253,21 @@ impl ApexSDK {
             #[cfg(feature = "substrate")]
             apex_sdk_types::ChainType::Substrate => self.substrate_adapter.is_some(),
 
-            #[cfg(feature = "evm")]
-            apex_sdk_types::ChainType::Evm => self.evm_adapter.is_some(),
+            #[cfg(feature = "revive")]
+            apex_sdk_types::ChainType::Evm => self.revive_adapter.is_some(),
 
-            #[cfg(all(feature = "substrate", feature = "evm"))]
+            #[cfg(all(feature = "substrate", feature = "revive"))]
             apex_sdk_types::ChainType::Hybrid => {
-                self.substrate_adapter.is_some() || self.evm_adapter.is_some()
+                self.substrate_adapter.is_some() || self.revive_adapter.is_some()
             }
 
-            #[cfg(not(any(feature = "substrate", feature = "evm")))]
+            #[cfg(not(any(feature = "substrate", feature = "revive")))]
             _ => false,
 
-            #[cfg(all(not(feature = "substrate"), feature = "evm"))]
+            #[cfg(all(not(feature = "substrate"), feature = "revive"))]
             apex_sdk_types::ChainType::Substrate | apex_sdk_types::ChainType::Hybrid => false,
 
-            #[cfg(all(feature = "substrate", not(feature = "evm")))]
+            #[cfg(all(feature = "substrate", not(feature = "revive")))]
             apex_sdk_types::ChainType::Evm | apex_sdk_types::ChainType::Hybrid => false,
         }
     }
@@ -293,13 +281,13 @@ impl ApexSDK {
             .ok_or_else(|| Error::Config("Substrate adapter not configured".to_string()))
     }
 
-    /// Get access to the EVM adapter (if configured).
-    #[cfg(feature = "evm")]
-    pub fn evm(&self) -> Result<Arc<EvmAdapter>> {
-        self.evm_adapter
+    /// Get access to the Revive adapter (if configured).
+    #[cfg(feature = "revive")]
+    pub fn revive(&self) -> Result<Arc<ReviveAdapter>> {
+        self.revive_adapter
             .as_ref()
             .cloned()
-            .ok_or_else(|| Error::Config("EVM adapter not configured".to_string()))
+            .ok_or_else(|| Error::Config("Revive adapter not configured".to_string()))
     }
 
     /// Get the configured timeout duration.
@@ -483,13 +471,9 @@ impl ApexSDK {
         let result = match self.config.confirmation_strategy {
             ConfirmationStrategy::Immediate => TransactionResult::new(tx_hash)
                 .with_status(crate::transaction::TransactionStatus::Pending),
-            ConfirmationStrategy::WaitForInclusion => {
-                // Current behavior - transaction_executor.transfer() already waits for inclusion
-                TransactionResult::new(tx_hash)
-                    .with_status(crate::transaction::TransactionStatus::Success)
-            }
+            ConfirmationStrategy::WaitForInclusion => TransactionResult::new(tx_hash)
+                .with_status(crate::transaction::TransactionStatus::Success),
             ConfirmationStrategy::WaitForFinality => {
-                // Wait for finalized block containing our transaction
                 tracing::info!("Waiting for transaction finalization...");
                 self.wait_for_substrate_finality(adapter, &tx_hash).await?;
                 TransactionResult::new(tx_hash)
@@ -505,127 +489,52 @@ impl ApexSDK {
         Ok(result)
     }
 
-    #[cfg(feature = "evm")]
-    async fn execute_evm_transaction(
+    /// Execute a Revive transaction
+    #[cfg(feature = "revive")]
+    async fn execute_revive_transaction(
         &self,
-        adapter: &EvmAdapter,
+        adapter: &ReviveAdapter,
         transaction: Transaction,
     ) -> Result<TransactionResult> {
-        use alloy_primitives::{Address as EthAddress, U256};
+        tracing::debug!(
+            "Executing Revive transaction: {} -> {}",
+            transaction.from,
+            transaction.to
+        );
 
-        let _wallet = self.evm_wallet.as_ref().ok_or_else(|| {
-            Error::Transaction(
-                "EVM wallet not configured. Transaction execution requires signing.\n\
-                \n\
-                To execute EVM transactions, provide a wallet when building the SDK:\n\
-                \n\
-                use apex_sdk::ApexSDKBuilder;\n\
-                use apex_sdk_evm::wallet::Wallet;\n\
-                \n\
-                let wallet = Wallet::from_private_key(\"your_private_key\")?;\n\
-                let sdk = ApexSDKBuilder::new()\n\
-                    .with_evm_endpoint(\"https://eth.llamarpc.com\")\n\
-                    .with_evm_wallet(wallet)\n\
-                    .build()\n\
-                    .await?;\n\
-                \n\
-                Alternatively, use the adapter API directly:\n\
-                let executor = sdk.evm()?.transaction_executor();\n\
-                let tx_hash = executor.send_transaction(&wallet, to_address, U256::from(amount), data).await?;"
-                    .to_string(),
-            )
+        let signer = self.substrate_wallet.as_ref().ok_or_else(|| {
+            Error::Config("Substrate wallet required for Revive transactions (PolkaVM)".into())
         })?;
 
-        let to_address = match &transaction.to {
-            Address::Evm(addr) => addr
-                .parse::<EthAddress>()
-                .map_err(|e| Error::Transaction(format!("Invalid EVM address: {}", e)))?,
-            _ => {
-                return Err(Error::Transaction(
-                    "Destination address must be EVM address for EVM transactions".to_string(),
-                ))
-            }
-        };
+        let subxt_signer = signer.to_subxt_signer();
+        let contract_manager = crate::revive::ContractManager::new(adapter, subxt_signer);
 
-        let value = U256::from(transaction.amount);
+        let result = if transaction.is_deploy {
+            let code = transaction.data.ok_or_else(|| {
+                Error::Transaction("Contract code is required for deployment".into())
+            })?;
+            let salt = transaction.salt.unwrap_or([0u8; 32]);
+            let value = transaction.amount;
 
-        let data = transaction.data;
+            let addr = contract_manager
+                .deploy(code, vec![], salt, value, transaction.gas_limit)
+                .await
+                .map_err(|e| Error::Transaction(e.to_string()))?;
 
-        tracing::debug!(
-            "Preparing EVM transaction: to={:?}, value={}, data_len={}, gas_limit={:?}",
-            to_address,
-            value,
-            data.as_ref().map(|d| d.len()).unwrap_or(0),
-            transaction.gas_limit
-        );
-
-        let executor = adapter.transaction_executor().unwrap();
-
-        // Build proper transaction bytes for EVM
-        // Transaction structure: [type][to(20)][amount(16)][data_marker(1)]
-        let mut tx_bytes = Vec::new();
-        tx_bytes.push(0x00); // Native transfer type marker
-
-        // Add recipient address (20 bytes)
-        if let Address::Evm(to_addr) = &transaction.to {
-            let addr_bytes = hex::decode(to_addr.strip_prefix("0x").unwrap_or(to_addr))
-                .map_err(|e| Error::InvalidAddress(format!("Invalid EVM address: {}", e)))?;
-            if addr_bytes.len() != 20 {
-                return Err(Error::InvalidAddress(
-                    "EVM address must be 20 bytes".to_string(),
-                ));
-            }
-            tx_bytes.extend_from_slice(&addr_bytes);
+            TransactionResult::new(format!("deploy:{}", addr))
+                .with_status(crate::transaction::TransactionStatus::Success)
         } else {
-            return Err(Error::UnsupportedChain("Expected EVM address".to_string()));
-        }
+            let data = transaction.data.clone().unwrap_or_default();
+            let value = transaction.amount;
 
-        // Add amount (16 bytes for u128)
-        tx_bytes.extend_from_slice(&transaction.amount.to_be_bytes());
+            let _return_data = contract_manager
+                .call(&transaction.to, data, value, transaction.gas_limit)
+                .await
+                .map_err(|e| Error::Transaction(e.to_string()))?;
 
-        let tx_result = executor
-            .execute_transaction(&tx_bytes)
-            .await
-            .map_err(|e| Error::Transaction(format!("EVM transaction failed: {}", e)))?;
-
-        let tx_hash_str = tx_result.hash;
-
-        tracing::info!(
-            "EVM transaction submitted: {} → {:?}, amount: {}, hash: {}",
-            match &transaction.from {
-                Address::Evm(a) => a.as_str(),
-                _ => "unknown",
-            },
-            to_address,
-            transaction.amount,
-            tx_hash_str
-        );
-
-        tracing::debug!("Waiting for transaction confirmation...");
-
-        // Handle EVM transaction confirmation based on configuration
-        let result = match self.config.confirmation_strategy {
-            ConfirmationStrategy::Immediate => TransactionResult::new(tx_hash_str)
-                .with_status(crate::transaction::TransactionStatus::Pending),
-            ConfirmationStrategy::WaitForInclusion | ConfirmationStrategy::WaitForFinality => {
-                // Wait for transaction receipt
-                match self.wait_for_evm_confirmation(adapter, &tx_hash_str).await {
-                    Ok(receipt_info) => TransactionResult::new(tx_hash_str)
-                        .with_status(crate::transaction::TransactionStatus::Success)
-                        .with_block_number(receipt_info.block_number),
-                    Err(e) => {
-                        tracing::error!("Failed to get transaction receipt: {}", e);
-                        TransactionResult::new(tx_hash_str)
-                            .with_status(crate::transaction::TransactionStatus::Failed)
-                    }
-                }
-            }
+            TransactionResult::new(transaction.hash())
+                .with_status(crate::transaction::TransactionStatus::Success)
         };
-
-        tracing::info!(
-            "EVM transaction executed successfully, hash: {}",
-            result.source_tx_hash
-        );
 
         Ok(result)
     }
@@ -677,36 +586,6 @@ impl ApexSDK {
             tokio::time::sleep(poll_interval).await;
         }
     }
-
-    /// Wait for EVM transaction confirmation
-    #[cfg(feature = "evm")]
-    async fn wait_for_evm_confirmation(
-        &self,
-        _adapter: &EvmAdapter,
-        _tx_hash: &str,
-    ) -> Result<ReceiptInfo> {
-        // The EVM transaction confirmation is now handled by the EvmReceiptWatcher
-        // which is integrated into the transaction pipeline. This method provides
-        // compatibility but the actual confirmation logic is in the EVM adapter.
-
-        // For the SDK level, we trust that the transaction has been confirmed
-        // by the time it reaches this point since the adapter handles confirmation
-        Ok(ReceiptInfo {
-            block_number: 0,
-            gas_used: None,
-            status: true,
-        })
-    }
-}
-
-/// Information extracted from transaction receipt
-#[derive(Debug, Clone)]
-struct ReceiptInfo {
-    block_number: u64,
-    #[allow(dead_code)]
-    gas_used: Option<u64>,
-    #[allow(dead_code)]
-    status: bool,
 }
 
 #[cfg(test)]
@@ -721,9 +600,7 @@ mod tests {
             None,
             #[cfg(feature = "substrate")]
             None,
-            #[cfg(feature = "evm")]
-            None,
-            #[cfg(feature = "evm")]
+            #[cfg(feature = "revive")]
             None,
             Duration::from_secs(30),
             SdkConfig::default(),
@@ -758,10 +635,8 @@ mod tests {
             substrate_adapter: None,
             #[cfg(feature = "substrate")]
             substrate_wallet: None,
-            #[cfg(feature = "evm")]
-            evm_adapter: None,
-            #[cfg(feature = "evm")]
-            evm_wallet: None,
+            #[cfg(feature = "revive")]
+            revive_adapter: None,
             timeout: Duration::from_secs(30),
         };
 
@@ -902,37 +777,15 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "evm")]
-    fn test_evm_adapter_not_configured() {
-        let sdk = ApexSDK {
-            config: SdkConfig::default(),
-            #[cfg(feature = "substrate")]
-            substrate_adapter: None,
-            #[cfg(feature = "substrate")]
-            substrate_wallet: None,
-            evm_adapter: None,
-            evm_wallet: None,
-            timeout: Duration::from_secs(30),
-        };
-
-        let result = sdk.evm();
-        assert!(result.is_err());
-        if let Err(Error::Config(msg)) = result {
-            assert!(msg.contains("EVM adapter not configured"));
-        }
-    }
-
-    #[test]
-    #[cfg(feature = "substrate")]
     fn test_get_transaction_status_substrate_not_configured() {
         let sdk = ApexSDK {
             config: SdkConfig::default(),
+            #[cfg(feature = "substrate")]
             substrate_adapter: None,
+            #[cfg(feature = "substrate")]
             substrate_wallet: None,
-            #[cfg(feature = "evm")]
-            evm_adapter: None,
-            #[cfg(feature = "evm")]
-            evm_wallet: None,
+            #[cfg(feature = "revive")]
+            revive_adapter: None,
             timeout: Duration::from_secs(30),
         };
 
@@ -941,28 +794,6 @@ mod tests {
         assert!(result.is_err());
         if let Err(Error::UnsupportedChain(msg)) = result {
             assert!(msg.contains("Substrate adapter not configured"));
-        }
-    }
-
-    #[test]
-    #[cfg(feature = "evm")]
-    fn test_get_transaction_status_evm_not_configured() {
-        let sdk = ApexSDK {
-            config: SdkConfig::default(),
-            #[cfg(feature = "substrate")]
-            substrate_adapter: None,
-            #[cfg(feature = "substrate")]
-            substrate_wallet: None,
-            evm_adapter: None,
-            evm_wallet: None,
-            timeout: Duration::from_secs(30),
-        };
-
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        let result = rt.block_on(sdk.get_transaction_status("0x123", &Chain::Ethereum));
-        assert!(result.is_err());
-        if let Err(Error::UnsupportedChain(msg)) = result {
-            assert!(msg.contains("EVM adapter not configured"));
         }
     }
 
@@ -976,10 +807,8 @@ mod tests {
             substrate_adapter: None,
             #[cfg(feature = "substrate")]
             substrate_wallet: None,
-            #[cfg(feature = "evm")]
-            evm_adapter: None,
-            #[cfg(feature = "evm")]
-            evm_wallet: None,
+            #[cfg(feature = "revive")]
+            revive_adapter: None,
             timeout: Duration::from_secs(30),
         };
 

@@ -13,9 +13,11 @@ name = "apex-cli"
 path = "src/main.rs"
 
 [dependencies]
+apex-sdk = { path = "../apex-sdk", version = "0.1.6", features = ["substrate", "revive"] }
 apex-sdk-core = { path = "../apex-sdk-core", version = "0.1.6" }
 apex-sdk-types = { path = "../apex-sdk-types", version = "0.1.6" }
-apex-sdk-evm = { path = "../apex-sdk-evm", version = "0.1.6" }
+apex-sdk-revive = { path = "../apex-sdk-revive", version = "0.1.6" }
+apex-sdk-substrate = { path = "../apex-sdk-substrate", version = "0.1.6" }
 clap = { version = "4.5.4", features = ["derive"] }
 clap_complete = "4.5"
 tokio = { version = "1.38.0", features = ["full"] }
@@ -27,6 +29,7 @@ sp-core = { workspace = true }
 rand = { workspace = true }
 alloy = { workspace = true }
 alloy-signer-local = { workspace = true }
+alloy-primitives = { workspace = true }
 subxt = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

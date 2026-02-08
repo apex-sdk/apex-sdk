@@ -17,6 +17,8 @@ pub struct TransactionBuilder {
     gas_price: Option<u64>,
     data: Option<Vec<u8>>,
     chain: Option<Chain>,
+    salt: Option<[u8; 32]>,
+    is_deploy: bool,
 }
 
 impl TransactionBuilder {
@@ -86,6 +88,18 @@ impl TransactionBuilder {
         self
     }
 
+    /// Set the salt for contract deployment
+    pub fn salt(mut self, salt: [u8; 32]) -> Self {
+        self.salt = Some(salt);
+        self
+    }
+
+    /// Mark this transaction as a contract deployment
+    pub fn deploy(mut self, is_deploy: bool) -> Self {
+        self.is_deploy = is_deploy;
+        self
+    }
+
     /// Alias for data (for consistency with documentation)
     pub fn with_data(self, data: Vec<u8>) -> Self {
         self.data(data)
@@ -102,12 +116,16 @@ impl TransactionBuilder {
         let from = self
             .from
             .ok_or_else(|| crate::error::Error::Config("From address is required".to_string()))?;
-        let to = self
-            .to
-            .ok_or_else(|| crate::error::Error::Config("To address is required".to_string()))?;
-        let amount = self
-            .amount
-            .ok_or_else(|| crate::error::Error::Config("Amount is required".to_string()))?;
+
+        let to = if self.is_deploy {
+            self.to
+                .unwrap_or_else(|| Address::evm("0x0000000000000000000000000000000000000000"))
+        } else {
+            self.to
+                .ok_or_else(|| crate::error::Error::Config("To address is required".to_string()))?
+        };
+
+        let amount = self.amount.unwrap_or(0);
 
         Ok(Transaction {
             from,
@@ -118,6 +136,8 @@ impl TransactionBuilder {
             data: self.data,
             chain: self.chain,
             nonce: None,
+            salt: self.salt,
+            is_deploy: self.is_deploy,
         })
     }
 }
@@ -133,6 +153,8 @@ pub struct Transaction {
     pub data: Option<Vec<u8>>,
     pub chain: Option<Chain>,
     pub nonce: Option<u64>,
+    pub salt: Option<[u8; 32]>,
+    pub is_deploy: bool,
 }
 
 impl Transaction {
@@ -153,22 +175,14 @@ impl Transaction {
             (Address::Substrate(_), Address::Evm(_)) => true,
             (Address::Evm(_), Address::Substrate(_)) => true,
             (Address::Substrate(from_addr), Address::Substrate(to_addr)) => {
-                // For Substrate-to-Substrate, check if they have different SS58 prefixes
-                // indicating different parachains/relay chains
                 !Self::same_substrate_network(from_addr, to_addr)
             }
-            (Address::Evm(_), Address::Evm(_)) => {
-                // For EVM-to-EVM, same chain unless proven otherwise
-                // Would need chain_id comparison in future enhancement
-                false
-            }
+            (Address::Evm(_), Address::Evm(_)) => false,
         }
     }
 
     /// Check if two Substrate addresses are on the same network
     fn same_substrate_network(addr1: &str, addr2: &str) -> bool {
-        // Extract network prefix from SS58 addresses
-        // Different prefixes indicate different networks (e.g., Polkadot vs Kusama)
         use apex_sdk_types::extract_ss58_prefix;
 
         match (extract_ss58_prefix(addr1), extract_ss58_prefix(addr2)) {
@@ -292,7 +306,8 @@ mod tests {
             .to(Address::evm("0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7"))
             .build();
 
-        assert!(result.is_err());
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap().amount, 0);
     }
 
     #[test]

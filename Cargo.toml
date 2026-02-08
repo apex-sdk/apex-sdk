@@ -3,7 +3,7 @@ members = [
     "apex-sdk",
     "apex-sdk-core",
     "apex-sdk-substrate",
-    "apex-sdk-evm",
+    "apex-sdk-revive",
     "apex-sdk-types",
     "apex-sdk-metrics",
     "cli",
@@ -41,10 +41,10 @@ serde_json = "1.0"
 
 # Error handling
 anyhow = "1.0"
-thiserror = "2.0.17"
+thiserror = "2.0.18"
 
 # Substrate dependencies
-subxt = "0.44.0"
+subxt = "0.44.2"
 sp-core = "39.0.0"
 sp-runtime = "45.0.0"
 
@@ -72,7 +72,7 @@ tracing-subscriber = "0.3.22"
 rand = "0.9.2"
 sha3 = "0.10"
 zeroize = "1.7"
-chrono = "0.4"
+chrono = "0.4.43"
 
 # Network and HTTP
 reqwest = { version = "0.13", features = ["json"] }
@@ -85,7 +85,7 @@ mockall = "0.14.0"
 # Internal workspace dependencies
 apex-sdk-core = { path = "apex-sdk-core", version = "0.1.6" }
 apex-sdk-substrate = { path = "apex-sdk-substrate", version = "0.1.6" }
-apex-sdk-evm = { path = "apex-sdk-evm", version = "0.1.6" }
+apex-sdk-revive = { path = "apex-sdk-revive", version = "0.1.6" }
 apex-sdk-types = { path = "apex-sdk-types", version = "0.1.6" }
 
 # Development profile - fast compilation, minimal optimizations

@@ -1,15 +1,16 @@
-# Apex SDK CLI Guide
 
-The Apex SDK CLI is a powerful command-line tool for building, testing, and deploying blockchain applications across Substrate and EVM ecosystems.
+# Apex SDK CLI Guide (System Chain Standard)
+
+The Apex SDK CLI is the canonical tool for building, testing, and deploying dApps on Polkadot Asset Hub and Revive (PolkaVM/Solidity).
 
 ## Table of Contents
 
 - [Installation](#installation)
 - [Getting Started](#getting-started)
 - [Commands](#commands)
-  - [Project Management](#project-management)
-  - [Account Management](#account-management)
-  - [Chain Operations](#chain-operations)
+  - [Asset Hub Operations](#asset-hub-operations)
+  - [Revive Contract Management](#revive-contract-management)
+  - [Atomic Orchestration](#atomic-orchestration)
   - [Deployment](#deployment)
   - [Testing & Benchmarking](#testing--benchmarking)
 - [Configuration](#configuration)
@@ -32,10 +33,40 @@ cargo install --path .
 cargo install apex-sdk-cli
 ```
 
+
 ### Verify Installation
 
 ```bash
 apex version
+```
+
+---
+
+## Asset Hub Operations
+
+```bash
+# Mint an asset
+apex asset mint --id 1000 --to 5F... --amount 1000000000000
+
+# Transfer NFT
+apex nft transfer --collection 42 --item 1 --to 5F...
+```
+
+## Revive Contract Management
+
+```bash
+# Compile Solidity to PolkaVM
+apex compile MyContract.sol --target polkavm
+
+# Deploy contract
+apex deploy --revive --file MyContract.polkavm
+```
+
+## Atomic Orchestration
+
+```bash
+# Mint asset and deposit to contract in one workflow
+apex workflow run --script atomic-mint-deposit.yaml
 ```
 
 ## Getting Started
