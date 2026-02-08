@@ -18,7 +18,7 @@
 //! async fn main() -> anyhow::Result<()> {
 //!     let sdk = ApexSDK::builder()
 //!         .with_substrate_endpoint("wss://polkadot.api.onfinality.io/public-ws")
-//!         .with_evm_endpoint("https://mainnet.infura.io/v3/YOUR_KEY")
+//!         .with_revive_endpoint("https://mainnet.infura.io/v3/YOUR_KEY")
 //!         .build()
 //!         .await?;
 //!     

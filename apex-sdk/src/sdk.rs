@@ -5,7 +5,7 @@ use crate::{
     transaction::{Transaction, TransactionResult},
     types::{Address, Chain},
 };
-// use apex_sdk_core::ChainAdapter; // Removed unused import
+use apex_sdk_core::ChainAdapter;
 use apex_sdk_types::TxStatus;
 use std::{sync::Arc, time::Duration};
 
@@ -148,18 +148,14 @@ impl ApexSDK {
 
             #[cfg(feature = "revive")]
             chain if chain.chain_type() == apex_sdk_types::ChainType::Evm => {
-                let _adapter = self.revive_adapter.as_ref().ok_or_else(|| {
+                let adapter = self.revive_adapter.as_ref().ok_or_else(|| {
                     Error::UnsupportedChain(format!(
                         "Revive adapter not configured for {}",
                         chain.name()
                     ))
                 })?;
 
-                // For Revive, we might still use a specialized execution method
-                // or map it to a general one.
-                Err(Error::Transaction(
-                    "Revive execution not yet fully implemented in unified execute".into(),
-                ))
+                self.execute_revive_transaction(adapter, transaction).await
             }
 
             chain => Err(Error::UnsupportedChain(format!(
@@ -200,13 +196,9 @@ impl ApexSDK {
                     ))
                 })?;
 
-                // Use a proper address construction instead of Address::default()
-                let dummy_addr =
-                    Address::evm("0x0000000000000000000000000000000000000000".to_string());
                 adapter
-                    .get_balance(&dummy_addr)
+                    .get_transaction_status(tx_hash)
                     .await
-                    .map(|_| apex_sdk_types::TransactionStatus::default())
                     .map_err(|e| Error::Transaction(e.to_string()))
             }
 
@@ -220,12 +212,9 @@ impl ApexSDK {
                         .map_err(|e| Error::Transaction(e.to_string()))
                 } else if let Some(revive_adapter) = &self.revive_adapter {
                     // Use revive_adapter for hybrid if substrate is not present
-                    let dummy_addr =
-                        Address::evm("0x0000000000000000000000000000000000000000".to_string());
                     revive_adapter
-                        .get_balance(&dummy_addr)
+                        .get_transaction_status(tx_hash)
                         .await
-                        .map(|_| apex_sdk_types::TransactionStatus::default())
                         .map_err(|e| Error::Transaction(e.to_string()))
                 } else {
                     Err(Error::UnsupportedChain(format!(
@@ -482,13 +471,9 @@ impl ApexSDK {
         let result = match self.config.confirmation_strategy {
             ConfirmationStrategy::Immediate => TransactionResult::new(tx_hash)
                 .with_status(crate::transaction::TransactionStatus::Pending),
-            ConfirmationStrategy::WaitForInclusion => {
-                // Current behavior - transaction_executor.transfer() already waits for inclusion
-                TransactionResult::new(tx_hash)
-                    .with_status(crate::transaction::TransactionStatus::Success)
-            }
+            ConfirmationStrategy::WaitForInclusion => TransactionResult::new(tx_hash)
+                .with_status(crate::transaction::TransactionStatus::Success),
             ConfirmationStrategy::WaitForFinality => {
-                // Wait for finalized block containing our transaction
                 tracing::info!("Waiting for transaction finalization...");
                 self.wait_for_substrate_finality(adapter, &tx_hash).await?;
                 TransactionResult::new(tx_hash)
@@ -504,7 +489,55 @@ impl ApexSDK {
         Ok(result)
     }
 
-    // ...existing code...
+    /// Execute a Revive transaction
+    #[cfg(feature = "revive")]
+    async fn execute_revive_transaction(
+        &self,
+        adapter: &ReviveAdapter,
+        transaction: Transaction,
+    ) -> Result<TransactionResult> {
+        tracing::debug!(
+            "Executing Revive transaction: {} -> {}",
+            transaction.from,
+            transaction.to
+        );
+
+        let signer = self.substrate_wallet.as_ref().ok_or_else(|| {
+            Error::Config("Substrate wallet required for Revive transactions (PolkaVM)".into())
+        })?;
+
+        let subxt_signer = signer.to_subxt_signer();
+        let contract_manager = crate::revive::ContractManager::new(adapter, subxt_signer);
+
+        let result = if transaction.is_deploy {
+            let code = transaction.data.ok_or_else(|| {
+                Error::Transaction("Contract code is required for deployment".into())
+            })?;
+            let salt = transaction.salt.unwrap_or([0u8; 32]);
+            let value = transaction.amount;
+
+            let addr = contract_manager
+                .deploy(code, vec![], salt, value, transaction.gas_limit)
+                .await
+                .map_err(|e| Error::Transaction(e.to_string()))?;
+
+            TransactionResult::new(format!("deploy:{}", addr))
+                .with_status(crate::transaction::TransactionStatus::Success)
+        } else {
+            let data = transaction.data.clone().unwrap_or_default();
+            let value = transaction.amount;
+
+            let _return_data = contract_manager
+                .call(&transaction.to, data, value, transaction.gas_limit)
+                .await
+                .map_err(|e| Error::Transaction(e.to_string()))?;
+
+            TransactionResult::new(transaction.hash())
+                .with_status(crate::transaction::TransactionStatus::Success)
+        };
+
+        Ok(result)
+    }
 
     /// Wait for Substrate transaction finality
     #[cfg(feature = "substrate")]
@@ -553,11 +586,7 @@ impl ApexSDK {
             tokio::time::sleep(poll_interval).await;
         }
     }
-
-    // ...existing code...
 }
-
-// ...existing code...
 
 #[cfg(test)]
 mod tests {
@@ -747,8 +776,6 @@ mod tests {
         }
     }
 
-    // Removed EVM adapter test
-
     #[test]
     fn test_get_transaction_status_substrate_not_configured() {
         let sdk = ApexSDK {
@@ -769,8 +796,6 @@ mod tests {
             assert!(msg.contains("Substrate adapter not configured"));
         }
     }
-
-    // Removed EVM transaction status test
 
     #[test]
     fn test_execute_unsupported_chain() {

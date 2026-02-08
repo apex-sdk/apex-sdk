@@ -38,7 +38,6 @@ hex.workspace = true
 sp-core = { workspace = true, optional = true }
 
 # EVM dependencies (conditional)
-alloy-primitives = { workspace = true, optional = true }
 
 # Internal workspace dependencies
 apex-sdk-core.workspace = true
@@ -58,7 +57,7 @@ criterion.workspace = true
 [features]
 default = ["substrate", "revive"]
 substrate = ["apex-sdk-substrate", "sp-core"]
-revive = ["apex-sdk-revive", "alloy-primitives"]
+revive = ["apex-sdk-revive"]
 mocks = ["apex-sdk-core/mocks"]
 
 [package.metadata.cargo-udeps.ignore]
