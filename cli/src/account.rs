@@ -103,7 +103,6 @@ fn generate_revive_account(name: Option<String>) -> Result<()> {
     println!("• Store it offline in multiple secure locations");
     println!("• This mnemonic cannot be recovered if lost");
 
-    // Ask if user wants to save the account
     if let Some(account_name) = name {
         save_account_interactive(account_name, AccountType::Revive, address, &mnemonic_phrase)?;
     } else {
@@ -121,7 +120,6 @@ fn generate_revive_account(name: Option<String>) -> Result<()> {
 pub fn import_account(mnemonic: &str, account_type: &str, name: String) -> Result<()> {
     use alloy_signer_local::{coins_bip39::English, MnemonicBuilder};
 
-    // Validate mnemonic
     let mnemonic_obj: bip39::Mnemonic = mnemonic.parse().context("Invalid mnemonic phrase")?;
 
     match account_type.to_lowercase().as_str() {
@@ -158,10 +156,9 @@ fn save_account_interactive(
     address: String,
     mnemonic: &str,
 ) -> Result<()> {
-    println!("\n{}", "💾 Saving Account to Keystore".cyan().bold());
+    println!("\n{}", "Saving Account to Keystore".cyan().bold());
     println!("{}", "═══════════════════════════════════════".dimmed());
 
-    // Get password
     let password = rpassword::prompt_password("Enter password to encrypt account: ")
         .context("Failed to read password")?;
 
@@ -176,7 +173,6 @@ fn save_account_interactive(
         anyhow::bail!("Passwords do not match");
     }
 
-    // Load keystore
     let keystore_path = crate::keystore::get_keystore_path()?;
     let mut keystore = Keystore::load(&keystore_path)?;
 
@@ -248,7 +244,7 @@ pub fn export_account(name: &str) -> Result<()> {
         anyhow::bail!("Account '{}' not found", name);
     }
 
-    println!("\n{}", "🔓 Export Account".yellow().bold());
+    println!("\n{}", "Export Account".yellow().bold());
     println!("{}", "═══════════════════════════════════════".dimmed());
     println!(
         "{}",
@@ -279,7 +275,7 @@ pub fn remove_account(name: &str) -> Result<()> {
         anyhow::bail!("Account '{}' not found", name);
     }
 
-    println!("\n{}", "🗑️  Remove Account".red().bold());
+    println!("\n{}", "Remove Account".red().bold());
     println!("{}", "═══════════════════════════════════════".dimmed());
     println!("{}", "Warning: This action cannot be undone!".red());
 
@@ -311,8 +307,6 @@ mod tests {
 
     #[test]
     fn test_generate_substrate_account() {
-        // This test just verifies the function doesn't panic
-        // We can't test interactive parts without mocking
         let result = generate_substrate_account(None);
         assert!(result.is_ok());
     }

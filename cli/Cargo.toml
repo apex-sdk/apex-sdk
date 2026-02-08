@@ -13,6 +13,7 @@ name = "apex-cli"
 path = "src/main.rs"
 
 [dependencies]
+apex-sdk = { path = "../apex-sdk", version = "0.1.6", features = ["substrate", "revive"] }
 apex-sdk-core = { path = "../apex-sdk-core", version = "0.1.6" }
 apex-sdk-types = { path = "../apex-sdk-types", version = "0.1.6" }
 apex-sdk-revive = { path = "../apex-sdk-revive", version = "0.1.6" }

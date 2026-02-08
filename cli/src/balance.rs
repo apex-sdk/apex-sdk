@@ -26,12 +26,9 @@ pub async fn get_substrate_balance(address: &str, endpoint: &str) -> Result<()> 
 
     spinner.set_message("Fetching balance...");
 
-    // Determine the correct account storage key
-    // For most chains it's System::Account
     let address_val = apex_sdk_substrate::storage::StorageQuery::parse_address(address)
         .context("Invalid Substrate address")?;
 
-    // Use subxt dynamic query to fetch balance from System pallet
     let account_query = subxt::dynamic::storage("System", "Account", vec![address_val.clone()]);
 
     let account_data = api
@@ -42,8 +39,6 @@ pub async fn get_substrate_balance(address: &str, endpoint: &str) -> Result<()> 
         .await?
         .context("Account not found on chain")?;
 
-    // Extract balance from AccountInfo { nonce, consumers, providers, sufficients, data: AccountData { free, ... } }
-    // Use the extract_u128 helper from apex-sdk-substrate
     fn extract_u128<T>(value: &subxt::dynamic::Value<T>, path: &[&str]) -> Option<u128> {
         let mut current = value;
         for &key in path {
@@ -58,24 +53,32 @@ pub async fn get_substrate_balance(address: &str, endpoint: &str) -> Result<()> 
     let free_balance = extract_u128(&value, &["data", "free"])
         .context("Failed to parse free balance from storage")?;
 
-    // Get chain properties for decimals and symbol
-    // In subxt 0.37+, we can't easily get runtime properties from metadata directly in the same way.
-    // We'll use defaults if we can't find them, or try to fetch constants if needed.
-    // For now, let's use sensible defaults for Substrate chains (12 decimals, UNIT)
-    // or try to fetch from system constants if possible.
-
     // Attempt to fetch constants from System pallet if available
     let token_symbol = "UNIT";
     let token_decimals = 12;
-
     spinner.finish_and_clear();
+
+    // Try to fetch chain name from runtime metadata (fallback to static value)
+    let chain_name = api
+        .metadata()
+        .pallet_by_name_err("System")
+        .ok()
+        .and_then(|pallet| {
+            pallet
+                .constants()
+                .find(|c| c.name() == "ChainName")
+                .and_then(|constant| {
+                    std::str::from_utf8(constant.value())
+                        .map(|s| s.to_owned())
+                        .ok()
+                })
+        })
+        .unwrap_or_else(|| "Substrate Chain".to_string());
 
     println!("\n{}", "Balance Retrieved".green().bold());
     println!("{}", "═══════════════════════════════════════".dimmed());
     println!("{}: {}", "Address".cyan(), address);
-    // chain_name is not directly available on metadata in newer subxt versions without custom logic
-    // We'll just skip printing the network name from metadata for now or use a placeholder
-    println!("{}: Substrate Chain", "Network".dimmed());
+    println!("{}: {}", "Network".dimmed(), chain_name);
     println!();
 
     // Format balance with decimals
@@ -102,14 +105,53 @@ pub async fn get_substrate_balance(address: &str, endpoint: &str) -> Result<()> 
 
 /// Get account balance for Revive chains
 pub async fn get_revive_balance(address: &str, endpoint: &str) -> Result<()> {
+    use apex_sdk::core::Provider;
+    use apex_sdk::prelude::*;
+
     println!("\n{}", "Fetching Revive Balance".cyan().bold());
     println!("{}", "═══════════════════════════════════════".dimmed());
     println!("{}: {}", "Endpoint".dimmed(), endpoint);
     println!("{}: {}", "Address".dimmed(), address);
     println!();
 
-    println!("Revive balance checking not yet fully implemented in CLI.");
-    println!("Target: pallet-revive on Asset Hub.");
+    // Show progress
+    let spinner = indicatif::ProgressBar::new_spinner();
+    spinner.set_message("Connecting to Revive node...");
+    spinner.enable_steady_tick(std::time::Duration::from_millis(100));
+
+    let adapter = ReviveAdapter::connect(endpoint)
+        .await
+        .map_err(|e| anyhow::anyhow!("Failed to connect to Revive endpoint: {}", e))?;
+
+    spinner.set_message("Fetching balance...");
+
+    let addr = Address::evm(address);
+    let balance = adapter
+        .get_balance(&addr)
+        .await
+        .map_err(|e| anyhow::anyhow!("Failed to fetch Revive balance: {}", e))?;
+
+    spinner.finish_and_clear();
+
+    println!("\n{}", "Revive Balance Retrieved".green().bold());
+    println!("{}", "═══════════════════════════════════════".dimmed());
+    println!("{}: {}", "Address".cyan(), address);
+
+    // Revive usually uses 18 decimals like Ethereum
+    let token_decimals = 18;
+    let token_symbol = "ETH";
+
+    // Format balance with decimals
+    let divisor = 10u128.pow(token_decimals as u32);
+    let balance_formatted = format_balance(balance, divisor);
+
+    println!(
+        "{}: {} {}",
+        "Free Balance".green().bold(),
+        balance_formatted,
+        token_symbol
+    );
+    println!("{}: {} raw units", "Raw".dimmed(), balance);
 
     Ok(())
 }
@@ -122,7 +164,6 @@ fn format_balance(balance: u128, divisor: u128) -> String {
     if frac == 0 {
         whole.to_string()
     } else {
-        // Calculate number of decimal places from divisor
         let decimal_places = (divisor as f64).log10() as usize;
         let frac_str = format!("{:0width$}", frac, width = decimal_places);
         let trimmed = frac_str.trim_end_matches('0');
@@ -132,7 +173,6 @@ fn format_balance(balance: u128, divisor: u128) -> String {
 
 /// Auto-detect chain type and get balance
 pub async fn get_balance(address: &str, chain: &str, endpoint: &str) -> Result<()> {
-    // Determine if it's a Substrate or Revive chain using centralized logic
     let is_substrate = apex_sdk_types::Chain::is_substrate_endpoint(endpoint)
         || apex_sdk_types::Chain::from_str_case_insensitive(chain)
             .map(|c| c.chain_type() == apex_sdk_types::ChainType::Substrate)
@@ -157,10 +197,10 @@ mod tests {
         let test_cases = [
             (0u128, "0"),
             (1u128, "0.0000000001"),
-            (divisor, "1"),             // 1 token
-            (divisor / 2, "0.5"),       // 0.5 tokens
-            (divisor * 10, "10"),       // 10 tokens
-            (15 * divisor / 10, "1.5"), // 1.5 tokens
+            (divisor, "1"),
+            (divisor / 2, "0.5"),
+            (divisor * 10, "10"),
+            (15 * divisor / 10, "1.5"),
         ];
 
         for (balance, expected) in &test_cases {
