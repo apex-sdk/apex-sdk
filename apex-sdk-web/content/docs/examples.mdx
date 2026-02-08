@@ -1,0 +1,512 @@
+---
+title: "Examples & Tutorials"
+description: "Working code samples and step-by-step tutorials demonstrating common patterns and use cases with Apex SDK."
+section: "examples"
+order: 1
+tags: ["examples", "tutorials", "code-samples", "guides"]
+lastUpdated: "2026-01-06"
+---
+
+# Examples & Tutorials
+
+Learn Apex SDK through practical examples and step-by-step tutorials. All examples are available in the [GitHub repository](https://github.com/apex-sdk/apex-sdk-docs/tree/main/examples).
+
+## Quick Examples
+
+### Basic Balance Transfer
+
+```rust
+use apex_sdk::{ApexSDK, Config};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Configure SDK
+    let config = Config::new()
+        .with_substrate_endpoint("wss://westend-rpc.polkadot.io");
+    
+    let sdk = ApexSDK::builder()
+        .with_config(config)
+        .build()
+        .await?;
+
+    // Create transaction
+    let tx = sdk.substrate()
+        .transaction_builder()
+        .with_pallet("balances")
+        .with_call("transfer")
+        .with_params(vec![
+            recipient_account,
+            1_000_000_000_000u128 // 1 WND
+        ])
+        .build()?;
+
+    // Sign and submit
+    let hash = sdk.submit_transaction(&tx, &keypair).await?;
+    println!("Transaction hash: {:?}", hash);
+
+    Ok(())
+}
+```
+
+### Event Subscription
+
+```rust
+use apex_sdk::{ApexSDK, Config};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let config = Config::new()
+        .with_substrate_endpoint("wss://polkadot-rpc.dwellir.com");
+        
+    let sdk = ApexSDK::builder()
+        .with_config(config)
+        .build()
+        .await?;
+
+    // Subscribe to events
+    let mut subscriber = sdk.substrate()
+        .events()
+        .subscribe_finalized_blocks()
+        .await?;
+
+    while let Some(events) = subscriber.next().await {
+        for event in events.iter() {
+            if let Ok(transfer) = event.as_event::<balances::Transfer>() {
+                println!(
+                    "Transfer: {} -> {} ({})",
+                    transfer.from,
+                    transfer.to, 
+                    transfer.amount
+                );
+            }
+        }
+    }
+
+    Ok(())
+}
+```
+
+## Beginner Tutorials
+
+### Tutorial 1: Your First DApp
+
+**Duration**: 30 minutes  
+**Difficulty**: Beginner
+
+Build a simple balance checker application.
+
+#### What You'll Build
+
+A command-line application that:
+- Connects to a Substrate network
+- Checks account balances
+- Displays formatted output
+
+#### Prerequisites
+
+- Rust installed (1.70+)
+- Basic Rust knowledge
+- Terminal/command line access
+
+#### Step 1: Project Setup
+
+```bash
+cargo new balance-checker
+cd balance-checker
+```
+
+Add dependencies to `Cargo.toml`:
+
+```toml
+[dependencies]
+apex-sdk = "^0.1"
+tokio = { version = "^1.0", features = ["full"] }
+clap = { version = "^4.0", features = ["derive"] }
+```
+
+#### Step 2: CLI Interface
+
+```rust
+// src/main.rs
+use clap::Parser;
+use apex_sdk::{ApexSDK, Config, AccountId};
+
+#[derive(Parser)]
+#[command(name = "balance-checker")]
+#[command(about = "Check account balances on Substrate networks")]
+struct Cli {
+    /// Account address to check
+    #[arg(short, long)]
+    account: String,
+    
+    /// Network to connect to
+    #[arg(short, long, default_value = "westend")]
+    network: String,
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let cli = Cli::parse();
+    
+    // Parse account
+    let account = AccountId::from_string(&cli.account)?;
+    
+    // Configure network endpoint
+    let endpoint = match cli.network.as_str() {
+        "polkadot" => "wss://rpc.polkadot.io",
+        "kusama" => "wss://kusama-rpc.polkadot.io", 
+        "westend" => "wss://westend-rpc.polkadot.io",
+        _ => return Err("Unsupported network".into()),
+    };
+    
+    // Initialize SDK
+    let config = Config::new()
+        .with_substrate_endpoint(endpoint);
+        
+    let sdk = ApexSDK::builder()
+        .with_config(config)
+        .build()
+        .await?;
+
+    // Query balance
+    let balance = sdk.substrate()
+        .storage()
+        .fetch_balance(&account)
+        .await?;
+
+    // Display result
+    println!("Account: {}", account);
+    println!("Network: {}", cli.network);
+    println!("Free Balance: {} {}", balance.free, balance.symbol);
+    println!("Reserved: {} {}", balance.reserved, balance.symbol);
+    
+    Ok(())
+}
+```
+
+#### Step 3: Test and Run
+
+```bash
+# Build the project
+cargo build
+
+# Test with Westend
+cargo run -- --account 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
+
+# Test with different networks
+cargo run -- --account 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY --network polkadot
+```
+
+### Tutorial 2: Cross-Chain Bridge Monitor
+
+**Duration**: 45 minutes  
+**Difficulty**: Intermediate  
+
+Monitor cross-chain transfers between Polkadot and Ethereum.
+
+[View full tutorial →](https://github.com/apex-sdk/apex-sdk-docs/tree/main/examples/bridge-monitor)
+
+### Tutorial 3: DeFi Yield Tracker
+
+**Duration**: 60 minutes  
+**Difficulty**: Advanced
+
+Build a yield tracking application for DeFi protocols.
+
+[View full tutorial →](https://github.com/apex-sdk/apex-sdk-docs/tree/main/examples/yield-tracker)
+
+## Code Samples
+
+### Substrate Integration
+
+#### Query Storage
+
+```rust
+// Query account info
+let account_info = client
+    .storage()
+    .at_latest()
+    .await?
+    .fetch(&storage().system().account(&account_id))
+    .await?;
+
+// Query custom pallet storage
+let custom_value = client
+    .storage() 
+    .at_latest()
+    .await?
+    .fetch(&storage().my_pallet().my_storage(&key))
+    .await?;
+```
+
+#### Submit Extrinsics
+
+```rust
+use apex_sdk::tx;
+
+// Create and submit transaction
+let call = tx().balances().transfer(dest, value);
+
+let hash = client
+    .tx()
+    .sign_and_submit_default(&call, &signer)
+    .await?;
+
+println!("Extrinsic hash: {:?}", hash);
+```
+
+#### Event Filtering
+
+```rust
+// Filter specific events
+let events = client
+    .events()
+    .at_latest()
+    .await?;
+
+for event in events.iter() {
+    if let Ok(transfer) = event.as_event::<balances::Transfer>() {
+        println!("Transfer event: {:?}", transfer);
+    }
+    
+    if let Ok(slash) = event.as_event::<staking::Slash>() {
+        println!("Slash event: {:?}", slash);
+    }
+}
+```
+
+### EVM Integration
+
+#### Contract Interaction
+
+```rust
+use apex_sdk::evm::{Contract, Address};
+
+// Load contract ABI
+let contract = Contract::from_abi(
+    address,
+    include_str!("../abi/MyContract.json")
+)?;
+
+// Call read-only function
+let result: U256 = contract
+    .method("balanceOf", (account,))?
+    .call()
+    .await?;
+
+// Send transaction
+let tx_hash = contract
+    .method("transfer", (to, amount))?
+    .from(from_account)
+    .gas(100_000u64)
+    .send()
+    .await?;
+```
+
+#### Event Monitoring
+
+```rust
+use apex_sdk::evm::filters;
+
+// Monitor transfer events
+let filter = contract
+    .event("Transfer")?
+    .from_block(BlockNumber::Latest)
+    .address(vec![contract_address]);
+
+let mut stream = sdk.evm().subscribe_logs(&filter).await?;
+
+while let Some(log) = stream.next().await {
+    let transfer: TransferEvent = contract.parse_log(log)?;
+    println!("Transfer: {} -> {} ({})", 
+             transfer.from, transfer.to, transfer.value);
+}
+```
+
+## Advanced Examples
+
+### Multi-Chain Portfolio Tracker
+
+Track assets across multiple chains:
+
+```rust
+use apex_sdk::{ApexSDK, MultiChainConfig};
+
+struct PortfolioTracker {
+    sdk: ApexSDK,
+    chains: Vec<ChainConfig>,
+}
+
+impl PortfolioTracker {
+    pub async fn new() -> Result<Self, Error> {
+        let config = MultiChainConfig::new()
+            .add_substrate_chain("polkadot", "wss://rpc.polkadot.io")
+            .add_substrate_chain("kusama", "wss://kusama-rpc.polkadot.io")
+            .add_evm_chain("ethereum", "https://eth.api.onfinality.io/public")
+            .add_evm_chain("polygon", "https://polygon-rpc.com");
+
+        let sdk = ApexSDK::builder()
+            .with_multi_chain_config(config)
+            .build()
+            .await?;
+
+        Ok(Self { sdk, chains: vec![] })
+    }
+
+    pub async fn get_portfolio(&self, account: &AccountId) -> Result<Portfolio, Error> {
+        let mut portfolio = Portfolio::new();
+
+        // Query Substrate chains
+        for chain in &self.substrate_chains {
+            let balance = self.sdk
+                .substrate_client(chain)
+                .await?
+                .get_balance(account)
+                .await?;
+                
+            portfolio.add_balance(chain, balance);
+        }
+
+        // Query EVM chains  
+        for chain in &self.evm_chains {
+            let balance = self.sdk
+                .evm_client(chain)
+                .await?
+                .get_balance(account)
+                .await?;
+                
+            portfolio.add_balance(chain, balance);
+        }
+
+        Ok(portfolio)
+    }
+}
+```
+
+### Automated Arbitrage Bot
+
+Cross-chain arbitrage opportunities:
+
+[View implementation →](https://github.com/apex-sdk/apex-sdk-docs/tree/main/examples/arbitrage-bot)
+
+### Governance Automation
+
+Automated governance participation:
+
+[View implementation →](https://github.com/apex-sdk/apex-sdk-docs/tree/main/examples/governance-bot)
+
+## Testing Examples
+
+### Integration Tests
+
+```rust
+#[cfg(test)]
+mod integration_tests {
+    use super::*;
+    use apex_sdk::testing::MockClient;
+
+    #[tokio::test]
+    async fn test_balance_transfer() {
+        let mock = MockClient::new()
+            .with_balance(alice(), 1000)
+            .with_balance(bob(), 500);
+
+        let result = transfer_funds(&mock, alice(), bob(), 100).await;
+        
+        assert!(result.is_ok());
+        assert_eq!(mock.get_balance(alice()).await, 900);
+        assert_eq!(mock.get_balance(bob()).await, 600);
+    }
+}
+```
+
+### Property-Based Tests
+
+```rust
+use proptest::prelude::*;
+
+proptest! {
+    #[test]
+    fn test_transfer_properties(
+        initial_balance in 1000u128..=10_000u128,
+        transfer_amount in 1u128..=500u128
+    ) {
+        let result = validate_transfer(initial_balance, transfer_amount);
+        
+        if transfer_amount <= initial_balance {
+            prop_assert!(result.is_ok());
+        } else {
+            prop_assert!(result.is_err());
+        }
+    }
+}
+```
+
+## Performance Examples
+
+### Batch Operations
+
+```rust
+// Efficient batch processing
+async fn process_large_dataset(data: Vec<Transaction>) -> Result<(), Error> {
+    const BATCH_SIZE: usize = 100;
+    
+    for chunk in data.chunks(BATCH_SIZE) {
+        let futures: Vec<_> = chunk
+            .iter()
+            .map(|tx| process_transaction(tx))
+            .collect();
+            
+        let results = futures::future::join_all(futures).await;
+        
+        for result in results {
+            if let Err(e) = result {
+                log::error!("Transaction failed: {:?}", e);
+            }
+        }
+        
+        // Add delay to avoid rate limiting
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+    
+    Ok(())
+}
+```
+
+## Real-World Applications
+
+### DeFi Dashboard
+
+Complete implementation of a DeFi dashboard showing:
+- Portfolio balances across chains
+- Staking rewards and positions
+- Lending/borrowing positions
+- Historical performance
+
+[View source code →](https://github.com/apex-sdk/apex-sdk-docs/tree/main/examples/defi-dashboard)
+
+### NFT Marketplace
+
+Cross-chain NFT marketplace featuring:
+- Multi-chain NFT discovery
+- Cross-chain transfers
+- Price aggregation
+- Metadata indexing
+
+[View source code →](https://github.com/apex-sdk/apex-sdk-docs/tree/main/examples/nft-marketplace)
+
+## Contributing Examples
+
+Have a useful example to share?
+
+1. Fork the [documentation repository](https://github.com/apex-sdk/apex-sdk-docs)
+2. Add your example to the `examples/` directory
+3. Include comprehensive documentation
+4. Add tests and usage instructions
+5. Submit a pull request
+
+## Next Steps
+
+- [API Reference](./api) - Explore the complete API
+- [Testing Guide](./testing) - Learn testing best practices  
+- [Contributing](./contributing) - Help improve the SDK

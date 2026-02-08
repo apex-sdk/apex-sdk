@@ -1,0 +1,83 @@
+---
+title: "Revive & PolkaVM Integration"
+description: "Guide to using Apex SDK with Revive (Pallet-Revive) and PolkaVM/Solidity smart contracts on Polkadot Asset Hub."
+section: "revive"
+order: 1
+tags: ["revive", "polkavm", "solidity", "asset-hub", "integration"]
+lastUpdated: "2026-01-06"
+---
+
+# Revive & PolkaVM Integration
+
+Apex SDK provides first-class support for the Revive protocol (Pallet-Revive) and PolkaVM/Solidity smart contracts on Polkadot Asset Hub, enabling seamless interoperability between native Substrate assets and EVM-compatible contracts.
+
+## Overview
+
+- **Revive**: Native asset recovery and management protocol for Polkadot Asset Hub.
+- **PolkaVM**: EVM-compatible virtual machine for running Solidity contracts on Substrate.
+- **Apex SDK**: Unified Rust interface for interacting with both native and EVM assets, contracts, and Revive operations.
+
+## Quick Start
+
+### 1. Enable Revive & PolkaVM Features
+
+```toml
+[dependencies]
+apex-sdk = { version = "0.1", features = ["revive", "polkavm"] }
+```
+
+### 2. Basic Usage
+
+```rust
+use apex_sdk::prelude::*;
+use apex_sdk::revive::{ReviveAdapter, ReviveConfig};
+
+#[tokio::main]
+async fn main() -> Result<(), ApexError> {
+    let revive = ReviveAdapter::new(ReviveConfig::default()).await?;
+    // Native asset recovery
+    let result = revive.recover_asset(account_id, asset_id).await?;
+    println!("Recovered asset: {:?}", result);
+    Ok(())
+}
+```
+
+## Features
+
+- Native asset recovery (Pallet-Revive)
+- Cross-chain asset migration
+- Solidity contract deployment and calls (PolkaVM)
+- Unified account and asset management
+
+## Example: Solidity Contract on Asset Hub
+
+```rust
+use apex_sdk::polkavm::{ContractManager, ContractConfig};
+
+let contract = ContractManager::deploy(
+    &bytecode,
+    ContractConfig::default(),
+    &deployer_account
+).await?;
+
+let result = contract.call_method("transfer", &[recipient, amount]).await?;
+println!("Call result: {:?}", result);
+```
+
+## Best Practices
+
+- Use typed metadata for all Substrate calls
+- Validate asset IDs and account addresses
+- Monitor events for asset recovery and contract execution
+
+## Troubleshooting
+
+- Ensure the correct features are enabled in your `Cargo.toml`
+- Use the latest Apex SDK for up-to-date Revive/PolkaVM support
+- For contract errors, check PolkaVM logs and event subscriptions
+
+## Next Steps
+
+- [Asset Hub Integration](/docs/substrate)
+- [API Reference](/docs/api)
+- [Security Best Practices](/docs/security)

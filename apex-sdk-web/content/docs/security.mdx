@@ -1,0 +1,656 @@
+---
+title: "Security Best Practices"
+description: "Essential security guidelines and best practices for building secure cross-chain applications with Apex SDK."
+section: "security"
+order: 1
+tags: ["security", "best-practices", "safety", "guidelines"]
+lastUpdated: "2026-01-06"
+---
+
+# Security Best Practices
+
+Security is paramount when building cross-chain applications. This guide covers essential security practices, common vulnerabilities, and mitigation strategies.
+
+## Core Security Principles
+
+### Defense in Depth
+
+Implement multiple layers of security:
+
+- **Input Validation** - Validate all external inputs
+- **Access Control** - Restrict privileged operations  
+- **Error Handling** - Fail securely without leaking information
+- **Monitoring** - Log security-relevant events
+- **Testing** - Comprehensive security testing
+
+### Principle of Least Privilege
+
+Grant minimal necessary permissions:
+
+```rust
+// Overly permissive
+pub struct Client {
+    pub keypair: Keypair,  // Exposed keypair
+    pub admin_key: Keypair, // Unnecessary admin access
+}
+
+// Minimal exposure
+pub struct Client {
+    signer: Box<dyn Signer>,  // Abstract signer interface
+    permissions: Permissions, // Explicit permissions
+}
+```
+
+### Input Validation
+
+Always validate external inputs:
+
+```rust
+use apex_sdk::types::{AccountId, Balance};
+
+pub fn transfer_funds(
+    to: &str,
+    amount: &str,
+) -> Result<Transaction, ValidationError> {
+    // Validate account address
+    let recipient = AccountId::from_string(to)
+        .map_err(|_| ValidationError::InvalidAddress)?;
+    
+    // Validate amount
+    let amount: Balance = amount.parse()
+        .map_err(|_| ValidationError::InvalidAmount)?;
+    
+    if amount == 0 {
+        return Err(ValidationError::ZeroAmount);
+    }
+    
+    if amount > MAX_TRANSFER_AMOUNT {
+        return Err(ValidationError::AmountTooLarge);
+    }
+    
+    Ok(create_transfer_tx(recipient, amount))
+}
+```
+
+## Key Management
+
+### Secure Key Storage
+
+Never hardcode private keys:
+
+```rust
+// Hardcoded key (never do this!)
+const PRIVATE_KEY: &str = "0x1234...";
+
+// Secure key loading
+use std::env;
+use apex_sdk::crypto::Keystore;
+
+fn load_keypair() -> Result<Keypair, Error> {
+    // From environment variable
+    if let Ok(key) = env::var("APEX_PRIVATE_KEY") {
+        return Keypair::from_string(&key);
+    }
+    
+    // From secure keystore
+    let keystore = Keystore::new("~/.apex/keystore")?;
+    keystore.load_keypair("main")
+}
+```
+
+### Hardware Security Modules (HSM)
+
+For production applications, consider HSM integration:
+
+```rust
+use apex_sdk::crypto::hsm::HsmSigner;
+
+// Configure HSM signer
+let hsm_signer = HsmSigner::new()
+    .with_device("/dev/ttyUSB0")
+    .with_pin_from_env("HSM_PIN")
+    .build()?;
+
+let client = ApexSDK::builder()
+    .with_signer(Box::new(hsm_signer))
+    .build()
+    .await?;
+```
+
+### Key Rotation
+
+Implement regular key rotation:
+
+```rust
+pub struct RotatingKeyManager {
+    primary_key: Keypair,
+    secondary_key: Option<Keypair>,
+    rotation_threshold: u64,
+    usage_count: u64,
+}
+
+impl RotatingKeyManager {
+    pub fn should_rotate(&self) -> bool {
+        self.usage_count >= self.rotation_threshold
+    }
+    
+    pub async fn rotate_keys(&mut self) -> Result<(), Error> {
+        // Generate new key
+        let new_key = Keypair::generate();
+        
+        // Gradual migration
+        self.secondary_key = Some(self.primary_key.clone());
+        self.primary_key = new_key;
+        self.usage_count = 0;
+        
+        // Update on-chain permissions if needed
+        self.update_permissions().await?;
+        
+        Ok(())
+    }
+}
+```
+
+## Transaction Security
+
+### Transaction Validation
+
+Validate all transaction parameters:
+
+```rust
+pub fn validate_transaction(tx: &Transaction) -> Result<(), SecurityError> {
+    // Check transaction size
+    if tx.encoded_size() > MAX_TX_SIZE {
+        return Err(SecurityError::TransactionTooLarge);
+    }
+    
+    // Validate nonce
+    if tx.nonce > expected_nonce + NONCE_WINDOW {
+        return Err(SecurityError::InvalidNonce);
+    }
+    
+    // Check for known malicious addresses
+    if is_blacklisted(&tx.destination) {
+        return Err(SecurityError::BlacklistedAddress);
+    }
+    
+    // Validate fee parameters
+    if tx.fee > MAX_FEE {
+        return Err(SecurityError::ExcessiveFee);
+    }
+    
+    Ok(())
+}
+```
+
+### Replay Attack Protection
+
+Implement nonce tracking and validation:
+
+```rust
+use std::collections::HashMap;
+
+pub struct NonceTracker {
+    account_nonces: HashMap<AccountId, u64>,
+}
+
+impl NonceTracker {
+    pub fn validate_nonce(
+        &mut self, 
+        account: &AccountId, 
+        nonce: u64
+    ) -> Result<(), Error> {
+        let expected = self.account_nonces
+            .get(account)
+            .unwrap_or(&0) + 1;
+            
+        if nonce != expected {
+            return Err(Error::InvalidNonce { 
+                expected, 
+                received: nonce 
+            });
+        }
+        
+        self.account_nonces.insert(*account, nonce);
+        Ok(())
+    }
+}
+```
+
+### Transaction Limits
+
+Implement rate limiting and amount restrictions:
+
+```rust
+use tokio::time::{Duration, Instant};
+
+pub struct TransactionLimiter {
+    daily_limit: Balance,
+    hourly_limit: Balance,
+    transactions: Vec<(Instant, Balance)>,
+}
+
+impl TransactionLimiter {
+    pub fn check_limits(&mut self, amount: Balance) -> Result<(), Error> {
+        let now = Instant::now();
+        let one_hour_ago = now - Duration::from_secs(3600);
+        let one_day_ago = now - Duration::from_secs(86400);
+        
+        // Clean old transactions
+        self.transactions.retain(|(time, _)| *time > one_day_ago);
+        
+        // Check hourly limit
+        let hourly_total: Balance = self.transactions
+            .iter()
+            .filter(|(time, _)| *time > one_hour_ago)
+            .map(|(_, amount)| amount)
+            .sum();
+            
+        if hourly_total + amount > self.hourly_limit {
+            return Err(Error::HourlyLimitExceeded);
+        }
+        
+        // Check daily limit
+        let daily_total: Balance = self.transactions
+            .iter()
+            .map(|(_, amount)| amount)
+            .sum();
+            
+        if daily_total + amount > self.daily_limit {
+            return Err(Error::DailyLimitExceeded);
+        }
+        
+        self.transactions.push((now, amount));
+        Ok(())
+    }
+}
+```
+
+## Network Security
+
+### Endpoint Validation
+
+Validate RPC endpoints and use TLS:
+
+```rust
+use url::Url;
+
+pub fn validate_endpoint(endpoint: &str) -> Result<Url, SecurityError> {
+    let url = Url::parse(endpoint)
+        .map_err(|_| SecurityError::InvalidEndpoint)?;
+    
+    // Require secure protocols
+    match url.scheme() {
+        "wss" | "https" => {},
+        "ws" | "http" if is_development() => {},
+        _ => return Err(SecurityError::InsecureProtocol),
+    }
+    
+    // Validate hostname
+    if let Some(host) = url.host_str() {
+        if is_blacklisted_host(host) {
+            return Err(SecurityError::BlacklistedHost);
+        }
+    }
+    
+    Ok(url)
+}
+```
+
+### Certificate Pinning
+
+Implement certificate pinning for critical endpoints:
+
+```rust
+use rustls::{Certificate, ServerCertVerifier};
+
+pub struct PinnedCertVerifier {
+    pinned_certs: Vec<Certificate>,
+}
+
+impl ServerCertVerifier for PinnedCertVerifier {
+    fn verify_server_cert(
+        &self,
+        end_entity: &Certificate,
+        intermediates: &[Certificate],
+        server_name: &str,
+        scts: &mut dyn Iterator<Item = &[u8]>,
+        ocsp_response: &[u8],
+        now: std::time::SystemTime,
+    ) -> Result<ServerCertVerified, rustls::Error> {
+        // Check if certificate is in pinned set
+        if self.pinned_certs.contains(end_entity) {
+            Ok(ServerCertVerified::assertion())
+        } else {
+            Err(rustls::Error::General("Certificate not pinned".into()))
+        }
+    }
+}
+```
+
+## Error Handling
+
+### Secure Error Messages
+
+Avoid leaking sensitive information in errors:
+
+```rust
+#[derive(Debug)]
+pub enum PublicError {
+    InvalidInput,
+    InsufficientFunds,
+    NetworkUnavailable,
+    OperationFailed,
+}
+
+#[derive(Debug)]
+struct InternalError {
+    message: String,
+    sensitive_data: Option<String>,
+}
+
+impl From<InternalError> for PublicError {
+    fn from(err: InternalError) -> Self {
+        // Log internal details securely
+        log::error!("Internal error: {}", err.message);
+        
+        if let Some(data) = err.sensitive_data {
+            log::debug!("Sensitive context: {}", data);
+        }
+        
+        // Return generic public error
+        PublicError::OperationFailed
+    }
+}
+```
+
+### Panic Safety
+
+Handle panics gracefully:
+
+```rust
+use std::panic;
+
+pub fn safe_operation<T, F>(f: F) -> Result<T, Error>
+where
+    F: FnOnce() -> T + panic::UnwindSafe,
+{
+    match panic::catch_unwind(f) {
+        Ok(result) => Ok(result),
+        Err(_) => {
+            log::error!("Operation panicked");
+            Err(Error::InternalError)
+        }
+    }
+}
+```
+
+## Monitoring and Logging
+
+### Security Event Logging
+
+Log security-relevant events:
+
+```rust
+use serde_json::json;
+
+pub struct SecurityLogger {
+    logger: slog::Logger,
+}
+
+impl SecurityLogger {
+    pub fn log_auth_attempt(&self, account: &AccountId, success: bool) {
+        let event = json!({
+            "event": "authentication_attempt",
+            "account": account.to_string(),
+            "success": success,
+            "timestamp": chrono::Utc::now().to_rfc3339(),
+        });
+        
+        if success {
+            info!(self.logger, "Auth success"; "event" => event.to_string());
+        } else {
+            warn!(self.logger, "Auth failure"; "event" => event.to_string());
+        }
+    }
+    
+    pub fn log_transaction(&self, tx: &Transaction, result: &Result<Hash, Error>) {
+        let event = json!({
+            "event": "transaction_submission",
+            "hash": tx.hash().to_string(),
+            "from": tx.sender().to_string(),
+            "success": result.is_ok(),
+            "timestamp": chrono::Utc::now().to_rfc3339(),
+        });
+        
+        info!(self.logger, "Transaction"; "event" => event.to_string());
+    }
+}
+```
+
+### Anomaly Detection
+
+Implement basic anomaly detection:
+
+```rust
+pub struct AnomalyDetector {
+    baseline_metrics: Metrics,
+    thresholds: Thresholds,
+}
+
+impl AnomalyDetector {
+    pub fn check_transaction_anomaly(&self, tx: &Transaction) -> Vec<Anomaly> {
+        let mut anomalies = Vec::new();
+        
+        // Check transaction size
+        if tx.encoded_size() > self.thresholds.max_tx_size {
+            anomalies.push(Anomaly::LargeTransaction);
+        }
+        
+        // Check fee ratio
+        let fee_ratio = tx.fee as f64 / tx.value as f64;
+        if fee_ratio > self.thresholds.max_fee_ratio {
+            anomalies.push(Anomaly::HighFeeRatio);
+        }
+        
+        // Check timing patterns
+        if self.is_rapid_succession(&tx.sender) {
+            anomalies.push(Anomaly::RapidTransactions);
+        }
+        
+        anomalies
+    }
+}
+```
+
+## Common Vulnerabilities
+
+### Integer Overflow
+
+Prevent arithmetic overflows:
+
+```rust
+use checked_arithmetic::CheckedArithmetic;
+
+pub fn safe_add_balance(balance: Balance, amount: Balance) -> Result<Balance, Error> {
+    balance.checked_add(amount)
+        .ok_or(Error::BalanceOverflow)
+}
+
+pub fn safe_multiply_fee(base_fee: Balance, multiplier: u32) -> Result<Balance, Error> {
+    let multiplier = Balance::from(multiplier);
+    base_fee.checked_mul(multiplier)
+        .ok_or(Error::FeeOverflow)
+}
+```
+
+### Reentrancy Protection
+
+Implement reentrancy guards:
+
+```rust
+use std::sync::atomic::{AtomicBool, Ordering};
+
+pub struct ReentrancyGuard {
+    in_use: AtomicBool,
+}
+
+impl ReentrancyGuard {
+    pub fn new() -> Self {
+        Self {
+            in_use: AtomicBool::new(false),
+        }
+    }
+    
+    pub fn execute<T, F>(&self, f: F) -> Result<T, Error>
+    where
+        F: FnOnce() -> Result<T, Error>,
+    {
+        if self.in_use.compare_exchange(
+            false,
+            true,
+            Ordering::Acquire,
+            Ordering::Relaxed
+        ).is_err() {
+            return Err(Error::ReentrantCall);
+        }
+        
+        let result = f();
+        
+        self.in_use.store(false, Ordering::Release);
+        result
+    }
+}
+```
+
+## Security Testing
+
+### Fuzzing
+
+Use cargo-fuzz for security testing:
+
+```rust
+// fuzz/fuzz_targets/transaction_parser.rs
+#![no_main]
+use libfuzzer_sys::fuzz_target;
+use apex_sdk::Transaction;
+
+fuzz_target!(|data: &[u8]| {
+    // Test transaction parsing with arbitrary input
+    if let Ok(tx) = Transaction::decode(data) {
+        // Ensure parsed transaction is valid
+        assert!(tx.validate().is_ok());
+        
+        // Test round-trip encoding
+        let encoded = tx.encode();
+        let decoded = Transaction::decode(&encoded).unwrap();
+        assert_eq!(tx, decoded);
+    }
+});
+```
+
+### Property-Based Security Testing
+
+```rust
+use proptest::prelude::*;
+
+proptest! {
+    #[test]
+    fn test_balance_operations_never_overflow(
+        balance in 0u128..=u128::MAX/2,
+        amount in 0u128..=u128::MAX/2,
+    ) {
+        let result = safe_add_balance(balance, amount);
+        prop_assert!(result.is_ok());
+        
+        if let Ok(new_balance) = result {
+            prop_assert!(new_balance >= balance);
+            prop_assert!(new_balance >= amount);
+        }
+    }
+}
+```
+
+## Compliance and Auditing
+
+### Audit Trail
+
+Maintain comprehensive audit trails:
+
+```rust
+#[derive(Serialize)]
+pub struct AuditEvent {
+    pub timestamp: DateTime<Utc>,
+    pub event_type: AuditEventType,
+    pub actor: AccountId,
+    pub resource: String,
+    pub action: String,
+    pub result: AuditResult,
+    pub metadata: serde_json::Value,
+}
+
+pub trait Auditable {
+    fn create_audit_event(&self, action: &str, result: AuditResult) -> AuditEvent;
+}
+
+impl Auditable for Transaction {
+    fn create_audit_event(&self, action: &str, result: AuditResult) -> AuditEvent {
+        AuditEvent {
+            timestamp: Utc::now(),
+            event_type: AuditEventType::Transaction,
+            actor: self.sender(),
+            resource: self.hash().to_string(),
+            action: action.to_string(),
+            result,
+            metadata: json!({
+                "destination": self.destination(),
+                "amount": self.value(),
+                "fee": self.fee(),
+            }),
+        }
+    }
+}
+```
+
+## Security Checklist
+
+Before deploying to production:
+
+### Code Review
+- [ ] All code reviewed by security-aware developers
+- [ ] No hardcoded secrets or private keys
+- [ ] Input validation implemented everywhere
+- [ ] Error handling doesn't leak information
+- [ ] Logging captures security events
+
+### Testing
+- [ ] Comprehensive unit tests including edge cases
+- [ ] Integration tests with security scenarios
+- [ ] Fuzzing tests for input parsing
+- [ ] Property-based tests for arithmetic operations
+- [ ] Penetration testing performed
+
+### Infrastructure
+- [ ] Secure key management system deployed
+- [ ] TLS/encryption enabled for all communications
+- [ ] Monitoring and alerting configured
+- [ ] Access controls and permissions reviewed
+- [ ] Backup and recovery procedures tested
+
+### Documentation
+- [ ] Security architecture documented
+- [ ] Threat model created and reviewed
+- [ ] Incident response procedures documented
+- [ ] Security contact information published
+
+## Resources
+
+- [Rust Secure Code Guidelines](https://anssi-fr.github.io/rust-guide/)
+- [OWASP Blockchain Security](https://owasp.org/www-project-smart-contract-security-top-10/)
+- [Substrate Security Best Practices](https://docs.substrate.io/main-docs/build/troubleshoot-your-code/)
+
+## Next Steps
+
+- [Testing Guide](./testing) - Learn comprehensive testing strategies
+- [Contributing](./contributing) - Help improve security
+- [API Reference](./api) - Explore secure API patterns

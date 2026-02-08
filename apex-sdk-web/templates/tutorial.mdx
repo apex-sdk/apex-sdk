@@ -1,0 +1,135 @@
+---
+title: "Tutorial: Build a Feature"
+description: "Complete tutorial for building a specific feature from start to finish"
+section: "examples"
+order: 1
+tags: ["tutorial", "example", "hands-on"]
+difficulty: "beginner"
+estimatedTime: "30 minutes"
+lastUpdated: "2026-01-31"
+---
+
+# Tutorial: Build a Feature
+
+Learn how to build [specific feature] using the Apex SDK. This tutorial will take approximately **30 minutes** to complete.
+
+## What You'll Build
+
+Brief description and preview of the final result.
+
+## What You'll Learn
+
+- Key concept 1
+- Key concept 2
+- Key concept 3
+
+## Prerequisites
+
+Before starting this tutorial, you should have:
+- Prerequisite 1
+- Prerequisite 2
+- Basic knowledge of [relevant technology]
+
+## Project Setup
+
+### Step 1: Initialize Project
+
+```bash
+mkdir my-project
+cd my-project
+npm init -y
+```
+
+### Step 2: Install Dependencies
+
+```bash
+npm install @apex/sdk
+```
+
+### Step 3: Basic Configuration
+
+Create the initial configuration:
+
+```typescript
+// config.ts
+export const config = {
+  // Configuration options
+}
+```
+
+## Implementation
+
+### Phase 1: Core Setup
+
+Detailed explanation of the first major phase.
+
+```typescript
+// src/core.ts
+import { ApexClient } from '@apex/sdk'
+
+const client = new ApexClient(config)
+```
+
+### Phase 2: Feature Implementation
+
+Continue with the main feature implementation.
+
+```typescript
+// src/feature.ts
+export class Feature {
+  constructor(private client: ApexClient) {}
+  
+  async execute() {
+    // Implementation
+  }
+}
+```
+
+### Phase 3: Testing
+
+Add tests to verify your implementation:
+
+```typescript
+// tests/feature.test.ts
+import { Feature } from '../src/feature'
+
+describe('Feature', () => {
+  it('should work correctly', async () => {
+    // Test implementation
+  })
+})
+```
+
+## Running the Example
+
+```bash
+npm run start
+```
+
+Expected output:
+```
+✅ Feature initialized
+✅ Connected to network
+✅ Feature executed successfully
+```
+
+## Next Steps
+
+Now that you've completed this tutorial:
+- Try modifying [specific aspect]
+- Explore [related feature]
+- Read the [advanced guide](./advanced-guide)
+
+## Complete Code
+
+Find the complete working example in our [GitHub repository](https://github.com/apex-sdk/apex-sdk-docs/tree/main/examples/tutorial-name).
+
+## Troubleshooting
+
+### Common Issues
+
+**Issue:** Error message
+**Solution:** How to resolve
+
+**Issue:** Another error
+**Solution:** Another resolution
