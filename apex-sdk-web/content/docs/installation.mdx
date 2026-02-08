@@ -16,62 +16,68 @@ Install Apex SDK and configure for Asset Hub, Revive, and PolkaVM system chain d
 
 ## Prerequisites
 
-- Rust (latest stable)
-- Node.js (for web integration)
-- Polkadot Asset Hub endpoint
-- Revive protocol endpoint
-- PolkaVM endpoint
+- **Rust** 1.85+ (latest stable recommended)
+- **Node.js** (optional, for web integration)
+- Access to a Polkadot Asset Hub RPC endpoint
 
 
 ## Install Apex SDK
 
-Install the core SDK and modules:
+Apex SDK is modular. Install the components your application requires:
 
 ```bash
-cargo add apex-sdk
-cargo add apex-sdk-substrate
-cargo add apex-sdk-revive
-cargo add apex-sdk-types
+# Core traits and types (required)
 cargo add apex-sdk-core
+cargo add apex-sdk-types
+
+# System Chain Modules
+cargo add apex-sdk-substrate  # For Asset Hub interaction
+cargo add apex-sdk-revive     # For Revive protocol support
 ```
 
-evm = true
-testing = true
-pool_size = 10
-retry_attempts = 3
-timeout_ms = 30000
-enable_tls = true
+### Optional Features
 
-## Configuration
+You can enable additional functionality via feature flags in your `Cargo.toml`:
 
-Configure endpoints and modules:
+```toml
+[dependencies]
+apex-sdk-core = { version = "0.1", features = ["testing", "metrics"] }
+```
+
+
+## Basic Configuration
+
+Initialize the SDK modules with your chain endpoints:
 
 ```rust
-use apex_sdk::{Config, AssetManager, ReviveAdapter, ContractManager};
+use apex_sdk::{Config, AssetManager, ReviveAdapter};
 
 let config = Config::new()
   .with_substrate_endpoint("wss://asset-hub.polkadot.io")
-  .with_revive_endpoint("wss://revive.polkadot.io")
-  .with_polkavm_endpoint("wss://polkavm.asset-hub.polkadot.io");
+  .with_revive_endpoint("wss://revive.polkadot.io");
 
 let asset_mgr = AssetManager::new(config.clone());
-let revive = ReviveAdapter::new(config.clone());
-let contract_mgr = ContractManager::new(config);
+let revive = ReviveAdapter::new(config);
 ```
 
+### System Dependencies
 
+On some systems, you may need to install SSL and build tools:
 
-
-
+**Ubuntu/Debian:**
+```bash
 sudo apt-get install build-essential pkg-config libssl-dev
+```
+
+**macOS:**
+```bash
 brew install openssl pkg-config
-sudo apt-get install build-essential pkg-config libssl-dev
-
+```
 
 
 ## Next Steps
 
 - [Quick Start](/docs/quickstart)
 - [API Reference](/docs/api)
-- [Asset Hub Integration](/docs/substrate)
+- [Architecture Overview](/docs/architecture)
 - [Revive & PolkaVM Guide](/docs/revive)

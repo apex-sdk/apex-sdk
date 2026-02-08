@@ -29,7 +29,7 @@ function generateBreadcrumbSchema(pathname: string) {
     'api': 'API Reference',
     'quickstart': 'Quick Start',
     'installation': 'Installation',
-    'cli-guide': 'CLI Guide', 
+    'cli-guide': 'CLI Guide',
     'architecture': 'Architecture',
     'testing': 'Testing',
     'security': 'Security',
@@ -46,14 +46,14 @@ function generateBreadcrumbSchema(pathname: string) {
   pathSegments.forEach((segment) => {
     currentPath += `/${segment}`;
     const name = pathNames[segment] || segment.charAt(0).toUpperCase() + segment.slice(1);
-    
+
     breadcrumbs.push({
       '@type': 'ListItem',
       position,
       name,
       item: `https://apexsdk.dev${currentPath}`
     });
-    
+
     position++;
   });
 
@@ -85,8 +85,9 @@ const staticNavigation = [
   {
     title: 'Network Integration',
     items: [
-      { title: 'EVM Chains', href: '/docs/evm', description: 'Ethereum, Polygon, BSC, and other EVM-compatible blockchain integration' },
-      { title: 'Substrate Networks', href: '/docs/substrate', description: 'Polkadot, Kusama, and parachain development with Apex SDK' },
+      { title: 'Asset Hub Integration', href: '/docs/substrate', description: 'Deep dive into Polkadot Asset Hub: assets, NFTs, and typed metadata' },
+      { title: 'PolkaVM & Solidity', href: '/docs/evm', description: 'Deploy and interact with Solidity contracts using PolkaVM on system chains' },
+      { title: 'Revive Protocol', href: '/docs/revive', description: 'Asset recovery and migration patterns unique to the Revive protocol' },
       { title: 'Typed Metadata', href: '/docs/typed-metadata', description: 'Type-safe blockchain metadata system for Substrate networks' },
       { title: 'Test Networks', href: '/docs/testnets', description: 'Development and testing blockchain networks configuration' },
     ]
@@ -117,10 +118,10 @@ export default function DocsLayout({
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
 
   const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
-  
+
   // Generate breadcrumb schema for SEO
   const breadcrumbSchema = generateBreadcrumbSchema(currentPath);
-  
+
   // Generate breadcrumb from current path
   const getBreadcrumb = (path: string) => {
     const segments = path.split('/').filter(Boolean);
@@ -155,7 +156,7 @@ export default function DocsLayout({
           __html: JSON.stringify(breadcrumbSchema),
         }}
       />
-      
+
       {/* Header */}
       <nav className="fixed top-0 w-full z-40 bg-obsidian-light/80 backdrop-blur-md border-b border-obsidian-lighter">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -166,24 +167,24 @@ export default function DocsLayout({
           <div className="hidden md:flex items-center space-x-6">
             {/* Search Box */}
             <div className="relative w-48">
-              <EnhancedSearch 
-                placeholder="Search docs..." 
+              <EnhancedSearch
+                placeholder="Search docs..."
                 className="w-full"
                 compact={true}
               />
             </div>
-            
+
             {/* Navigation Links */}
             <div className="flex items-center space-x-6 text-sm text-white font-medium">
               <Link href="/docs" className="text-gradient-primary hover:opacity-80 transition-all duration-300 flex items-center space-x-2 px-3 py-2 rounded-md">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
                 </svg>
                 <span>Documentation</span>
               </Link>
               <Link href="/docs/api" className="text-gradient-primary hover:text-gradient-secondary transition-all duration-300 px-3 py-2 rounded-md flex items-center space-x-2">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span>API Reference</span>
               </Link>
@@ -195,13 +196,13 @@ export default function DocsLayout({
               </a>
               <a href="https://discord.gg/zCDFsBaZJN" target="_blank" rel="noopener noreferrer" className="text-gradient-primary hover:text-gradient-secondary transition-all duration-300 px-3 py-2 rounded-md flex items-center space-x-2">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.010c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.120.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                  <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.010c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.120.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
                 </svg>
                 <span>Discord</span>
               </a>
             </div>
           </div>
-          
+
           {/* Mobile menu button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -216,15 +217,15 @@ export default function DocsLayout({
             </svg>
           </button>
         </div>
-        
+
         {/* Mobile menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden bg-obsidian-light border-t border-obsidian-lighter">
             <div className="px-6 py-4 space-y-4">
               {/* Mobile Search */}
               <div className="mb-4">
-                <EnhancedSearch 
-                  placeholder="Search docs..." 
+                <EnhancedSearch
+                  placeholder="Search docs..."
                   className="w-full"
                   compact={true}
                 />
@@ -246,7 +247,7 @@ export default function DocsLayout({
             <div className="mb-6">
               <EnhancedSearch placeholder="Search docs..." />
             </div>
-            
+
             <nav className="space-y-4">
               {staticNavigation.map((section) => {
                 const isCollapsed = collapsedSections.has(section.title);
@@ -257,12 +258,11 @@ export default function DocsLayout({
                       className="w-full flex items-center justify-between font-semibold text-sm uppercase tracking-wider text-slate-gray mb-3 hover:text-white transition-colors"
                     >
                       {section.title}
-                      <svg 
-                        className={`w-3 h-3 transition-transform duration-200 ${
-                          isCollapsed ? 'transform rotate-0' : 'transform rotate-90'
-                        }`}
-                        fill="none" 
-                        stroke="currentColor" 
+                      <svg
+                        className={`w-3 h-3 transition-transform duration-200 ${isCollapsed ? 'transform rotate-0' : 'transform rotate-90'
+                          }`}
+                        fill="none"
+                        stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -276,17 +276,17 @@ export default function DocsLayout({
                             <li key={item.href}>
                               <Link
                                 href={item.href}
-                                className={`block text-sm py-2 px-3 rounded-md transition-all duration-300 ${
-                                  isCurrent 
+                                className={`block text-sm py-2 px-3 rounded-md transition-all duration-300 ${isCurrent
                                     ? 'text-white bg-hyperBlue/10 border-l-2 border-hyperBlue font-medium'
                                     : 'text-white/70 hover:text-white hover:bg-obsidian-lighter/50'
-                                }`}
+                                  }`}
                                 title={item.description}
                               >
                                 {item.title}
                               </Link>
                             </li>
-                          )}
+                          )
+                        }
                         )}
                       </ul>
                     )}
@@ -315,7 +315,7 @@ export default function DocsLayout({
                         {index === breadcrumbs.length - 1 ? (
                           <span className="text-white font-medium">{crumb.title}</span>
                         ) : (
-                          <Link 
+                          <Link
                             href={crumb.href}
                             className="text-slate-gray hover:text-hyperBlue transition-colors"
                           >
@@ -329,15 +329,32 @@ export default function DocsLayout({
               </div>
             </div>
           )}
-          
-          <div className="flex max-w-7xl mx-auto">
+
+          <div className="flex max-w-7xl mx-auto relative">
             {/* Main content */}
-            <div className="flex-1 max-w-4xl px-6 py-8">
-              {children}
+            <div className="flex-1 max-w-4xl px-4 md:px-6 py-8">
+              {/* Mobile Table of Contents Toggle */}
+              <div className="xl:hidden mb-6">
+                <details className="bg-obsidian-light border border-obsidian-lighter rounded-lg overflow-hidden group">
+                  <summary className="px-4 py-3 text-sm font-semibold text-white/80 cursor-pointer hover:bg-obsidian-lighter list-none flex items-center justify-between">
+                    <span>On this page</span>
+                    <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div className="p-4 border-t border-obsidian-lighter">
+                    <TableOfContents className="!static !top-0" />
+                  </div>
+                </details>
+              </div>
+
+              <div className="prose">
+                {children}
+              </div>
             </div>
-            
-            {/* Table of Contents */}
-            <div className="hidden xl:block w-64 pl-8">
+
+            {/* Table of Contents - Desktop */}
+            <div className="hidden xl:block w-64 pl-8 pt-8">
               <TableOfContents />
             </div>
           </div>

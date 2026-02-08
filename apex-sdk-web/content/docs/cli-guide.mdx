@@ -1,25 +1,26 @@
 ---
-title: "CLI Guide - Complete Command Reference"
-description: "Complete guide to using the Apex CLI tool for project management and development workflows."
+title: "Apex CLI Guide"
+description: "Complete guide to using the Apex CLI tool for system chain project management and development workflows."
 section: "cli-guide"
 order: 1
-tags: ["cli", "commands", "development", "tools"]
-lastUpdated: "2026-01-06"
+tags: ["cli", "commands", "development", "tools", "system-chain"]
+lastUpdated: "2026-02-08"
+author: "Apex SDK Team"
 ---
 
-# CLI Guide
+# Apex CLI Guide
 
-The Apex CLI provides powerful tools for managing your cross-chain projects, from initialization to deployment.
+**The Apex CLI provides powerful tools for managing your System Chain projects, from initial setup to production deployment on Polkadot Asset Hub and Revive.**
 
 ## Installation
 
-The CLI is automatically installed with the Apex SDK:
+The CLI is part of the modular Apex SDK suite and can be installed via cargo:
 
 ```bash
 cargo install apex-cli
 ```
 
-Verify installation:
+Verify the installation:
 
 ```bash
 apex --version
@@ -27,248 +28,117 @@ apex --version
 
 ## Project Management
 
-### Create New Project
+### Initialize a System Chain Project
 
 ```bash
-# Create a basic project
-apex new my-project
+# Create a new project focused on Polkadot System Chains
+apex new my-system-dapp --template system-chain
 
-# Create from template
-apex new my-project --template substrate
-apex new my-project --template evm
-apex new my-project --template cross-chain
+# Specifically for Asset Hub or Revive
+apex new my-asset-project --template asset-hub
+apex new my-revive-project --template revive
 ```
 
 Available templates:
-- **substrate**: Substrate-focused project
-- **evm**: EVM-compatible chains
-- **cross-chain**: Multi-chain application
-- **minimal**: Basic setup
+- **system-chain**: General purpose Polkadot system chain setup.
+- **asset-hub**: Optimized for Asset Hub (Assets, NFTs).
+- **revive**: Optimized for Revive protocol and asset recovery.
+- **minimal**: Basic Rust blockchain project setup.
 
-### Initialize Existing Project
-
-```bash
-apex init
-```
-
-This adds Apex configuration to an existing Rust project.
-
-### Build Project
+### Development Workflow
 
 ```bash
-# Standard build
+# Build the project (optimized for PolkaVM and Substrate)
 apex build
 
-# Development build with watch
-apex build --watch
-
-# Release build
-apex build --release
-```
-
-### Run Tests
-
-```bash
-# Run all tests
+# Run unit and integration tests
 apex test
 
-# Run specific test suite
-apex test --unit
-apex test --integration
+# Start a local development node (requires Docker)
+apex dev-node start
 ```
 
-## Account Management
+## Account and Key Management
 
-### List Accounts
+### Manage Accounts
 
 ```bash
+# List all managed accounts
 apex account list
+
+# Generate a new BIP-39 mnemonic and account
+apex account generate --name dev-wallet
+
+# Import an existing account
+apex account import --seed "mnemonic words..."
 ```
 
-### Generate New Account
+## Network and Deployment
+
+### Chain Connectivity
 
 ```bash
-apex account generate --name my-account
-apex account generate --name my-account --network polkadot
+# Connect to a system chain RPC
+apex chain connect asset-hub
+apex chain connect revive
+
+# Check chain status and metadata
+apex chain status
 ```
 
-### Import Account
+### Contract Deployment (PolkaVM/Solidity)
 
 ```bash
-# From seed phrase
-apex account import --seed "word1 word2 ... word12"
+# Deploy a Solidity contract to the current system chain
+apex deploy --contract ./contracts/MyContract.sol
 
-# From private key
-apex account import --key "0x..."
+# Deploy with constructor arguments
+apex deploy --contract ./MyToken.sol --args "1000,ApexToken"
 ```
 
-## Network Operations
+## Advanced Tools
 
-### Connect to Networks
+### Metadata Generation
 
-```bash
-# Substrate networks
-apex connect polkadot
-apex connect kusama
-apex connect westend
-
-# EVM networks
-apex connect ethereum
-apex connect polygon
-```
-
-### Deploy Contract
+Apex SDK relies on type-safe metadata. You can generate Rust bindings directly from a live chain:
 
 ```bash
-# Deploy to current network
-apex deploy
-
-# Deploy to specific network
-apex deploy --network polkadot
-
-# Deploy with parameters
-apex deploy --args "param1,param2"
-```
-
-## Development Tools
-
-### Generate Bindings
-
-```bash
-# Generate typed bindings from metadata
-apex generate bindings --network polkadot
-
-# Generate for specific pallets
-apex generate bindings --pallets "system,balances"
-```
-
-### Metadata Tools
-
-```bash
-# Fetch latest metadata
-apex metadata fetch --network kusama
-
-# Compare metadata versions
-apex metadata diff v1.0.0 v1.1.0
+apex generate bindings --network asset-hub
 ```
 
 ### Event Monitoring
 
 ```bash
-# Monitor all events
-apex events monitor
+# Monitor all System Chain events in real-time
+apex monitor events
 
-# Filter specific events
-apex events monitor --filter "transfer,swap"
-
-# Monitor specific blocks
-apex events monitor --from-block 1000 --to-block 2000
+# Filter for specific pallets (Asset Hub)
+apex monitor events --pallet assets
 ```
 
 ## Configuration
 
-### Global Configuration
-
-Configuration file location: `~/.apex/config.toml`
-
-```toml
-[default]
-network = "polkadot"
-account = "my-default-account"
-
-[networks.polkadot]
-endpoint = "wss://rpc.polkadot.io"
-
-[networks.kusama] 
-endpoint = "wss://kusama-rpc.polkadot.io"
-```
-
-### Project Configuration
-
-Project configuration: `apex.toml`
+Project settings are managed in `apex.toml`:
 
 ```toml
 [project]
-name = "my-project"
-version = "0.1.0"
+name = "my-system-dapp"
+template = "system-chain"
 
-[build]
-target = "wasm32-unknown-unknown"
-features = ["std"]
+[networks.asset-hub]
+rpc = "wss://asset-hub.polkadot.io"
 
-[deploy]
-network = "polkadot"
-account = "deploy-account"
-```
-
-## Common Commands
-
-### Development Workflow
-
-```bash
-# Start new project
-apex new my-dapp --template cross-chain
-cd my-dapp
-
-# Set up development environment  
-apex account generate --name dev
-apex connect westend
-
-# Development cycle
-apex build --watch &
-apex test --watch
-
-# Deploy when ready
-apex deploy --network westend
-```
-
-### Production Deployment
-
-```bash
-# Build for production
-apex build --release
-
-# Run comprehensive tests
-apex test --all
-
-# Deploy to mainnet
-apex deploy --network polkadot --account production
+[networks.revive]
+rpc = "wss://revive-rpc.polkadot.io"
 ```
 
 ## Troubleshooting
 
-### Common Issues
-
-**Command not found**: Ensure `~/.cargo/bin` is in your PATH
-
-**Network connection failed**: Check network endpoints and internet connection
-
-**Account not found**: Verify account exists with `apex account list`
-
-**Build failed**: Check Rust toolchain and dependencies
-
-### Debug Mode
-
-Run any command with `-v` for verbose output:
-
-```bash
-apex build -v
-apex deploy -v
-```
-
-### Getting Help
-
-```bash
-# General help
-apex --help
-
-# Command-specific help
-apex build --help
-apex deploy --help
-```
+- **WS Connection Errors**: Ensure your system supports WebSockets and the RPC endpoint is reachable.
+- **Build Failures**: Verify you have the `wasm32-unknown-unknown` target installed for PolkaVM builds.
 
 ## Next Steps
 
-- [API Reference](./api) - Explore the programmatic API
-- [Examples](./examples) - See working code samples  
-- [Testing Guide](./testing) - Learn testing best practices
+- [Quick Start](/docs/quickstart)
+- [API Reference](/docs/api)
+- [Architecture Overview](/docs/architecture)
