@@ -351,6 +351,25 @@ impl Wallet {
     pub fn ed25519_pair(&self) -> Option<&ed25519::Pair> {
         self.ed25519_pair.as_ref()
     }
+
+    /// Convert the wallet to a subxt-compatible signer
+    #[allow(clippy::clone_on_copy)]
+    pub fn to_subxt_signer(&self) -> crate::signer::ApexSigner {
+        match self.key_type {
+            KeyPairType::Sr25519 => {
+                let pair = self.sr25519_pair.as_ref().expect("SR25519 pair missing");
+                crate::signer::ApexSigner::Sr25519(Box::new(crate::signer::Sr25519Signer::new(
+                    pair.clone(),
+                )))
+            }
+            KeyPairType::Ed25519 => {
+                let pair = self.ed25519_pair.as_ref().expect("ED25519 pair missing");
+                crate::signer::ApexSigner::Ed25519(Box::new(crate::signer::Ed25519Signer::new(
+                    pair.clone(),
+                )))
+            }
+        }
+    }
 }
 
 impl std::fmt::Debug for Wallet {
