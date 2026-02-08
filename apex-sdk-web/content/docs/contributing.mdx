@@ -1,247 +1,53 @@
 ---
 title: "Contributing"
-description: "Learn how to contribute to Apex SDK through bug reports, feature requests, code contributions, and documentation improvements."
+description: "Learn how to contribute to the Apex SDK System Chain Standard Library: from code to documentation."
 section: "contributing"
 order: 1
-tags: ["contributing", "development", "community", "open-source"]
-lastUpdated: "2026-01-06"
+tags: ["contributing", "development", "community", "open-source", "system-chain"]
+lastUpdated: "2026-02-08"
+author: "Apex SDK Team"
 ---
 
 # Contributing to Apex SDK
 
-We welcome contributions from the community! Whether you're fixing bugs, adding features, improving documentation, or helping with testing, your contributions help make Apex SDK better for everyone.
+**We welcome contributions that help us build the definitive System Chain Standard Library for Polkadot.**
 
-## Ways to Contribute
+## How to Contribute
 
-### Reporting Bugs
-
-Help us identify and fix issues:
-
-1. **Check existing issues** - Search for similar problems
-2. **Create detailed bug report** - Use our issue template
-3. **Provide reproduction steps** - Clear steps to reproduce
-4. **Include environment info** - OS, Rust version, SDK version
-
-### Feature Requests
-
-Propose new functionality:
-
-1. **Check roadmap and existing issues** - Avoid duplicates
-2. **Create feature request** - Use our template
-3. **Explain use case and benefits** - Why is this needed?
-4. **Discuss implementation approach** - How should it work?
-
-### Code Contributions
-
-Submit fixes and improvements:
-
-1. **Fork repository** - Create your own copy
-2. **Create feature branch** - Use descriptive branch names
-3. **Write tests and docs** - Ensure quality
-4. **Submit pull request** - Follow our guidelines
-
-### Documentation
-
-Improve guides and examples:
-
-1. **Identify gaps** - What's missing or unclear?
-2. **Write clear explanations** - Keep it simple
-3. **Add code examples** - Show, don't just tell
-4. **Review for accuracy** - Test examples work
+1. **Bug Reports**: Open an issue for any bugs you find in the SDK or documentation.
+2. **Feature Requests**: Propose new adapters for system chain features (e.g., new Asset Hub pallets).
+3. **Draft PRs**: We encourage starting with a Draft Pull Request to discuss implementation patterns early.
 
 ## Development Setup
 
-### Prerequisites
-
-- **Rust**: Latest stable version
-- **Git**: Version control
-- **Editor**: VS Code with rust-analyzer recommended
-
-### Getting Started
+The SDK is written in Rust. You'll need the latest stable toolchain:
 
 ```bash
 # Clone the repository
 git clone https://github.com/apex-sdk/apex-sdk
 cd apex-sdk
 
-# Install dependencies
-cargo build
-
-# Run tests
-cargo test
-
-# Check formatting and linting
-cargo fmt --check
-cargo clippy -- -D warnings
+# Run the test suite
+cargo test --all-features
 ```
 
-### Project Structure
+## Contribution Guidelines
 
-```
-apex-sdk/
-├── src/           # Core SDK implementation
-├── adapters/      # Protocol adapters
-├── examples/      # Usage examples
-├── tests/         # Integration tests
-├── docs/          # Documentation source
-└── tools/         # Development tools
-```
+- **Standard Library Quality**: Since we aim to be a "standard library", we prioritize clarity, safety, and thorough documentation over complex abstractions.
+- **Testing**: Every new feature must include unit tests and, where applicable, integration tests against a mock or live system chain.
+- **Documentation**: Update the relevant MDX documentation file in `apex-sdk-web` whenever you change public APIs.
 
-## Code Guidelines
+## Community
 
-### Code Style
-
-- **Follow standard Rust conventions**
-- **Run `cargo fmt` before committing**
-- **Run `cargo clippy` and address warnings**
-- **Write documentation for public APIs**
-- **Use meaningful variable and function names**
-
-### Testing
-
-- **Write unit tests for new functionality**
-- **Include integration tests for complex features**
-- **Test edge cases and error conditions**
-- **Maintain test coverage above 80%**
-- **Update tests when changing APIs**
-
-### Documentation
-
-- **Document all public APIs with examples**
-- **Update README for significant changes**
-- **Include inline code documentation**
-- **Write clear commit messages**
-- **Update changelog for breaking changes**
-
-## Pull Request Process
-
-### Before Submitting
-
-1. **Sync with main branch**
-```bash
-git checkout main
-git pull upstream main
-git checkout your-feature-branch
-git rebase main
-```
-
-2. **Run full test suite**
-```bash
-cargo test --all
-cargo clippy --all-targets -- -D warnings
-cargo fmt --check
-```
-
-3. **Update documentation**
-- Add/update API docs
-- Update README if needed
-- Add changelog entry
-
-### PR Requirements
-
-Your pull request should include:
-
-- **Clear description** of changes
-- **Link to related issue** (if applicable)
-- **Test coverage** for new functionality
-- **Documentation updates** for new APIs
-- **Changelog entry** for user-facing changes
-
-### Review Process
-
-1. **Automated checks** - CI pipeline runs tests
-2. **Code review** - Maintainers review changes
-3. **Address feedback** - Make requested changes
-4. **Final approval** - Maintainer approves and merges
-
-## Issue Guidelines
-
-### Bug Reports
-
-When reporting bugs, please include:
-
-- **SDK version** and Rust version
-- **Operating system** and version
-- **Clear description** of the problem
-- **Reproduction steps** - minimal example
-- **Expected vs actual behavior**
-- **Relevant logs or error messages**
-
-Example:
-```markdown
-## Bug Description
-Connection to Polkadot fails with timeout error.
-
-## Environment
-- Apex SDK: v0.1.x
-- Rust: 1.70.0
-- OS: Ubuntu 22.04
-
-## Steps to Reproduce
-1. Create new project with `apex new test-project`
-2. Run `apex connect polkadot`
-3. Observe timeout error after 30 seconds
-
-## Expected Behavior
-Should connect successfully to Polkadot network.
-
-## Actual Behavior
-Connection times out with error: "Failed to connect..."
-```
-
-### Feature Requests
-
-For new features, provide:
-
-- **Problem statement** - what need does this address?
-- **Proposed solution** - how should it work?
-- **Use cases** - who would benefit?
-- **Implementation ideas** - any technical thoughts?
-- **Breaking changes** - would this affect existing code?
-
-## Community Guidelines
-
-### Code of Conduct
-
-We follow the [Rust Code of Conduct](https://www.rust-lang.org/policies/code-of-conduct). Please:
-
-- **Be respectful** and inclusive
-- **Be patient** with newcomers
-- **Be constructive** in feedback
-- **Be collaborative** not competitive
-
-### Communication Channels
-
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - General questions and ideas
-- **Discord** - Real-time community chat
-- **Email** - Security issues (security@apex.dev)
+- **Discord**: Join our developer channels to discuss system chain patterns.
+- **GitHub Discussions**: Use discussions for long-form design proposals.
 
 ## Recognition
 
-Contributors are recognized in:
-
-- **CONTRIBUTORS.md** - All contributors listed
-- **Release notes** - Major contributors highlighted
-- **Annual report** - Top contributors featured
-
-## Getting Help
-
-Need help contributing?
-
-- **Check existing issues** with "good first issue" label
-- **Ask questions** in GitHub Discussions
-- **Join our Discord** for real-time help
-- **Read the architecture docs** to understand the codebase
+Significant contributors are added to the `CONTRIBUTORS.md` file and recognized in our seasonal ecosystem updates.
 
 ## Next Steps
 
-Ready to contribute?
-
-1. **Find an issue** to work on
-2. **Comment on the issue** to claim it
-3. **Fork and create branch** 
-4. **Make your changes**
-5. **Submit pull request**
-
-Thanks for helping make Apex SDK better!
+- [API Reference](/docs/api)
+- [Architecture Overview](/docs/architecture)
+- [Testing Guide](/docs/testing)

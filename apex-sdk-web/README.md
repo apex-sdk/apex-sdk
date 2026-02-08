@@ -1,6 +1,6 @@
-# Apex SDK Documentation
+# Apex SDK: System Chain Standard Library
 
-> Official documentation site for Apex SDK Protocol - the unified standard for cross-chain blockchain development.
+> The unified standard for building system chain applications on Polkadot Asset Hub, Revive, and PolkaVM.
 
 ![Next.js](https://img.shields.io/badge/Next.js-16.1.1-black) ![React](https://img.shields.io/badge/React-19.2.3-blue) ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.0-06B6D4) ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6)
 
@@ -12,7 +12,6 @@ npm install
 
 # Start development server
 npm run dev
-
 # Open http://localhost:3000
 ```
 
@@ -24,14 +23,14 @@ npm run dev
 | `npm run build` | Build for production |
 | `npm run start` | Start production server |
 | `npm run lint` | Run ESLint checks |
-| `npm test` | Run full test suite (lint + type-check + build) |
+| `npm test` | Run full test suite |
 
 ## Tech Stack
 
 - **Framework**: Next.js 16 (App Router)
 - **Styling**: TailwindCSS v4
 - **Language**: TypeScript
-- **Deployment**: Static export ready
+- **Target**: System Chain Standard (Asset Hub, Revive, PolkaVM)
 
 ## Development
 
