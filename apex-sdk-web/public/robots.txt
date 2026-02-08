@@ -1,0 +1,64 @@
+# Apex SDK - Robots.txt
+# Updated: 2026-01-06
+
+User-agent: *
+Allow: /
+Allow: /docs/
+Allow: /docs/api/
+Allow: /docs/quickstart/
+Allow: /docs/installation/
+Allow: /docs/cli-guide/
+Allow: /docs/architecture/
+Allow: /docs/security/
+Allow: /docs/examples/
+Allow: /docs/contributing/
+
+# Disallow admin and private areas
+Disallow: /_next/
+Disallow: /api/_internal/
+Disallow: /.well-known/
+
+# Allow specific bots
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+# Crawl delay for aggressive bots
+User-agent: *
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://apexsdk.dev/sitemap.xml
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+# Disallow build files and development directories
+Disallow: /_next/
+Disallow: /api/
+Disallow: /*.json$
+Disallow: /*.map$
+
+# Sitemap location
+Sitemap: https://apex-sdk-docs.pages.dev/sitemap.xml

@@ -1,0 +1,77 @@
+---
+title: "Installation Guide"
+description: "Install Apex SDK and configure for Asset Hub, Revive, and PolkaVM system chain development."
+section: "installation"
+order: 4
+lastUpdated: "2026-02-02"
+tags: ["installation", "setup", "system-chain", "asset-hub", "revive", "polkavm"]
+author: "Apex SDK Team"
+---
+
+
+# Installation Guide
+
+Install Apex SDK and configure for Asset Hub, Revive, and PolkaVM system chain development.
+
+
+## Prerequisites
+
+- Rust (latest stable)
+- Node.js (for web integration)
+- Polkadot Asset Hub endpoint
+- Revive protocol endpoint
+- PolkaVM endpoint
+
+
+## Install Apex SDK
+
+Install the core SDK and modules:
+
+```bash
+cargo add apex-sdk
+cargo add apex-sdk-substrate
+cargo add apex-sdk-revive
+cargo add apex-sdk-types
+cargo add apex-sdk-core
+```
+
+evm = true
+testing = true
+pool_size = 10
+retry_attempts = 3
+timeout_ms = 30000
+enable_tls = true
+
+## Configuration
+
+Configure endpoints and modules:
+
+```rust
+use apex_sdk::{Config, AssetManager, ReviveAdapter, ContractManager};
+
+let config = Config::new()
+  .with_substrate_endpoint("wss://asset-hub.polkadot.io")
+  .with_revive_endpoint("wss://revive.polkadot.io")
+  .with_polkavm_endpoint("wss://polkavm.asset-hub.polkadot.io");
+
+let asset_mgr = AssetManager::new(config.clone());
+let revive = ReviveAdapter::new(config.clone());
+let contract_mgr = ContractManager::new(config);
+```
+
+
+
+
+
+sudo apt-get install build-essential pkg-config libssl-dev
+brew install openssl pkg-config
+sudo apt-get install build-essential pkg-config libssl-dev
+
+
+
+## Next Steps
+
+- [Quick Start](/docs/quickstart)
+- [API Reference](/docs/api)
+- [Asset Hub Integration](/docs/substrate)
+- [Revive & PolkaVM Guide](/docs/revive)

@@ -1,0 +1,449 @@
+---
+title: "Testing Guide"
+description: "Comprehensive testing strategies for Apex SDK applications including unit tests, integration tests, and property-based testing."
+section: "testing"
+order: 1
+tags: ["testing", "quality", "unit-tests", "integration"]
+lastUpdated: "2026-01-06"
+---
+
+# Testing Guide
+
+Testing is crucial for building reliable cross-chain applications. This guide covers testing strategies, tools, and best practices for Apex SDK projects.
+
+## Testing Philosophy
+
+Apex SDK follows a comprehensive testing approach:
+
+- **Unit Tests** - Test individual functions and modules
+- **Integration Tests** - Test component interactions
+- **Property-Based Tests** - Verify behavior across input ranges
+- **Benchmarks** - Measure and track performance
+
+## Test Types
+
+### Unit Tests
+
+Test individual functions in isolation:
+
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_transaction_builder() {
+        let builder = TransactionBuilder::new()
+            .with_pallet("balances")
+            .with_call("transfer")
+            .with_params(vec![
+                AccountId::from([1u8; 32]),
+                1_000_000_000_000u128
+            ]);
+
+        assert!(builder.validate().is_ok());
+    }
+
+    #[test]
+    fn test_invalid_transaction() {
+        let builder = TransactionBuilder::new();
+        
+        let result = builder.build();
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err(), BuildError::MissingPallet);
+    }
+}
+```
+
+### Integration Tests
+
+Test component interactions in `tests/` directory:
+
+```rust
+// tests/integration_test.rs
+use apex_sdk::{ApexSDK, Config};
+use tokio_test;
+
+#[tokio::test]
+async fn test_substrate_connection() {
+    let config = Config::new()
+        .with_substrate_endpoint("wss://westend-rpc.polkadot.io");
+        
+    let sdk = ApexSDK::builder()
+        .with_config(config)
+        .build()
+        .await
+        .expect("Failed to build SDK");
+
+    // Test actual connection
+    let client = sdk.substrate_client().await.unwrap();
+    let header = client.get_header(None).await.unwrap();
+    
+    assert!(header.number > 0);
+}
+```
+
+### Property-Based Tests
+
+Use `proptest` for testing properties across input ranges:
+
+```rust
+use proptest::prelude::*;
+
+proptest! {
+    #[test]
+    fn test_amount_conversion(amount in 1u128..=1_000_000u128) {
+        let converted = convert_to_units(amount);
+        let back = convert_from_units(converted);
+        
+        prop_assert_eq!(amount, back);
+    }
+
+    #[test]
+    fn test_account_generation(seed in any::<[u8; 32]>()) {
+        let account = AccountId::from_seed(seed);
+        
+        // Account should be valid
+        prop_assert!(account.is_valid());
+        
+        // Should be deterministic
+        let account2 = AccountId::from_seed(seed);
+        prop_assert_eq!(account, account2);
+    }
+}
+```
+
+## Testing Tools
+
+### Test Framework Setup
+
+Add testing dependencies to `Cargo.toml`:
+
+```toml
+[dev-dependencies]
+tokio-test = "^0.4"
+proptest = "^1.0"
+criterion = "^0.5"
+mock-server = "^0.1"
+```
+
+### Mocking Networks
+
+Create mock substrate nodes for testing:
+
+```rust
+use mock_server::MockServer;
+
+#[tokio::test]
+async fn test_with_mock_node() {
+    let mock = MockServer::start().await;
+    
+    // Configure mock responses
+    mock.when(method("system_properties"))
+        .respond_with(json!({
+            "ss58Format": 42,
+            "tokenDecimals": [12],
+            "tokenSymbol": ["WND"]
+        }));
+
+    let config = Config::new()
+        .with_substrate_endpoint(&mock.uri());
+        
+    let sdk = ApexSDK::builder()
+        .with_config(config)
+        .build()
+        .await
+        .expect("Failed to build SDK");
+
+    // Run tests against mock
+    let properties = sdk.substrate_client()
+        .await
+        .unwrap()
+        .get_properties()
+        .await
+        .unwrap();
+        
+    assert_eq!(properties.ss58_format, 42);
+}
+```
+
+## Test Organization
+
+### File Structure
+
+```
+my-project/
+├── src/
+│   ├── lib.rs
+│   ├── client.rs       # Module with unit tests
+│   └── builder.rs      # Module with unit tests
+├── tests/
+│   ├── integration_tests.rs
+│   ├── substrate_tests.rs
+│   └── evm_tests.rs
+└── benches/
+    └── performance.rs
+```
+
+### Test Categories
+
+Use test categories to organize test runs:
+
+```rust
+// Unit tests
+#[cfg(test)]
+mod unit_tests {
+    #[test]
+    fn fast_unit_test() { /* ... */ }
+}
+
+// Integration tests requiring network
+#[cfg(test)]
+mod integration_tests {
+    #[ignore = "requires network"]
+    #[tokio::test]
+    async fn test_live_network() { /* ... */ }
+}
+
+// Long-running tests
+#[cfg(test)]
+mod performance_tests {
+    #[ignore = "slow"]
+    #[test] 
+    fn stress_test() { /* ... */ }
+}
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+cargo test
+
+# Run only unit tests (fast)
+cargo test --lib
+
+# Run integration tests
+cargo test --test integration_tests
+
+# Run ignored tests
+cargo test -- --ignored
+
+# Run specific test
+cargo test test_transaction_builder
+
+# Run with output
+cargo test -- --nocapture
+```
+
+## Testing Best Practices
+
+### Test Structure
+
+Follow the **Arrange-Act-Assert** pattern:
+
+```rust
+#[test]
+fn test_balance_transfer() {
+    // Arrange
+    let sender = AccountId::from([1u8; 32]);
+    let receiver = AccountId::from([2u8; 32]); 
+    let amount = 1_000_000_000_000u128;
+    
+    // Act
+    let result = create_transfer_transaction(sender, receiver, amount);
+    
+    // Assert
+    assert!(result.is_ok());
+    let tx = result.unwrap();
+    assert_eq!(tx.pallet, "balances");
+    assert_eq!(tx.call, "transfer");
+}
+```
+
+### Error Testing
+
+Test both success and failure cases:
+
+```rust
+#[test]
+fn test_insufficient_balance() {
+    let account = AccountId::from([1u8; 32]);
+    let amount = u128::MAX; // Impossibly large amount
+    
+    let result = check_balance(account, amount);
+    
+    assert!(result.is_err());
+    match result.unwrap_err() {
+        BalanceError::InsufficientFunds { available, required } => {
+            assert!(available < required);
+        }
+        _ => panic!("Expected InsufficientFunds error"),
+    }
+}
+```
+
+### Async Testing
+
+Test async code properly:
+
+```rust
+#[tokio::test]
+async fn test_async_operation() {
+    let client = create_test_client().await;
+    
+    let result = client.fetch_data().await;
+    
+    assert!(result.is_ok());
+}
+
+#[tokio::test]
+async fn test_timeout() {
+    let slow_client = create_slow_client().await;
+    
+    let result = tokio::time::timeout(
+        Duration::from_secs(1),
+        slow_client.fetch_data()
+    ).await;
+    
+    assert!(result.is_err()); // Should timeout
+}
+```
+
+## Coverage and Quality
+
+### Test Coverage
+
+Generate coverage reports:
+
+```bash
+# Install cargo-tarpaulin
+cargo install cargo-tarpaulin
+
+# Generate coverage report
+cargo tarpaulin --out Html
+
+# View coverage in browser
+open tarpaulin-report.html
+```
+
+### Quality Metrics
+
+Monitor test quality:
+
+- **Coverage**: Aim for >80% line coverage
+- **Mutation Testing**: Verify tests catch bugs
+- **Performance**: Track test execution time
+- **Reliability**: Tests should be deterministic
+
+### CI Integration
+
+Add testing to GitHub Actions:
+
+```yaml
+# .github/workflows/test.yml
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Setup Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        
+    - name: Run unit tests
+      run: cargo test --lib
+      
+    - name: Run integration tests  
+      run: cargo test --test integration_tests
+      
+    - name: Run clippy
+      run: cargo clippy -- -D warnings
+      
+    - name: Check formatting
+      run: cargo fmt --check
+```
+
+## Performance Testing
+
+### Benchmark Tests
+
+Use `criterion` for performance benchmarks:
+
+```rust
+// benches/transaction_bench.rs
+use criterion::{criterion_group, criterion_main, Criterion};
+use apex_sdk::TransactionBuilder;
+
+fn bench_transaction_build(c: &mut Criterion) {
+    c.bench_function("transaction_build", |b| {
+        b.iter(|| {
+            TransactionBuilder::new()
+                .with_pallet("balances")
+                .with_call("transfer")
+                .build()
+        })
+    });
+}
+
+criterion_group!(benches, bench_transaction_build);
+criterion_main!(benches);
+```
+
+Run benchmarks:
+
+```bash
+cargo bench
+```
+
+## Debugging Tests
+
+### Test Output
+
+Debug failing tests:
+
+```rust
+#[test]
+fn debug_test() {
+    let result = complex_operation();
+    
+    // Print debug info
+    println!("Result: {:?}", result);
+    
+    // Use dbg! macro
+    dbg!(&result);
+    
+    assert!(result.is_ok());
+}
+```
+
+### Test Environment
+
+Set up test environment variables:
+
+```rust
+#[test] 
+fn test_with_env() {
+    std::env::set_var("APEX_LOG_LEVEL", "debug");
+    std::env::set_var("APEX_NETWORK", "testnet");
+    
+    // Test logic here
+    
+    // Clean up
+    std::env::remove_var("APEX_LOG_LEVEL");
+    std::env::remove_var("APEX_NETWORK");
+}
+```
+
+## Next Steps
+
+- [Contributing Guide](./contributing) - Learn how to contribute tests
+- [API Reference](./api) - Explore testable APIs
+- [Examples](./examples) - See real-world test examples

@@ -1,0 +1,36 @@
+{
+  "navigation": [
+    {
+      "title": "Getting Started",
+      "items": [
+        { "title": "Installation", "href": "/docs/installation", "description": "Install Apex SDK in your project" },
+        { "title": "Quick Start", "href": "/docs/quickstart", "description": "Get up and running with Apex SDK" },
+        { "title": "Architecture", "href": "/docs/architecture", "description": "Understand Apex SDK's architecture" }
+      ]
+    },
+    {
+      "title": "Development",
+      "items": [
+        { "title": "EVM Guide", "href": "/docs/evm", "description": "Build for Ethereum Virtual Machine chains" },
+        { "title": "Substrate Guide", "href": "/docs/substrate", "description": "Build for Substrate-based chains" },
+        { "title": "Testing", "href": "/docs/testing", "description": "Test your cross-chain applications" }
+      ]
+    },
+    {
+      "title": "Resources",
+      "items": [
+        { "title": "API Reference", "href": "/docs/api", "description": "Complete API documentation" },
+        { "title": "Examples", "href": "/docs/examples", "description": "Code examples and tutorials" },
+        { "title": "CLI Guide", "href": "/docs/cli-guide", "description": "Command line interface documentation" }
+      ]
+    },
+    {
+      "title": "Community",
+      "items": [
+        { "title": "Contributing", "href": "/docs/contributing", "description": "How to contribute to Apex SDK" },
+        { "title": "Security", "href": "/docs/security", "description": "Security guidelines and reporting" },
+        { "title": "Research", "href": "/docs/research", "description": "Research papers and technical deep dives" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,355 @@
+---
+title: "Test Networks Guide"
+description: "Complete guide to using Apex SDK with test networks including setup, configuration, and best practices for development and testing."
+section: "testnets"
+order: 1
+tags: ["testnets", "testing", "development", "networks"]
+lastUpdated: "2026-01-06"
+---
+
+# Test Networks Guide
+
+**Complete guide to developing and testing with Apex SDK on various blockchain test networks.**
+
+## Overview
+
+Test networks provide safe environments for developing and testing cross-chain applications before deploying to mainnet. Apex SDK supports multiple test networks across different blockchain ecosystems.
+
+## EVM Test Networks
+
+### Ethereum Test Networks
+
+**Sepolia** (Recommended)
+- **Chain ID**: 11155111
+- **Purpose**: Primary Ethereum testnet
+- **Consensus**: Proof of Stake
+- **Faucet**: [Sepolia Faucet](https://sepoliafaucet.com/)
+
+```rust
+use apex_sdk::evm::{EvmClient, EvmConfig};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let config = EvmConfig {
+        network: EthereumNetwork::Sepolia,
+        rpc_url: "https://sepolia.infura.io/v3/YOUR_KEY".into(),
+        chain_id: 11155111,
+    };
+    
+    let client = EvmClient::new(config).await?;
+    println!("Connected to Sepolia testnet");
+    
+    Ok(())
+}
+```
+
+**Configuration for Sepolia:**
+
+```toml
+[network.sepolia]
+chain_id = 11155111
+rpc_url = "https://sepolia.infura.io/v3/YOUR_KEY"
+ws_url = "wss://sepolia.infura.io/ws/v3/YOUR_KEY"
+block_explorer = "https://sepolia.etherscan.io"
+```
+
+### Layer 2 Test Networks
+
+**Polygon Mumbai** (Deprecated - Use Amoy)
+**Polygon Amoy** (Current)
+- **Chain ID**: 80002
+- **Purpose**: Polygon testnet
+- **Faucet**: [Polygon Faucet](https://faucet.polygon.technology/)
+
+```toml
+[network.polygon_amoy]
+chain_id = 80002
+rpc_url = "https://rpc-amoy.polygon.technology"
+block_explorer = "https://amoy.polygonscan.com"
+```
+
+**Arbitrum Sepolia**
+- **Chain ID**: 421614
+- **Purpose**: Arbitrum Layer 2 testing
+- **Faucet**: [Arbitrum Bridge](https://bridge.arbitrum.io/)
+
+**Base Sepolia**
+- **Chain ID**: 84532
+- **Purpose**: Base Layer 2 testing
+- **Faucet**: [Base Bridge](https://bridge.base.org/)
+
+## Substrate Test Networks
+
+### Westend Testnet
+
+**Westend** (Recommended for Polkadot)
+- **Purpose**: Polkadot testnet
+- **SS58 Format**: 42
+- **Endpoint**: `wss://westend-rpc.polkadot.io`
+
+```rust
+use apex_sdk::substrate::{SubstrateClient, SubstrateConfig};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let config = SubstrateConfig::new()
+        .endpoint("wss://westend-rpc.polkadot.io")
+        .ss58_format(42);
+    
+    let client = SubstrateClient::new(config).await?;
+    println!("Connected to Westend testnet");
+    
+    Ok(())
+}
+```
+
+**Paseo Testnet**
+- **Purpose**: Community-maintained Polkadot testnet
+- **SS58 Format**: 0
+- **Endpoint**: `wss://paseo.dotters.network`
+
+### Kusama Canary Network
+
+**Kusama**
+- **Purpose**: Polkadot canary network (real economic value)
+- **SS58 Format**: 2
+- **Endpoint**: `wss://kusama-rpc.polkadot.io`
+
+## Multi-Chain Testing Setup
+
+### Configuration File
+
+Create a comprehensive test configuration:
+
+```toml
+# apex.config.toml
+[testing]
+enabled = true
+default_network = "sepolia"
+
+[network.sepolia]
+type = "evm"
+chain_id = 11155111
+rpc_url = "https://sepolia.infura.io/v3/YOUR_KEY"
+ws_url = "wss://sepolia.infura.io/ws/v3/YOUR_KEY"
+
+[network.polygon_amoy]
+type = "evm"
+chain_id = 80002
+rpc_url = "https://rpc-amoy.polygon.technology"
+
+[network.westend]
+type = "substrate"
+endpoint = "wss://westend-rpc.polkadot.io"
+ss58_format = 42
+
+[network.paseo]
+type = "substrate"
+endpoint = "wss://paseo.dotters.network"
+ss58_format = 0
+
+[wallet.testing]
+mnemonic = "YOUR_TEST_MNEMONIC_NEVER_USE_ON_MAINNET"
+derivation_paths = [
+    "//Alice",
+    "//Bob", 
+    "//Charlie"
+]
+```
+
+### Cross-Chain Testing Example
+
+```rust
+use apex_sdk::{ApexSDK, Config, ChainType};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let config = Config::from_file("apex.config.toml")?;
+    let sdk = ApexSDK::builder()
+        .config(config)
+        .enable_testing_mode(true)
+        .build()
+        .await?;
+    
+    // Test cross-chain transfer from Sepolia to Westend
+    let evm_client = sdk.evm(ChainType::Sepolia).await?;
+    let substrate_client = sdk.substrate(ChainType::Westend).await?;
+    
+    // Perform cross-chain operation
+    let transfer_result = sdk.cross_chain_transfer()
+        .from(ChainType::Sepolia)
+        .to(ChainType::Westend)
+        .amount(1_000_000_000_000_000_000u128) // 1 ETH equivalent
+        .execute()
+        .await?;
+    
+    println!("Cross-chain transfer successful: {:?}", transfer_result);
+    
+    Ok(())
+}
+```
+
+## Testing Best Practices
+
+### Development Workflow
+
+1. **Local Development**
+   - Use local blockchain nodes for rapid iteration
+   - Implement comprehensive unit tests
+   - Mock external dependencies
+
+2. **Testnet Integration**
+   - Deploy to testnets for integration testing
+   - Test cross-chain functionality
+   - Validate performance under realistic conditions
+
+3. **Staging Environment**
+   - Mirror mainnet configuration
+   - Perform final testing before production
+   - Test with realistic data volumes
+
+### Security Considerations
+
+**Wallet Management**
+- **Never use mainnet private keys on testnets**
+- Use dedicated test wallets with limited funds
+- Implement proper key rotation practices
+
+**Environment Separation**
+- Separate configuration files for each environment
+- Use environment variables for sensitive data
+- Implement proper access controls
+
+### Resource Management
+
+**Rate Limiting**
+- Respect testnet rate limits
+- Implement proper retry mechanisms
+- Use multiple RPC endpoints for redundancy
+
+**Gas Management**
+- Monitor gas usage on test networks
+- Optimize transaction costs
+- Test gas estimation accuracy
+
+## Faucets and Test Tokens
+
+### Ethereum Ecosystem
+
+**Sepolia ETH**
+- [Alchemy Faucet](https://sepoliafaucet.com/)
+- [Chainlink Faucet](https://faucets.chain.link/)
+- [Infura Faucet](https://infura.io/faucet/sepolia)
+
+**Polygon Amoy**
+- [Polygon Faucet](https://faucet.polygon.technology/)
+- [Alchemy Polygon Faucet](https://amoy-faucet.polygon.technology/)
+
+### Substrate Ecosystem
+
+**Westend (WND)**
+- [Polkadot Faucet](https://faucet.polkadot.io/)
+- Matrix Bot: `!drip YOUR_ADDRESS`
+
+**Paseo (PAS)**
+- [Paseo Faucet](https://faucet.paseo.network/)
+
+## Monitoring and Debugging
+
+### Block Explorers
+
+**EVM Networks**
+- **Sepolia**: [Sepolia Etherscan](https://sepolia.etherscan.io)
+- **Polygon Amoy**: [Amoy PolygonScan](https://amoy.polygonscan.com)
+- **Arbitrum Sepolia**: [Arbiscan Sepolia](https://sepolia.arbiscan.io)
+
+**Substrate Networks**
+- **Westend**: [Polkadot.js Apps](https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fwestend-rpc.polkadot.io#/explorer)
+- **Paseo**: [Polkadot.js Apps](https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fpaseo.dotters.network#/explorer)
+
+### Debug Tools
+
+**Transaction Analysis**
+```rust
+use apex_sdk::debug::{TransactionAnalyzer, DebugConfig};
+
+let analyzer = TransactionAnalyzer::new(DebugConfig {
+    verbose: true,
+    save_traces: true,
+});
+
+let analysis = analyzer.analyze_transaction(tx_hash).await?;
+println!("Gas used: {}", analysis.gas_used);
+println!("Execution trace: {:#?}", analysis.trace);
+```
+
+**Cross-Chain Monitoring**
+```rust
+use apex_sdk::monitoring::{CrossChainMonitor, AlertConfig};
+
+let monitor = CrossChainMonitor::new(AlertConfig {
+    tx_timeout: Duration::from_secs(300),
+    block_confirmation: 6,
+});
+
+monitor.track_transfer(transfer_id).await?;
+```
+
+## Common Issues and Solutions
+
+### Connection Problems
+
+**RPC Endpoint Issues**
+- Verify endpoint URLs and API keys
+- Check network connectivity
+- Monitor rate limiting
+
+**WebSocket Timeouts**
+- Implement reconnection logic
+- Use multiple endpoint URLs
+- Monitor connection health
+
+### Transaction Failures
+
+**Gas Estimation**
+- Set appropriate gas limits
+- Monitor network congestion
+- Implement dynamic gas pricing
+
+**Nonce Management**
+- Track transaction sequences
+- Implement proper nonce handling
+- Monitor for stuck transactions
+
+## Migration to Mainnet
+
+### Checklist
+
+- [ ] All tests passing on testnets
+- [ ] Security audit completed
+- [ ] Performance benchmarks met
+- [ ] Documentation updated
+- [ ] Monitoring systems configured
+- [ ] Emergency procedures documented
+
+### Configuration Updates
+
+```toml
+# Production configuration
+[network.ethereum]
+type = "evm"
+chain_id = 1
+rpc_url = "https://eth-mainnet.g.alchemy.com/v2/YOUR_KEY"
+
+[network.polkadot]
+type = "substrate"
+endpoint = "wss://rpc.polkadot.io"
+ss58_format = 0
+```
+
+## Resources
+
+- [Testnet Status Dashboard](https://status.ethereum.org)
+- [Substrate Networks](https://wiki.polkadot.network/docs/build-networks)
+- [EVM Network List](https://chainlist.org)
+- [Cross-Chain Testing Guide](/docs/testing)

@@ -1,0 +1,562 @@
+---
+title: "Asset Hub Integration"
+description: "Apex SDK integration with Polkadot Asset Hub: assets, NFTs, balances, and typed metadata."
+section: "substrate"
+order: 2
+tags: ["asset-hub", "substrate", "polkadot", "nft", "metadata"]
+lastUpdated: "2026-02-02"
+---
+
+
+# Asset Hub Integration
+
+Apex SDK provides high-level APIs for Polkadot Asset Hub, enabling seamless interaction with native assets, NFTs, balances, and typed metadata. The SDK abstracts Substrate runtime details for rapid dApp development.
+
+## Key Features
+
+- AssetManager: assets, balances, transfers
+- NftManager: NFT minting, transfer, metadata
+- Typed metadata: runtime-typed asset and NFT metadata
+
+
+## Quick Start
+
+```rust
+use apex_sdk::{AssetManager, NftManager, Config};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let config = Config::new()
+        .with_substrate_endpoint("wss://rpc.polkadot.io");
+
+    let asset_mgr = AssetManager::new(config.clone());
+    let nft_mgr = NftManager::new(config);
+
+    let balance = asset_mgr.get_balance(account_id, asset_id).await?;
+    let nft_id = nft_mgr.mint(account_id, metadata).await?;
+    let meta = nft_mgr.get_metadata(nft_id).await?;
+    Ok(())
+}
+```
+
+
+### Network Endpoints
+
+```rust
+let polkadot = Config::new().with_substrate_endpoint("wss://rpc.polkadot.io");
+let asset_hub = Config::new().with_substrate_endpoint("wss://asset-hub.polkadot.io");
+let local = Config::new().with_substrate_endpoint("ws://localhost:9944");
+```
+
+
+## Typed Metadata
+
+Asset Hub supports runtime-typed metadata for assets and NFTs. Apex SDK exposes these features via strongly-typed Rust APIs:
+
+```rust
+let asset_meta = asset_mgr.get_metadata(asset_id).await?;
+let nft_meta = nft_mgr.get_metadata(nft_id).await?;
+```
+
+
+## Cross-Chain Transfers
+
+Apex SDK supports cross-chain asset transfers using XCM and bridge protocols:
+
+```rust
+let status = asset_mgr.xcm_transfer(asset_id, from, to, amount, dest_chain).await?;
+```
+
+
+## Runtime Metadata
+
+Access runtime metadata for advanced use cases:
+
+```rust
+let meta = asset_mgr.runtime_metadata().await?;
+```
+
+### Historical Storage
+
+```rust
+// Query storage at specific block
+let block_hash = client.get_block_hash(Some(1_000_000)).await?;
+let historical_storage = client.storage().at(block_hash).await?;
+
+let old_balance = historical_storage
+    .fetch(&storage().balances().account(&account_id))
+    .await?;
+```
+
+### Storage Maps and Iterations
+
+```rust
+// Iterate over storage map
+let mut iter = client
+    .storage()
+    .at_latest()
+    .await?
+    .iter(storage().staking().validators())
+    .await?;
+
+while let Some((key, validator_prefs)) = iter.next().await? {
+    let validator_id = storage().staking().validators().decode_key(key);
+    println!("Validator: {:?}, Commission: {:?}", 
+             validator_id, validator_prefs.commission);
+}
+```
+
+### Storage Changes
+
+Monitor storage changes between blocks:
+
+```rust
+let storage_changes = client
+    .storage()
+    .watch(&storage().balances().account(&account_id), None)
+    .await?;
+
+tokio::pin!(storage_changes);
+
+while let Some(change) = storage_changes.next().await {
+    match change {
+        StorageChange::Added { block, value } => {
+            println!("Account created at block {:?}", block);
+        }
+        StorageChange::Modified { block, prev, new } => {
+            println!("Balance changed: {} -> {}", prev.free, new.free);
+        }
+        StorageChange::Removed { block } => {
+            println!("Account removed at block {:?}", block);
+        }
+    }
+}
+```
+
+## Transaction Building
+
+### Basic Extrinsics
+
+```rust
+use apex_sdk::tx;
+
+// Balance transfer
+let transfer = tx().balances().transfer(dest_account, amount);
+
+// Staking operations
+let bond = tx().staking().bond(controller, value, reward_destination);
+let nominate = tx().staking().nominate(targets);
+let unbond = tx().staking().unbond(amount);
+
+// Governance 
+let vote = tx().democracy().vote(proposal_index, vote);
+let propose = tx().democracy().propose(proposal_hash, value);
+```
+
+### Batch Transactions
+
+```rust
+// Create batch of operations
+let calls = vec![
+    tx().balances().transfer(dest1, amount1).into(),
+    tx().balances().transfer(dest2, amount2).into(),
+    tx().staking().nominate(validators).into(),
+];
+
+let batch = tx().utility().batch(calls);
+```
+
+### Signed Extrinsics
+
+```rust
+use apex_sdk::crypto::Keypair;
+
+// Load keypair
+let keypair = Keypair::from_seed(&seed)?;
+
+// Create and sign transaction
+let signed_tx = client
+    .tx()
+    .create_signed(
+        &transfer, 
+        &keypair,
+        Default::default() // Use default tx parameters
+    )
+    .await?;
+
+// Submit transaction
+let tx_hash = client.tx().submit_and_watch(&signed_tx).await?;
+println!("Transaction submitted: {:?}", tx_hash);
+```
+
+### Transaction Parameters
+
+```rust
+use apex_sdk::tx::TxParams;
+
+// Custom transaction parameters
+let params = TxParams::new()
+    .tip(1_000_000_000) // 0.1 DOT tip
+    .mortality(mortal(64)) // Valid for 64 blocks
+    .nonce(nonce);
+
+let signed_tx = client
+    .tx()
+    .create_signed(&transfer, &keypair, params)
+    .await?;
+```
+
+## Event Monitoring
+
+### Basic Event Subscription
+
+```rust
+// Subscribe to all events
+let mut events = client.events().subscribe().await?;
+
+while let Some(events_in_block) = events.next().await {
+    let block_hash = events_in_block.block_hash();
+    
+    for event in events_in_block.iter() {
+        if let Ok(transfer) = event.as_event::<balances::Transfer>() {
+            println!(
+                "Transfer in block {:?}: {} -> {} ({})",
+                block_hash,
+                transfer.from,
+                transfer.to,
+                transfer.amount
+            );
+        }
+    }
+}
+```
+
+### Filtered Events
+
+```rust
+// Subscribe to finalized blocks only
+let mut events = client
+    .events()
+    .subscribe_finalized()
+    .await?;
+
+// Filter specific event types
+while let Some(events_in_block) = events.next().await {
+    for event in events_in_block.iter() {
+        match event.variant_name() {
+            "Transfer" if event.pallet_name() == "Balances" => {
+                let transfer = event.as_event::<balances::Transfer>()?;
+                handle_transfer(transfer);
+            }
+            "Slash" if event.pallet_name() == "Staking" => {
+                let slash = event.as_event::<staking::Slash>()?;
+                handle_slash(slash);
+            }
+            _ => {}
+        }
+    }
+}
+```
+
+### Event Filtering
+
+```rust
+use apex_sdk::events::EventFilter;
+
+// Create event filter
+let filter = EventFilter::new()
+    .pallet("balances")
+    .event("Transfer")
+    .account(&account_id);
+
+// Apply filter to subscription
+let mut filtered_events = client
+    .events()
+    .subscribe_with_filter(filter)
+    .await?;
+```
+
+## Runtime APIs
+
+### Built-in Runtime APIs
+
+```rust
+// Get account nonce
+let nonce = client
+    .runtime_api()
+    .at(block_hash)
+    .call(apis().account_nonce_api().account_nonce(&account_id))
+    .await?;
+
+// Query transaction fees
+let fee_details = client
+    .runtime_api()
+    .at_latest()
+    .call(apis().transaction_payment_api().query_fee_details(&tx, None))
+    .await?;
+```
+
+### Custom Runtime APIs
+
+```rust
+// Define custom runtime API interface
+use apex_sdk::runtime_api;
+
+#[runtime_api]
+trait CustomApi {
+    fn custom_query(&self, param: u32) -> Result<CustomResult, Error>;
+}
+
+// Use custom API
+let result = client
+    .runtime_api()
+    .at_latest() 
+    .call(apis().custom_api().custom_query(42))
+    .await?;
+```
+
+## Advanced Features
+
+### Multi-Chain Setup
+
+```rust
+use apex_sdk::MultiChainConfig;
+
+let config = MultiChainConfig::new()
+    .add_chain("polkadot", ChainConfig::substrate("wss://rpc.polkadot.io"))
+    .add_chain("kusama", ChainConfig::substrate("wss://kusama-rpc.polkadot.io"));
+
+let sdk = ApexSDK::builder()
+    .with_multi_chain_config(config)
+    .build()
+    .await?;
+
+// Access different chains
+let polkadot = sdk.substrate_client("polkadot").await?;
+let kusama = sdk.substrate_client("kusama").await?;
+```
+
+### Runtime Upgrade Handling
+
+```rust
+// Monitor runtime upgrades
+let mut upgrades = client.runtime_upgrades().await?;
+
+while let Some(upgrade) = upgrades.next().await {
+    println!(
+        "Runtime upgraded at block {} to version {}", 
+        upgrade.block_number,
+        upgrade.spec_version
+    );
+    
+    // Regenerate types if needed
+    if upgrade.metadata_changed {
+        regenerate_types(&upgrade.metadata).await?;
+    }
+}
+```
+
+### Connection Management
+
+```rust
+use apex_sdk::connection::{ConnectionPool, RetryPolicy};
+
+// Configure connection with retry policy
+let retry_policy = RetryPolicy::new()
+    .max_retries(3)
+    .initial_delay(Duration::from_secs(1))
+    .backoff_multiplier(2.0);
+
+let config = Config::new()
+    .with_substrate_endpoint("wss://rpc.polkadot.io")
+    .with_connection_pool(ConnectionPool::new().max_connections(10))
+    .with_retry_policy(retry_policy);
+```
+
+## Performance Optimization
+
+### Batch Storage Queries
+
+```rust
+use apex_sdk::storage::BatchQuery;
+
+// Query multiple storage items efficiently
+let mut batch = BatchQuery::new();
+batch.add(storage().system().account(&account1));
+batch.add(storage().system().account(&account2));
+batch.add(storage().balances().total_issuance());
+
+let results = client
+    .storage()
+    .at_latest()
+    .await?
+    .fetch_batch(batch)
+    .await?;
+```
+
+### Subscription Multiplexing
+
+```rust
+// Single connection for multiple subscriptions
+let connection = client.connection();
+
+let events = connection.subscribe_events().await?;
+let headers = connection.subscribe_headers().await?;
+let justifications = connection.subscribe_justifications().await?;
+
+tokio::select! {
+    event = events.next() => handle_event(event),
+    header = headers.next() => handle_header(header),
+    justification = justifications.next() => handle_justification(justification),
+}
+```
+
+## Testing
+
+### Mock Substrate Client
+
+```rust
+#[cfg(test)]
+mod tests {
+    use apex_sdk::testing::{MockSubstrateClient, MockBlock};
+
+    #[tokio::test]
+    async fn test_balance_query() {
+        let mut mock = MockSubstrateClient::new();
+        
+        // Set up mock storage
+        mock.set_storage(
+            &storage().balances().account(&alice()),
+            Some(AccountData {
+                free: 1000,
+                reserved: 0,
+                frozen: 0,
+                flags: Default::default(),
+            })
+        );
+
+        // Test the query
+        let balance = mock
+            .storage()
+            .at_latest()
+            .await
+            .unwrap()
+            .fetch(&storage().balances().account(&alice()))
+            .await
+            .unwrap();
+
+        assert_eq!(balance.unwrap().free, 1000);
+    }
+}
+```
+
+
+## Best Practices
+
+- Use AssetManager and NftManager for all Asset Hub operations
+- Validate typed metadata before minting or transferring
+- Monitor cross-chain transfer status
+
+## Common Patterns
+
+### Account Monitoring
+
+```rust
+async fn monitor_account(account: AccountId) -> Result<(), Error> {
+    let balance_changes = client
+        .storage()
+        .watch(&storage().balances().account(&account), None)
+        .await?;
+
+    tokio::pin!(balance_changes);
+
+    while let Some(change) = balance_changes.next().await {
+        match change {
+            StorageChange::Modified { prev, new, .. } => {
+                let diff = new.free.saturating_sub(prev.free);
+                if diff > 0 {
+                    println!("Account {} received {}", account, diff);
+                } else {
+                    println!("Account {} spent {}", account, prev.free - new.free);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    Ok(())
+}
+```
+
+### Transaction Batching
+
+```rust
+async fn batch_transfers(
+    transfers: Vec<(AccountId, Balance)>
+) -> Result<Hash, Error> {
+    let calls: Vec<_> = transfers
+        .into_iter()
+        .map(|(dest, amount)| tx().balances().transfer(dest, amount).into())
+        .collect();
+
+    let batch = tx().utility().batch_all(calls);
+    
+    let signed = client
+        .tx()
+        .create_signed(&batch, &keypair, Default::default())
+        .await?;
+
+    client.tx().submit_and_watch(&signed).await
+}
+```
+
+## Troubleshooting
+
+### Connection Issues
+
+```rust
+// Implement connection health checks
+async fn check_connection_health(client: &SubstrateClient) -> Result<(), Error> {
+    // Check if node is synced
+    let health = client.system_health().await?;
+    if !health.is_syncing && health.peers > 0 {
+        return Ok(());
+    }
+    
+    // Check latest block
+    let latest_block = client.get_header(None).await?;
+    let now = chrono::Utc::now().timestamp();
+    let block_time = latest_block.timestamp().timestamp();
+    
+    if now - block_time > 300 { // 5 minutes
+        return Err(Error::ChainNotSynced);
+    }
+    
+    Ok(())
+}
+```
+
+### Debugging Transactions
+
+```rust
+// Debug transaction construction
+let dry_run = client
+    .tx()
+    .dry_run(&transfer, &account, None)
+    .await?;
+
+println!("Dry run result: {:?}", dry_run);
+println!("Estimated fee: {}", dry_run.fee);
+
+if let Err(dispatch_error) = dry_run.result {
+    println!("Transaction would fail: {:?}", dispatch_error);
+}
+```
+
+
+## Next Steps
+
+- [Quick Start](/docs/quickstart)
+- [API Reference](/docs/api)
+- [Revive & PolkaVM Guide](/docs/revive)
+- [Installation Guide](/docs/installation)

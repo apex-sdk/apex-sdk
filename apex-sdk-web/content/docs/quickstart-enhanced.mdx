@@ -1,0 +1,97 @@
+---
+title: "Quick Start (Enhanced)"
+description: "Advanced quick start for Apex SDK: modular install, configuration, and first app for Asset Hub, Revive, and PolkaVM."
+section: "quickstart"
+order: 2
+lastUpdated: "2026-02-02"
+tags: ["quickstart", "installation", "modular", "system-chain", "asset-hub", "revive", "polkavm"]
+author: "Apex SDK Team"
+---
+
+
+# Quick Start (Enhanced)
+
+Advanced quick start for Apex SDK: modular install, configuration, and first app for Asset Hub, Revive, and PolkaVM.
+
+## Prerequisites
+
+- Rust (latest stable)
+- Node.js (for web integration)
+- Polkadot Asset Hub endpoint
+- Revive protocol endpoint
+- PolkaVM endpoint
+
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+## Installation
+
+Install Apex SDK and required modules:
+
+```bash
+cargo add apex-sdk
+cargo add apex-sdk-substrate
+cargo add apex-sdk-revive
+cargo add apex-sdk-types
+cargo add apex-sdk-core
+```
+
+
+## Configuration
+
+Configure endpoints and modules:
+
+```rust
+use apex_sdk::{Config, AssetManager, ReviveAdapter, ContractManager};
+
+let config = Config::new()
+    .with_substrate_endpoint("wss://asset-hub.polkadot.io")
+    .with_revive_endpoint("wss://revive.polkadot.io")
+    .with_polkavm_endpoint("wss://polkavm.asset-hub.polkadot.io");
+
+let asset_mgr = AssetManager::new(config.clone());
+let revive = ReviveAdapter::new(config.clone());
+let contract_mgr = ContractManager::new(config);
+```
+
+
+
+cargo build
+
+## First App Example
+
+```rust
+// Asset transfer
+let tx_hash = asset_mgr.transfer(asset_id, from, to, amount).await?;
+
+// NFT minting
+let nft_id = asset_mgr.nft().mint(from, metadata).await?;
+
+// Revive asset recovery
+let result = revive.recover_asset(account_id, asset_id).await?;
+
+// Deploy Solidity contract
+let contract = contract_mgr.deploy(&bytecode, ContractConfig::default(), &deployer_account).await?;
+```
+
+
+## Testing
+
+Use the built-in test framework:
+
+```rust
+#[cfg(test)]
+mod tests {
+    use apex_sdk::testing::*;
+    // ...
+}
+```
+
+
+
+
+## Next Steps
+
+- [API Reference](/docs/api)
+- [Asset Hub Integration](/docs/substrate)
+- [Revive & PolkaVM Guide](/docs/revive)
+- [Installation Guide](/docs/installation)

@@ -1,0 +1,274 @@
+---
+title: "CLI Guide - Complete Command Reference"
+description: "Complete guide to using the Apex CLI tool for project management and development workflows."
+section: "cli-guide"
+order: 1
+tags: ["cli", "commands", "development", "tools"]
+lastUpdated: "2026-01-06"
+---
+
+# CLI Guide
+
+The Apex CLI provides powerful tools for managing your cross-chain projects, from initialization to deployment.
+
+## Installation
+
+The CLI is automatically installed with the Apex SDK:
+
+```bash
+cargo install apex-cli
+```
+
+Verify installation:
+
+```bash
+apex --version
+```
+
+## Project Management
+
+### Create New Project
+
+```bash
+# Create a basic project
+apex new my-project
+
+# Create from template
+apex new my-project --template substrate
+apex new my-project --template evm
+apex new my-project --template cross-chain
+```
+
+Available templates:
+- **substrate**: Substrate-focused project
+- **evm**: EVM-compatible chains
+- **cross-chain**: Multi-chain application
+- **minimal**: Basic setup
+
+### Initialize Existing Project
+
+```bash
+apex init
+```
+
+This adds Apex configuration to an existing Rust project.
+
+### Build Project
+
+```bash
+# Standard build
+apex build
+
+# Development build with watch
+apex build --watch
+
+# Release build
+apex build --release
+```
+
+### Run Tests
+
+```bash
+# Run all tests
+apex test
+
+# Run specific test suite
+apex test --unit
+apex test --integration
+```
+
+## Account Management
+
+### List Accounts
+
+```bash
+apex account list
+```
+
+### Generate New Account
+
+```bash
+apex account generate --name my-account
+apex account generate --name my-account --network polkadot
+```
+
+### Import Account
+
+```bash
+# From seed phrase
+apex account import --seed "word1 word2 ... word12"
+
+# From private key
+apex account import --key "0x..."
+```
+
+## Network Operations
+
+### Connect to Networks
+
+```bash
+# Substrate networks
+apex connect polkadot
+apex connect kusama
+apex connect westend
+
+# EVM networks
+apex connect ethereum
+apex connect polygon
+```
+
+### Deploy Contract
+
+```bash
+# Deploy to current network
+apex deploy
+
+# Deploy to specific network
+apex deploy --network polkadot
+
+# Deploy with parameters
+apex deploy --args "param1,param2"
+```
+
+## Development Tools
+
+### Generate Bindings
+
+```bash
+# Generate typed bindings from metadata
+apex generate bindings --network polkadot
+
+# Generate for specific pallets
+apex generate bindings --pallets "system,balances"
+```
+
+### Metadata Tools
+
+```bash
+# Fetch latest metadata
+apex metadata fetch --network kusama
+
+# Compare metadata versions
+apex metadata diff v1.0.0 v1.1.0
+```
+
+### Event Monitoring
+
+```bash
+# Monitor all events
+apex events monitor
+
+# Filter specific events
+apex events monitor --filter "transfer,swap"
+
+# Monitor specific blocks
+apex events monitor --from-block 1000 --to-block 2000
+```
+
+## Configuration
+
+### Global Configuration
+
+Configuration file location: `~/.apex/config.toml`
+
+```toml
+[default]
+network = "polkadot"
+account = "my-default-account"
+
+[networks.polkadot]
+endpoint = "wss://rpc.polkadot.io"
+
+[networks.kusama] 
+endpoint = "wss://kusama-rpc.polkadot.io"
+```
+
+### Project Configuration
+
+Project configuration: `apex.toml`
+
+```toml
+[project]
+name = "my-project"
+version = "0.1.0"
+
+[build]
+target = "wasm32-unknown-unknown"
+features = ["std"]
+
+[deploy]
+network = "polkadot"
+account = "deploy-account"
+```
+
+## Common Commands
+
+### Development Workflow
+
+```bash
+# Start new project
+apex new my-dapp --template cross-chain
+cd my-dapp
+
+# Set up development environment  
+apex account generate --name dev
+apex connect westend
+
+# Development cycle
+apex build --watch &
+apex test --watch
+
+# Deploy when ready
+apex deploy --network westend
+```
+
+### Production Deployment
+
+```bash
+# Build for production
+apex build --release
+
+# Run comprehensive tests
+apex test --all
+
+# Deploy to mainnet
+apex deploy --network polkadot --account production
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Command not found**: Ensure `~/.cargo/bin` is in your PATH
+
+**Network connection failed**: Check network endpoints and internet connection
+
+**Account not found**: Verify account exists with `apex account list`
+
+**Build failed**: Check Rust toolchain and dependencies
+
+### Debug Mode
+
+Run any command with `-v` for verbose output:
+
+```bash
+apex build -v
+apex deploy -v
+```
+
+### Getting Help
+
+```bash
+# General help
+apex --help
+
+# Command-specific help
+apex build --help
+apex deploy --help
+```
+
+## Next Steps
+
+- [API Reference](./api) - Explore the programmatic API
+- [Examples](./examples) - See working code samples  
+- [Testing Guide](./testing) - Learn testing best practices

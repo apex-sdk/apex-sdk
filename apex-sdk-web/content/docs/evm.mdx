@@ -1,0 +1,428 @@
+---
+title: "PolkaVM & Solidity Integration"
+description: "Apex SDK integration for PolkaVM/Solidity: contract deployment, calls, and cross-chain interoperability."
+section: "evm"
+order: 3
+lastUpdated: "2026-02-02"
+tags: ["polkavm", "solidity", "evm", "contract", "cross-chain"]
+author: "Apex SDK Team"
+---
+
+
+# PolkaVM & Solidity Integration
+
+Apex SDK enables PolkaVM/Solidity contract deployment and calls on Asset Hub and Revive. The SDK abstracts EVM/PolkaVM details for seamless system chain dApp development.
+
+## Key Features
+
+- Deploy and interact with Solidity contracts on Asset Hub and Revive
+- Event monitoring and filtering
+- Cross-chain contract calls
+- Unified account and transaction management
+
+## Quick Start
+
+### Deploying a Contract
+
+```rust
+use apex_sdk::{ContractManager, Config};
+
+let config = Config::new().with_polkavm_endpoint("wss://polkavm.asset-hub.polkadot.io");
+let contract_mgr = ContractManager::new(config);
+let contract = contract_mgr.deploy(&bytecode, ContractConfig::default(), &deployer_account).await?;
+```
+
+### Calling a Contract
+
+```rust
+let result = contract.call_method("transfer", &[recipient, amount]).await?;
+```
+
+## Event Monitoring
+
+```rust
+let mut events = contract.events().subscribe().await?;
+while let Some(event) = events.next().await {
+    println!("Contract event: {:?}", event);
+}
+```
+
+## Cross-Chain Contract Calls
+
+```rust
+let result = contract_mgr.cross_chain_call(
+    &contract_address,
+    "transfer",
+    &[recipient, amount],
+    dest_chain
+).await?;
+```
+
+## Unified Account Management
+
+```rust
+let account = Account::from_private_key("0x...");
+let address = account.address();
+```
+
+## Best Practices
+
+- Use strongly-typed contract interfaces
+- Validate contract bytecode before deployment
+- Monitor contract events for dApp logic
+
+## Next Steps
+
+- [Quick Start](/docs/quickstart)
+- [API Reference](/docs/api)
+- [Asset Hub Integration](/docs/substrate)
+- [Revive Guide](/docs/revive)
+- [Installation Guide](/docs/installation)
+
+## Smart Contract Interaction
+
+### Reading Contract State
+
+```rust
+use apex_sdk::evm::contract::{Contract, ReadOnlyContract};
+
+// Define your contract interface
+#[derive(Contract)]
+pub struct ERC20Token {
+    address: Address,
+    client: EvmClient,
+}
+
+impl ERC20Token {
+    pub async fn balance_of(&self, account: Address) -> Result<U256, ApexError> {
+        self.call("balanceOf", (account,)).await
+    }
+    
+    pub async fn total_supply(&self) -> Result<U256, ApexError> {
+        self.call("totalSupply", ()).await
+    }
+}
+
+// Usage
+let token = ERC20Token::new(token_address, client);
+let balance = token.balance_of(user_address).await?;
+println!("User balance: {}", balance);
+```
+
+### Writing to Contracts
+
+```rust
+impl ERC20Token {
+    pub async fn transfer(
+        &self, 
+        to: Address, 
+        amount: U256,
+        from: &Account
+    ) -> Result<TxHash, ApexError> {
+        self.send("transfer", (to, amount), from).await
+    }
+    
+    pub async fn approve(
+        &self, 
+        spender: Address, 
+        amount: U256,
+        from: &Account
+    ) -> Result<TxHash, ApexError> {
+        self.send("approve", (spender, amount), from).await
+    }
+}
+
+// Usage with automatic gas estimation
+let tx_hash = token
+    .transfer(recipient_address, amount, &sender_account)
+    .await?;
+    
+let receipt = client.wait_for_confirmation(tx_hash, 3).await?;
+println!("Transfer confirmed in block: {}", receipt.block_number);
+```
+
+## Cross-Chain Operations
+
+### Bridge Assets Between Chains
+
+```rust
+use apex_sdk::bridge::{BridgeConfig, CrossChainTransfer};
+
+async fn bridge_tokens() -> Result<(), ApexError> {
+    let bridge = CrossChainTransfer::builder()
+        .source_chain(ChainType::Ethereum)
+        .destination_chain(ChainType::Polygon)
+        .token_address(usdc_address)
+        .build()?;
+    
+    let transfer = bridge
+        .transfer(amount, recipient_address, &sender_account)
+        .await?;
+    
+    // Monitor cross-chain transfer
+    transfer.wait_for_completion().await?;
+    
+    Ok(())
+}
+```
+
+### Multi-Chain Wallet Management
+
+```rust
+use apex_sdk::wallet::MultiChainWallet;
+
+#[tokio::main]
+async fn main() -> Result<(), ApexError> {
+    let wallet = MultiChainWallet::new()?;
+    
+    // Add multiple chain accounts
+    wallet.add_account(ChainType::Ethereum, eth_private_key)?;
+    wallet.add_account(ChainType::Polygon, polygon_private_key)?;
+    
+    // Get balances across all chains
+    let total_balance = wallet.get_total_balance(usdc_token).await?;
+    
+    println!("Total USDC across all chains: ${}", total_balance);
+    
+    Ok(())
+}
+```
+
+## Gas Optimization
+
+### Smart Gas Management
+
+```rust
+use apex_sdk::evm::gas::{GasOptimizer, GasStrategy};
+
+// Automatic gas optimization
+let optimizer = GasOptimizer::new()
+    .strategy(GasStrategy::Fastest) // Fast, Standard, Slow, Custom
+    .max_fee_per_gas(50.gwei())
+    .priority_fee_per_gas(2.gwei())
+    .build();
+
+// Apply to transactions
+let tx = TransactionBuilder::new()
+    .to(contract_address)
+    .data(call_data)
+    .gas_config(optimizer.suggest().await?)
+    .build();
+    
+let hash = client.send_transaction(tx, &account).await?;
+```
+
+### Batch Operations
+
+```rust
+use apex_sdk::evm::batch::BatchExecutor;
+
+// Execute multiple operations in a single transaction
+let batch = BatchExecutor::new(client)
+    .add_call(token1.transfer_call(recipient1, amount1)?)
+    .add_call(token2.approve_call(spender, amount2)?)
+    .add_call(dex.swap_call(token_in, token_out, amount_in)?)
+    .build();
+
+let receipt = batch.execute(&account).await?;
+println!("Batch executed successfully: {}", receipt.transaction_hash);
+```
+
+## Event Monitoring
+
+### Real-time Event Listening
+
+```rust
+use apex_sdk::evm::events::{EventStream, EventFilter};
+
+#[tokio::main]
+async fn main() -> Result<(), ApexError> {
+    let filter = EventFilter::new()
+        .address(token_address)
+        .topic0("Transfer(address,address,uint256)")
+        .from_block(BlockNumber::Latest);
+    
+    let mut stream = client.subscribe_events(filter).await?;
+    
+    while let Some(event) = stream.next().await {
+        match event {
+            Ok(log) => {
+                println!("Transfer detected: {:?}", log);
+                // Process the transfer event
+            }
+            Err(e) => eprintln!("Event error: {}", e),
+        }
+    }
+    
+    Ok(())
+}
+```
+
+### Historical Event Queries
+
+```rust
+use apex_sdk::evm::events::HistoricalEvents;
+
+// Query past events
+let events = client
+    .get_events()
+    .address(contract_address)
+    .topic0("Transfer")
+    .from_block(start_block)
+    .to_block(end_block)
+    .limit(1000)
+    .execute()
+    .await?;
+
+for event in events {
+    println!("Block: {}, TxHash: {}", event.block_number, event.transaction_hash);
+}
+```
+
+## Advanced Features
+
+### Custom Contract Deployment
+
+```rust
+use apex_sdk::evm::deploy::{ContractDeployer, DeployConfig};
+
+async fn deploy_contract() -> Result<Address, ApexError> {
+    let deployer = ContractDeployer::new(client)
+        .bytecode(contract_bytecode)
+        .constructor_args((initial_supply, token_name, token_symbol))
+        .gas_limit(3_000_000)
+        .build();
+    
+    let deployment = deployer.deploy(&deployer_account).await?;
+    let contract_address = deployment.wait_for_deployment().await?;
+    
+    println!("Contract deployed at: {}", contract_address);
+    Ok(contract_address)
+}
+```
+
+### MEV Protection
+
+```rust
+use apex_sdk::evm::mev::{MevProtection, FlashbotsRelay};
+
+// Protect transactions from MEV
+let mev_protection = MevProtection::new()
+    .relay(FlashbotsRelay::Mainnet)
+    .max_block_delay(3)
+    .min_timestamp(SystemTime::now() + Duration::from_secs(30))
+    .build();
+
+let protected_tx = mev_protection
+    .wrap_transaction(regular_tx)
+    .await?;
+
+let receipt = client.send_protected(protected_tx, &account).await?;
+```
+
+## Configuration Reference
+
+### Network Configuration
+
+```rust
+use apex_sdk::evm::{EvmConfig, NetworkConfig};
+
+let config = EvmConfig {
+    networks: vec![
+        NetworkConfig {
+            name: "ethereum".into(),
+            chain_id: 1,
+            rpc_url: "https://eth-mainnet.g.alchemy.com/v2/YOUR-KEY".into(),
+            ws_url: Some("wss://eth-mainnet.g.alchemy.com/v2/YOUR-KEY".into()),
+            explorer_url: "https://etherscan.io".into(),
+            gas_price_oracle: Some("https://api.etherscan.io/api".into()),
+        },
+        NetworkConfig {
+            name: "polygon".into(),
+            chain_id: 137,
+            rpc_url: "https://polygon-rpc.com".into(),
+            ws_url: None,
+            explorer_url: "https://polygonscan.com".into(),
+            gas_price_oracle: Some("https://api.polygonscan.com/api".into()),
+        },
+    ],
+    default_network: "ethereum".into(),
+    retry_config: RetryConfig::default(),
+    timeout: Duration::from_secs(30),
+};
+```
+
+---
+
+## Best Practices
+
+### Recommended Practices
+
+- Always use proper error handling with `Result<T, ApexError>`
+- Implement gas price monitoring for cost optimization
+- Use event filtering to reduce network overhead
+- Cache contract ABIs and addresses
+- Implement proper transaction nonce management
+- Use batch operations when possible to reduce gas costs
+
+### Common Mistakes to Avoid
+
+- Don't hardcode gas limits - use estimation
+- Don't ignore failed transactions in batch operations
+- Don't store private keys in plain text
+- Don't poll for events - use subscriptions instead
+- Don't ignore network congestion when setting gas prices
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+**Connection timeouts:**
+```rust
+let config = EvmConfig {
+    timeout: Duration::from_secs(60), // Increase timeout
+    retry_config: RetryConfig {
+        max_retries: 5,
+        backoff_factor: 2.0,
+    },
+    // ... other config
+};
+```
+
+**Gas estimation errors:**
+```rust
+// Use manual gas estimation
+let gas_estimate = client
+    .estimate_gas(&transaction)
+    .await?
+    .checked_mul(120) // Add 20% buffer
+    .ok_or(ApexError::GasEstimationOverflow)?;
+    
+transaction.gas_limit = gas_estimate;
+```
+
+**Nonce conflicts:**
+```rust
+// Use pending nonce for multiple transactions
+let nonce = client.get_transaction_count(account.address(), Some("pending")).await?;
+```
+
+## Examples Repository
+
+For complete working examples, visit our [EVM Examples Repository](https://github.com/apex-sdk/apex-sdk/tree/main/examples/evm):
+
+- **Token Bridge** - Cross-chain token transfers
+- **DEX Integration** - Automated market making
+- **DeFi Protocols** - Lending and borrowing
+- **Gaming dApps** - NFT and token mechanics
+- **Analytics Dashboard** - Real-time blockchain data
+
+
+## Next Steps
+
+- [Smart Contract Security →](/docs/security)
+- [Cross-Chain Testing →](/docs/testing)
+- [Performance Optimization →](/docs/architecture)
+- [API Reference →](/docs/api)

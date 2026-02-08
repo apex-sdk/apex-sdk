@@ -1,0 +1,551 @@
+---
+title: "API Reference: System Chain Standard"
+description: "API documentation for Apex SDK as the System Chain Standard Library for Polkadot Asset Hub, Revive, and PolkaVM/Solidity."
+section: "api"
+order: 1
+lastUpdated: "2026-02-02"
+tags: ["api", "system-chain", "asset-hub", "revive", "polkavm", "solidity"]
+author: "Apex SDK Team"
+---
+
+
+# API Reference: System Chain Standard
+
+**Apex SDK is the canonical System Chain Standard Library for Polkadot Asset Hub, Revive, and PolkaVM/Solidity.**
+
+This reference covers:
+- High-level Asset Hub APIs (assets, NFTs, balances)
+- Revive protocol (asset recovery, migration)
+- PolkaVM/Solidity contract management
+- Unified account, transaction, and chain operations
+
+> **Note:** This documentation covers Apex SDK version 0.2.x and later. For legacy APIs, see the [version archive](https://docs.apex-sdk.org/archive).
+
+
+## Core Modules
+
+### `apex_sdk::prelude`
+
+Entry point for all system chain operations:
+
+```rust
+use apex_sdk::prelude::*;
+```
+
+**Exports:**
+- `AssetManager` — Asset Hub API (assets, NFTs, balances)
+- `ReviveAdapter` — Revive protocol integration
+- `ContractManager` — PolkaVM/Solidity contract deployment/calls
+- `Account` — Unified account abstraction
+- `SystemChainError` — Unified error type
+
+
+## Asset Hub API (`AssetManager`)
+
+High-level interface for Polkadot Asset Hub:
+
+```rust
+use apex_sdk::substrate::AssetManager;
+
+let asset_mgr = AssetManager::connect_env().await?;
+let assets = asset_mgr.list_assets().await?;
+let nfts = asset_mgr.list_nfts().await?;
+let balance = asset_mgr.get_balance(account_id, asset_id).await?;
+```
+
+
+## Revive Protocol (`ReviveAdapter`)
+
+Native asset recovery and migration:
+
+```rust
+use apex_sdk::revive::ReviveAdapter;
+
+let revive = ReviveAdapter::connect_env().await?;
+let recoverable = revive.list_recoverable_assets().await?;
+let result = revive.recover_asset(account_id, asset_id).await?;
+```
+
+
+## PolkaVM/Solidity Contracts (`ContractManager`)
+
+Deploy and interact with Solidity contracts on Asset Hub:
+
+```rust
+use apex_sdk::polkavm::{ContractManager, ContractConfig};
+
+let contract = ContractManager::deploy(
+    &bytecode,
+    ContractConfig::default(),
+    &deployer_account
+).await?;
+
+let result = contract.call_method("transfer", &[recipient, amount]).await?;
+```
+
+
+## Account Management
+
+Unified account abstraction for all system chain operations:
+
+```rust
+let account = Account::from_private_key("0x...");
+let address = account.address();
+```
+
+
+## Error Handling
+
+All system chain APIs return `Result<T, SystemChainError>`.
+
+```rust
+match asset_mgr.get_balance(account_id, asset_id).await {
+    Ok(balance) => println!("Balance: {balance}"),
+    Err(e) => eprintln!("Error: {e}"),
+}
+```
+
+
+## Chain Operations
+
+Query chain info, block height, and runtime metadata:
+
+```rust
+let info = asset_mgr.get_chain_info().await?;
+println!("Asset Hub block: {}", info.latest_block);
+```
+
+
+## Testing Support
+
+Test utilities for system chain modules:
+
+```rust
+use apex_sdk::testing::*;
+
+#[tokio::test]
+async fn test_asset_listing() {
+    let asset_mgr = AssetManager::connect_test().await.unwrap();
+    let assets = asset_mgr.list_assets().await.unwrap();
+    assert!(!assets.is_empty());
+}
+```
+
+
+## Example: Asset Recovery and Contract Call
+
+```rust
+// Recover asset using Revive
+let result = revive.recover_asset(account_id, asset_id).await?;
+println!("Recovered: {result:?}");
+
+// Call Solidity contract on Asset Hub
+let call_result = contract.call_method("transfer", &[recipient, amount]).await?;
+println!("Contract call: {call_result:?}");
+```
+
+
+## Security Warning
+
+Store private keys securely. Never log or transmit private keys in plain text.
+
+
+## Next Steps
+
+- [Quick Start](/docs/quickstart)
+- [Asset Hub Integration](/docs/substrate)
+- [Revive & PolkaVM Guide](/docs/revive)
+- [Architecture Overview](/docs/architecture)
+- [Installation Guide](/docs/installation)
+
+**Ready to build the future of system chain applications?**
+
+##### `get_account_balance()`
+
+Retrieves native token balance for an account on a specific chain.
+
+**Syntax:**
+```rust
+pub async fn get_account_balance(&self, account: &Account, chain: ChainType) -> Result<Balance, ApexError>
+```
+
+**Parameters:**
+- **account** - Account to query balance for
+- **chain** - Target blockchain network
+
+**Return Value:**
+`Result<Balance, ApexError>` where:
+- **`Ok(Balance)`** - Account balance
+  - `amount: U256` - Balance in smallest denomination
+  - `decimals: u8` - Token decimal places
+  - `symbol: String` - Token symbol (ETH, DOT, etc.)
+- **`Err(ApexError)`** - Query failure
+
+**Exceptions:**
+- **`NetworkError`** - RPC connection issues
+- **`InvalidAccount`** - Account not found or invalid
+- **`UnsupportedChain`** - Chain not supported
+
+**Example:**
+```rust
+let balance = sdk.get_account_balance(&account, ChainType::Ethereum).await?;
+println!("Balance: {} ETH", balance.to_eth());
+println!("Raw amount: {}", balance.amount);
+```
+
+##### Transaction Operations
+
+```rust
+pub async fn send_transaction(&self, tx: Transaction) -> Result<TxHash, ApexError>
+pub async fn get_transaction_status(&self, hash: TxHash, chain: ChainType) -> Result<TxStatus, ApexError>
+pub async fn wait_for_confirmation(&self, hash: TxHash, chain: ChainType, confirmations: u32) -> Result<Receipt, ApexError>
+```
+
+**Example:**
+```rust
+let tx = Transaction::builder()
+    .from(&account)
+    .to("0x742d35Cc6635C0532925a3b8BC9C7C5C9c60e5e0")
+    .amount(100_000_000_000_000_000u64) // 0.1 ETH in wei
+    .chain(ChainType::Ethereum)
+    .build();
+
+let tx_hash = sdk.send_transaction(tx).await?;
+let receipt = sdk.wait_for_confirmation(tx_hash, ChainType::Ethereum, 3).await?;
+```
+
+## Chain-Specific Modules
+
+### EVM Chains (`apex_sdk::evm`)
+
+#### `EvmChain`
+
+```rust
+pub struct EvmChain {
+    pub chain_id: u64,
+    pub rpc_url: String,
+    pub name: String,
+}
+
+impl EvmChain {
+    pub async fn new(config: EvmConfig) -> Result<Self, ApexError>
+    pub async fn get_block_number(&self) -> Result<u64, ApexError>
+    pub async fn get_gas_price(&self) -> Result<u64, ApexError>
+    pub async fn estimate_gas(&self, tx: &Transaction) -> Result<u64, ApexError>
+}
+```
+
+#### Smart Contract Interaction
+
+```rust
+pub struct Contract {
+    pub address: Address,
+    pub abi: Abi,
+    pub chain: EvmChain,
+}
+
+impl Contract {
+    pub fn new(address: Address, abi: Abi, chain: EvmChain) -> Self
+    
+    pub async fn call<T: Tokenizable>(&self, method: &str, params: Vec<Token>) -> Result<T, ApexError>
+    pub async fn send(&self, method: &str, params: Vec<Token>, from: Account) -> Result<TxHash, ApexError>
+    pub async fn deploy(bytecode: &[u8], constructor_params: Vec<Token>, from: Account, chain: EvmChain) -> Result<Contract, ApexError>
+}
+```
+
+**Example:**
+```rust
+use apex_sdk::evm::*;
+
+// Load contract ABI
+let abi: Abi = serde_json::from_str(include_str!("./erc20.abi.json"))?;
+
+// Connect to existing contract
+let contract = Contract::new(
+    "0xA0b86a33E6411D7D5aC8BE7B2bDb5E95b3F3B7A0".parse()?,
+    abi,
+    evm_chain
+);
+
+// Call view function
+let balance: U256 = contract.call("balanceOf", vec![account.address.into()]).await?;
+
+// Send transaction
+let tx_hash = contract.send("transfer", vec![
+    recipient.into(),
+    amount.into()
+], account).await?;
+```
+
+### Substrate Chains (`apex_sdk::substrate`)
+
+#### `SubstrateChain`
+
+```rust
+pub struct SubstrateChain {
+    pub genesis_hash: H256,
+    pub rpc_url: String,
+    pub name: String,
+}
+
+impl SubstrateChain {
+    pub async fn new(config: SubstrateConfig) -> Result<Self, ApexError>
+    pub async fn get_block_number(&self) -> Result<u32, ApexError>
+    pub async fn get_runtime_version(&self) -> Result<RuntimeVersion, ApexError>
+    pub async fn get_chain_info(&self) -> Result<ChainInfo, ApexError>
+}
+```
+
+#### Extrinsic Building
+
+```rust
+pub struct ExtrinsicBuilder<'a> {
+    chain: &'a SubstrateChain,
+    pallet: String,
+    call: String,
+    args: Vec<Value>,
+}
+
+impl<'a> ExtrinsicBuilder<'a> {
+    pub fn new(chain: &'a SubstrateChain) -> Self
+    pub fn pallet(mut self, pallet: &str) -> Self
+    pub fn call(mut self, call: &str) -> Self
+    pub fn arg<T: Encode>(mut self, arg: T) -> Self
+    pub async fn sign_and_submit(self, account: &Account) -> Result<ExtrinsicHash, ApexError>
+}
+```
+
+**Example:**
+```rust
+use apex_sdk::substrate::*;
+
+// Submit balance transfer
+let hash = ExtrinsicBuilder::new(&substrate_chain)
+    .pallet("Balances")
+    .call("transfer")
+    .arg(recipient.clone())
+    .arg(1_000_000_000_000u128) // 1 DOT
+    .sign_and_submit(&account)
+    .await?;
+```
+
+## Bridge Operations (`apex_sdk::bridge`)
+
+### Cross-Chain Transfers
+
+```rust
+pub struct Bridge {
+    source_chain: ChainType,
+    target_chain: ChainType,
+    bridge_config: BridgeConfig,
+}
+
+impl Bridge {
+    pub async fn new(source: ChainType, target: ChainType) -> Result<Self, ApexError>
+    
+    pub async fn transfer_asset(&self, asset: Asset, amount: u128, to: Account) -> Result<BridgeTransfer, ApexError>
+    pub async fn get_transfer_status(&self, transfer_id: TransferId) -> Result<BridgeStatus, ApexError>
+    pub async fn estimate_fees(&self, asset: Asset, amount: u128) -> Result<BridgeFees, ApexError>
+}
+```
+
+**Example:**
+```rust
+use apex_sdk::bridge::*;
+
+// Create bridge between Ethereum and Polkadot
+let bridge = Bridge::new(ChainType::Ethereum, ChainType::Polkadot).await?;
+
+// Estimate fees
+let fees = bridge.estimate_fees(Asset::USDC, 1000_000_000).await?; // 1000 USDC
+
+// Perform transfer
+let transfer = bridge.transfer_asset(
+    Asset::USDC,
+    1000_000_000,
+    polkadot_account
+).await?;
+
+// Monitor status
+loop {
+    let status = bridge.get_transfer_status(transfer.id).await?;
+    match status {
+        BridgeStatus::Completed => break,
+        BridgeStatus::Failed(reason) => return Err(ApexError::BridgeFailed(reason)),
+        _ => tokio::time::sleep(Duration::from_secs(30)).await,
+    }
+}
+```
+
+## Error Handling
+
+### `ApexError`
+
+```rust
+#[derive(Debug, thiserror::Error)]
+pub enum ApexError {
+    #[error("Network connection failed: {0}")]
+    NetworkError(String),
+    
+    #[error("Invalid configuration: {0}")]
+    ConfigError(String),
+    
+    #[error("Chain not supported: {0}")]
+    UnsupportedChain(String),
+    
+    #[error("Transaction failed: {0}")]
+    TransactionError(String),
+    
+    #[error("Bridge operation failed: {0}")]
+    BridgeFailed(String),
+    
+    #[error("Account error: {0}")]
+    AccountError(String),
+    
+    #[error("Parsing error: {0}")]
+    ParseError(String),
+}
+```
+
+### Result Handling
+
+```rust
+use apex_sdk::prelude::*;
+
+// Recommended error handling pattern
+match sdk.get_chain_info(ChainType::Ethereum).await {
+    Ok(info) => println!("Chain info: {:?}", info),
+    Err(ApexError::NetworkError(msg)) => {
+        eprintln!("Network issue: {}", msg);
+        // Retry logic
+    }
+    Err(ApexError::UnsupportedChain(chain)) => {
+        eprintln!("Chain {} not configured", chain);
+        // Configuration update needed
+    }
+    Err(e) => return Err(e), // Propagate other errors
+}
+```
+
+## Configuration Types
+
+### `ApexConfig`
+
+```rust
+#[derive(Debug, Clone, Deserialize)]
+pub struct ApexConfig {
+    pub project: ProjectConfig,
+    pub networks: NetworkConfig,
+    pub features: FeatureConfig,
+    pub connection: ConnectionConfig,
+    pub logging: LoggingConfig,
+    pub security: SecurityConfig,
+}
+```
+
+### `NetworkConfig`
+
+```rust
+#[derive(Debug, Clone, Deserialize)]
+pub struct NetworkConfig {
+    // EVM Networks
+    pub ethereum: Option<EvmNetworkConfig>,
+    pub polygon: Option<EvmNetworkConfig>,
+    pub avalanche: Option<EvmNetworkConfig>,
+    pub arbitrum: Option<EvmNetworkConfig>,
+    pub optimism: Option<EvmNetworkConfig>,
+    
+    // Substrate Networks
+    pub polkadot: Option<SubstrateNetworkConfig>,
+    pub kusama: Option<SubstrateNetworkConfig>,
+    pub westend: Option<SubstrateNetworkConfig>,
+}
+```
+
+## Utilities (`apex_sdk::utils`)
+
+### Address Conversion
+
+```rust
+pub fn evm_to_substrate_address(evm_addr: H160) -> Result<AccountId32, ApexError>
+pub fn substrate_to_evm_address(substrate_addr: AccountId32) -> Result<H160, ApexError>
+pub fn address_checksum(address: &str) -> String
+```
+
+### Format Helpers
+
+```rust
+pub fn format_balance(amount: u128, decimals: u8) -> String
+pub fn parse_balance(amount_str: &str, decimals: u8) -> Result<u128, ApexError>
+pub fn wei_to_eth(wei: u128) -> f64
+pub fn eth_to_wei(eth: f64) -> u128
+```
+
+### Validation
+
+```rust
+pub fn validate_evm_address(address: &str) -> bool
+pub fn validate_substrate_address(address: &str) -> bool
+pub fn validate_private_key(key: &str) -> bool
+```
+
+## Constants
+
+### Chain IDs
+
+```rust
+pub mod chain_ids {
+    pub const ETHEREUM: u64 = 1;
+    pub const POLYGON: u64 = 137;
+    pub const AVALANCHE: u64 = 43114;
+    pub const ARBITRUM: u64 = 42161;
+    pub const OPTIMISM: u64 = 10;
+}
+```
+
+### Substrate Chain Genesis
+
+```rust
+pub mod genesis_hashes {
+    pub const POLKADOT: &str = "0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3";
+    pub const KUSAMA: &str = "0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe";
+    pub const WESTEND: &str = "0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e";
+}
+```
+
+## Testing Support
+
+### Test Utilities
+
+```rust
+pub mod testing {
+    pub async fn setup_test_environment() -> Result<ApexSDK, ApexError>
+    pub async fn fund_test_account(account: &Account, chain: ChainType, amount: u128) -> Result<(), ApexError>
+    pub fn create_mock_chain(chain_type: ChainType) -> MockChain
+}
+```
+
+### Integration Testing
+
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use apex_sdk::testing::*;
+
+    #[tokio::test]
+    async fn test_cross_chain_transfer() {
+        let sdk = setup_test_environment().await.unwrap();
+        let account = sdk.create_account().await.unwrap();
+        
+        // Fund account on source chain
+        fund_test_account(&account, ChainType::Ethereum, 1_000_000_000_000_000_000u128).await.unwrap();
+        
+        // Test bridge transfer
+        let bridge = Bridge::new(ChainType::Ethereum, ChainType::Polkadot).await.unwrap();
+        let transfer = bridge.transfer_asset(Asset::ETH, 100_000_000_000_000_000u128, account).await;
+        
+        assert!(transfer.is_ok());
+    }
+}
+```
