@@ -18,7 +18,7 @@ url = { workspace = true }
 hex = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-apex-sdk-substrate = { path = "../apex-sdk-substrate" }
+## apex-sdk-substrate removed: not used in src or tests
 
 # PolkaVM and Revive specific dependencies will be added here
 # sp-core = { workspace = true }
