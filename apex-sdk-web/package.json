@@ -12,7 +12,7 @@
     "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit",
     "test": "npm run lint && npm run type-check && npm run build",
-    "build:rustdoc": "cargo doc --no-deps --extend-css public/rustdoc.css",
+    "build:rustdoc": "RUSTDOCFLAGS=\"--extend-css $(pwd)/public/rustdoc.css\" cargo doc --no-deps",
     "validate-content": "node scripts/validate-content.js",
     "new-content": "node scripts/new-content.js",
     "content:validate": "npm run validate-content",
