@@ -42,20 +42,35 @@ async fn main() -> anyhow::Result<()> {
 }
 ```
 
-## Revive: Deploy Solidity Contract
+## Revive: Deploy & Call Solidity Contract
 
 ```rust
 use apex_sdk_revive::{ReviveAdapter, ContractManager};
+use apex_sdk_substrate::Wallet;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let adapter = ReviveAdapter::connect("wss://paseo-asset-hub-pub.dwellir.com").await?;
-    let contracts = ContractManager::new(&adapter);
+    let wallet = Wallet::from_mnemonic("your mnemonic...", Default::default())?;
+    let contracts = ContractManager::new(&adapter, wallet.to_subxt_signer());
+
+    // 1. Deploy
     let code = std::fs::read("MyContract.polkavm")?;
     let constructor_data = vec![]; // ABI-encoded constructor args
     let salt = [0u8; 32];
-    let address = contracts.deploy(code, constructor_data, salt).await?;
+    let value = 0;
+    let address = contracts.deploy(code, constructor_data, salt, value, None).await?;
     println!("Deployed contract at: {}", address);
+
+    // 2. Call (Transaction)
+    let call_data = hex::decode("0x...")?;
+    contracts.call(&address, call_data, 0, Some(100_000_000)).await?;
+
+    // 3. Read (Dry-run/Static Call)
+    let read_data = hex::decode("0x...")?;
+    let result = contracts.read(&address, read_data, 0).await?;
+    println!("Read result: {:?}", result);
+
     Ok(())
 }
 ```
