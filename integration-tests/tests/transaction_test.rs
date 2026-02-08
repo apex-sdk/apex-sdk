@@ -1,4 +1,4 @@
-//! Real Transaction Integration Tests
+//! Transaction Integration Tests
 //!
 //! These tests execute ACTUAL transactions on testnets.
 //! They are disabled by default to prevent accidental testnet spending.
@@ -107,15 +107,4 @@ async fn test_substrate_real_transfer_on_westend() {
         result.source_tx_hash
     );
     println!("\n=== Real Transaction Test PASSED ===\n");
-}
-
-#[tokio::test]
-#[ignore]
-async fn test_parallel_executor_with_real_transactions() {
-    skip_if_not_real_tx_test!();
-
-    println!("\n=== Parallel Executor Real Transaction Test ===\n");
-
-    // EVM test removed: only substrate/other tests remain
-    // (No implementation, as EVM support is removed)
 }

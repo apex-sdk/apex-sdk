@@ -13,5 +13,3 @@ apex-sdk-substrate = { path = "../apex-sdk-substrate" }
 tokio = { workspace = true }
 reqwest = { version = "0.13", features = ["json"] }
 serde_json = { workspace = true }
-alloy = { workspace = true }
-alloy-primitives = { workspace = true }

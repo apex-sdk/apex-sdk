@@ -16,8 +16,6 @@ async fn test_asset_hub_manager_preparations() {
     let adapter = match SubstrateAdapter::connect("ws://127.0.0.1:9944").await {
         Ok(adapter) => adapter,
         Err(_) => {
-            // Fallback for environment where we can't even connect to a mock
-            // In a real test we'd expect a live node or a mock
             println!("Note: Using placeholder adapter for preparation test");
             return;
         }
