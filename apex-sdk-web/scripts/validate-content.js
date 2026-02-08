@@ -86,7 +86,8 @@ const validationRules = [
         'substrate',
         'evm',
         'testnets',
-        'typed-metadata'
+        'typed-metadata',
+        'revive'
       ]
       
       if (metadata.section && !validSections.includes(metadata.section)) {

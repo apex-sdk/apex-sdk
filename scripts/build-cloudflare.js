@@ -9,22 +9,28 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const DIST_DIR = path.join(__dirname, '..', 'dist');
 const DOCS_DIR = path.join(__dirname, '..', 'docs');
+
+// Parse --out argument
+const outIndex = process.argv.indexOf('--out');
+const outValue = outIndex > -1 ? process.argv[outIndex + 1] : 'dist';
+const DIST_DIR = path.isAbsolute(outValue) 
+  ? outValue 
+  : path.join(__dirname, '..', outValue);
 
 // Get the Web3Forms access key from environment
 const WEB3FORMS_KEY = process.env.WEB3FORMS_ACCESS_KEY;
 
 console.log('🚀 Starting Cloudflare Pages build...');
 
-// Step 1: Create dist directory
-console.log('📁 Creating dist directory...');
+// Step 1: Create output directory
+console.log('📁 Creating output directory...');
 if (!fs.existsSync(DIST_DIR)) {
   fs.mkdirSync(DIST_DIR, { recursive: true });
 }
 
-// Step 2: Copy docs to dist
-console.log('📋 Copying docs to dist...');
+// Step 2: Copy docs to output directory
+console.log('📋 Copying docs to output directory...');
 try {
   execSync(`cp -r ${DOCS_DIR}/* ${DIST_DIR}/`, { stdio: 'inherit' });
   console.log('✓ Docs copied successfully');

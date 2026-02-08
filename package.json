@@ -4,9 +4,13 @@
   "version": "1.0.0",
   "description": "Apex SDK Documentation",
   "scripts": {
-    "build": "node scripts/build-cloudflare.js",
-    "build:simple": "mkdir -p dist && cp -r docs/* dist/",
-    "deploy": "npm run build"
+    "build": "node scripts/build-cloudflare.js --out out",
+    "build:simple": "mkdir -p out && cp -r docs/* out/",
+    "deploy": "npm run build",
+    "validate-content": "cd apex-sdk-web && npm run validate-content",
+    "lint": "cd apex-sdk-web && npm run lint",
+    "type-check": "cd apex-sdk-web && npm run type-check",
+    "build:rustdoc": "cd apex-sdk-web && npm run build:rustdoc"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260131.0",
