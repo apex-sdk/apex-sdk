@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "description": "Apex SDK Documentation",
   "scripts": {
-    "build": "node scripts/build-cloudflare.js",
-    "build:simple": "mkdir -p dist && cp -r docs/* dist/",
+    "build": "node scripts/build-cloudflare.js --out out",
+    "build:simple": "mkdir -p out && cp -r docs/* out/",
     "deploy": "npm run build"
   },
   "devDependencies": {
