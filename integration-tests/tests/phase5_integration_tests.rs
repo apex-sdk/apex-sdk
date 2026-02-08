@@ -39,10 +39,7 @@ fn test_phase5_unit_tests_status() {
     assert_eq!(vector.chain_type, ChainType::Ethereum);
 
     let duration = start.elapsed();
-    println!(
-        "Phase 5 unit test verification completed in {:?}",
-        duration
-    );
+    println!("Phase 5 unit test verification completed in {:?}", duration);
 }
 
 #[test]
@@ -183,10 +180,7 @@ fn test_phase5_completion_verification() {
 
     let duration = start.elapsed();
 
-    println!(
-        "Phase 5 completion verification PASSED in {:?}",
-        duration
-    );
+    println!("Phase 5 completion verification PASSED in {:?}", duration);
     println!("   Golden vectors system: FUNCTIONAL");
     println!("   Metrics collection: FUNCTIONAL");
     println!("   Serialization: FUNCTIONAL");
