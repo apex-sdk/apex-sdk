@@ -6,7 +6,8 @@
   "scripts": {
     "build": "node scripts/build-cloudflare.js --out out",
     "build:simple": "mkdir -p out && cp -r docs/* out/",
-    "deploy": "npm run build"
+    "deploy": "npm run build",
+    "validate-content": "cd apex-sdk-web && npm run validate-content"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260131.0",
