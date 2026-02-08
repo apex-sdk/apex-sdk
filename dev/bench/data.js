@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1770531422733,
+  "lastUpdate": 1770534190283,
   "repoUrl": "https://github.com/apex-sdk/apex-sdk",
   "entries": {
     "Benchmark": [
@@ -8471,6 +8471,162 @@ window.BENCHMARK_DATA = {
             "name": "bulk_transaction_creation/substrate_bulk/100",
             "value": 5964,
             "range": "± 397",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "decimal_conversions/dot_to_planck",
+            "value": 6,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "decimal_conversions/ksm_to_planck",
+            "value": 6,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "decimal_conversions/eth_to_wei",
+            "value": 6,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "decimal_conversions/planck_to_dot",
+            "value": 6,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "decimal_conversions/wei_to_eth",
+            "value": 6,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "chain_metadata_operations/get_rpc_endpoints",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "chain_metadata_operations/check_smart_contract_support",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "kherld.hussein@gmail.com",
+            "name": "kh3rld",
+            "username": "kh3rld"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "44cf55e216fd3bfb3ef48b1c47fc2ab4bb924141",
+          "message": "feat: revive docs (#117)\n\n* refactor(evm) remove EVM Transfer and Parachain Assets Examples\n\n- Deleted the `evm-transfer` example, including its Cargo.toml, README.md, and main.rs files.\n- Removed the `parachain-assets` example, including its Cargo.toml, README.md, and main.rs files.\n- Cleaned up integration tests related to EVM functionality, including tests for connection, balance retrieval, transaction sending, and contract interaction.\n- Removed integration tests for the overall architecture of the Apex SDK, ensuring no remnants of the deleted examples remain.\n\n* refactor(evm): remove comprehensive tests for transaction execution and wallet operations from the apex-sdk-evm test suite\n\n* chore(docs): impl IndexNow integration and update software version in SEO script\n\n- Implemented IndexNow functionality to notify search engines of URL changes.\n- Added a check to prevent duplicate notifications within 24 hours.\n- Updated software version from 0.1.6 to 0.1.5 in structured data.\n- Included placeholder for Google Analytics 4 script.\n\n* feat(cli): update CLI to support Revive accounts and balance checking\n\n* feat(substrate): implement AssetManager for pallet-assets interaction\n\n-  add NftManager for NFT collection and item management\n\n- add address parsing utility for storage queries\n\n* feat(revive): integrate Revive support into Apex SDK\n\n- Replace EVM references with Revive in Cargo.toml and lib.rs\n- Update builder.rs to configure Revive endpoint and adapter\n- Modify sdk.rs to handle Revive transactions and remove EVM transaction logic\n- Refactor advanced.rs and transaction_benchmarks.rs to remove EVM benchmarks\n- Adjust working_integration_tests.rs to focus on Substrate and Revive\n\n* feat(revive): update telemetry initialization to include revive metrics\n\n* feat(integration-tests): replace apex-sdk-evm dependency with apex-sdk-revive and remove EVM transaction tests\n\n* feat(revive): implement Revive adapter with contract management and balance querying\n\n* feat(revive): update dependencies and modify README for Revive integration\n\n* feat(substrate): impl method to convert wallet to subxt-compatible signer\n\n* feat(revive): enhance ReviveAdapter with connection checks and transaction management methods\n\n* feat(adk): refine Revive transaction handling and enhance transaction builder with deployment support\n\n* feat(cli): enhance CLI with Revive contract deployment and balance checking functionality\n\n* feat(docs): enhance Revive contract deployment with transaction and read capabilities\n\n* feat(tests): add Revive integration tests and refine transaction test descriptions\n\n* refactor(tests): streamline logging in Phase 5 integration tests\n\n* fix: ci\n\n* feat(docs): implement proper docs website\n\n* chore: update docs ci\n\n* chore: update deps",
+          "timestamp": "2026-02-08T01:55:12-05:00",
+          "tree_id": "bd28ec18d0b33e8ed0b57551b25a3f1f89d9bc27",
+          "url": "https://github.com/apex-sdk/apex-sdk/commit/44cf55e216fd3bfb3ef48b1c47fc2ab4bb924141"
+        },
+        "date": 1770534189518,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "transaction_creation/create_substrate_transfer",
+            "value": 59,
+            "range": "± 3",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/substrate_validation/0",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/substrate_validation/1",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "address_validation/substrate_validation/2",
+            "value": 12,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "sdk_initialization/create_substrate_sdk",
+            "value": 27,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "sdk_initialization/create_multi_chain_sdk",
+            "value": 28,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "transaction_signing/substrate_sign_simulation",
+            "value": 160945,
+            "range": "± 402",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "amount_operations/amount_creation",
+            "value": 0,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "amount_operations/amount_arithmetic",
+            "value": 0,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cross_chain_operations/chain_type_detection",
+            "value": 1,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cross_chain_operations/multi_chain_transaction_creation",
+            "value": 59,
+            "range": "± 3",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cross_chain_operations/cross_chain_address_handling",
+            "value": 10,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "hybrid_chain_operations/hybrid_chain_type_check",
+            "value": 1,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "bulk_transaction_creation/substrate_bulk/10",
+            "value": 599,
+            "range": "± 43",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "bulk_transaction_creation/substrate_bulk/100",
+            "value": 6039,
+            "range": "± 451",
             "unit": "ns/iter"
           },
           {
