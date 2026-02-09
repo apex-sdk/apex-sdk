@@ -46,7 +46,7 @@ chrono = { workspace = true }
 uuid = { version = "1.11", features = ["v4", "serde"] }
 
 # System metrics
-sysinfo = "0.33"
+sysinfo = "0.38"
 
 [dev-dependencies]
 reqwest = { workspace = true }
