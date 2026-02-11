@@ -11,7 +11,7 @@ jobs:
     if: ${{ secrets.DISCORD_WEBHOOK_URL != '' }}
     steps:
       - name: Send Discord Notification
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const release = context.payload.release;
@@ -79,7 +79,7 @@ jobs:
     if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
     steps:
       - name: Send Slack Notification
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const release = context.payload.release;
