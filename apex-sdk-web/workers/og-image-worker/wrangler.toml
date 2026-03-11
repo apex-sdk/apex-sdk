@@ -1,0 +1,12 @@
+name = "apex-sdk-og"
+main = "src/index.tsx"
+compatibility_date = "2024-01-29"
+
+
+# Actually, modern wrangler handles ts/tsx automatically.
+# We don't need a build command if we point main to the tsx file.
+
+[[rules]]
+type = "CompiledWasm"
+globs = ["**/*.wasm"]
+fallthrough = true

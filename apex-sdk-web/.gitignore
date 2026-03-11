@@ -1,0 +1,41 @@
+# Node modules and build output
+node_modules/
+.next/
+dist/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env files
+.env
+.env.*
+
+# IDE/editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test coverage
+coverage/
+
+# Misc
+*.log
+*.tmp
+tmp/
+
+# Ignore lock file if using yarn or pnpm (uncomment as needed)
+# yarn.lock
+# pnpm-lock.yaml
+
+# Ignore generated public assets (optional, if you generate files in public/)
+# public/*.generated.*

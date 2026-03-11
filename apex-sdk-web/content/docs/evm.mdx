@@ -1,0 +1,104 @@
+---
+title: "PolkaVM & Solidity Integration"
+description: "Apex SDK integration for PolkaVM/Solidity: contract deployment, calls, and cross-chain interoperability on Polkadot System Chains."
+section: "evm"
+order: 3
+lastUpdated: "2026-02-02"
+tags: ["polkavm", "solidity", "evm", "contract", "system-chain"]
+author: "Apex SDK Team"
+---
+
+
+# PolkaVM & Solidity Integration
+
+**Apex SDK enables high-performance PolkaVM/Solidity contract deployment and interaction on Polkadot System Chains like Asset Hub and Revive.**
+
+By abstracting the underlying PolkaVM mechanics, Apex SDK allows you to build sophisticated Solidity applications while leveraging Polkadot's shared security and interoperability.
+
+## Key Features
+
+- **Native PolkaVM Support**: Direct interaction with the PolkaVM backend for Solidity contracts.
+- **System Chain Deployment**: Simplified deployment workflow for Asset Hub and Revive.
+- **Unified API**: Shared contract management interfaces with Substrate and Revive modules.
+- **Event Subscriptions**: Real-time event monitoring for system chain contracts.
+
+## Quick Start
+
+### Connecting to a System Chain
+
+```rust
+use apex_sdk::prelude::*;
+use apex_sdk::polkavm::{ContractManager, ContractConfig};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Connect to Asset Hub
+    let contract_mgr = ContractManager::connect_env().await?;
+    println!("Connected to PolkaVM on Asset Hub");
+
+    Ok(())
+}
+```
+
+### Deploying a Solidity Contract
+
+```rust
+let contract = contract_mgr.deploy(
+    &bytecode,
+    ContractConfig::default(),
+    &deployer_account
+).await?;
+
+println!("Contract deployed at: {:?}", contract.address());
+```
+
+### Calling a Contract Method
+
+```rust
+let result = contract.call_method("transfer", &[recipient, amount]).await?;
+println!("Call result: {:?}", result);
+```
+
+## Advanced Usage
+
+### Event Monitoring
+
+Subscribe to contract events in real-time:
+
+```rust
+let mut events = contract.events().subscribe().await?;
+while let Some(event) = events.next().await {
+    println!("System chain contract event: {:?}", event);
+}
+```
+
+### Typed Contract Interfaces
+
+Apex SDK supports generating type-safe interfaces for your Solidity ABI:
+
+```rust
+#[derive(Contract)]
+#[abi = "path/to/abi.json"]
+pub struct MyToken;
+
+let token = contract_mgr.attach::<MyToken>(address);
+let balance = token.balance_of(user).await?;
+```
+
+## Security Best Practices
+
+- **Private Key Management**: Use secure environment variables or hardware security modules (HSM).
+- **Bytecode Validation**: Always verify bytecode before deploying to production system chains.
+- **Gas Fee Management**: Polkadot system chains use a different fee model; ensure your `ContractConfig` accounts for block limits.
+
+## Troubleshooting
+
+- **Deployment Failures**: Ensure the deployer account has sufficient native tokens on the target system chain.
+- **RPC Issues**: Verify you are using a PolkaVM-compatible RPC endpoint for Asset Hub or Revive.
+
+## Next Steps
+
+- [Quick Start](/docs/quickstart)
+- [API Reference](/docs/api)
+- [Asset Hub Guide](/docs/substrate)
+- [Revive Guide](/docs/revive)

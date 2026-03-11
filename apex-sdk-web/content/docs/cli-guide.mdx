@@ -1,0 +1,144 @@
+---
+title: "Apex CLI Guide"
+description: "Complete guide to using the Apex CLI tool for system chain project management and development workflows."
+section: "cli-guide"
+order: 1
+tags: ["cli", "commands", "development", "tools", "system-chain"]
+lastUpdated: "2026-02-08"
+author: "Apex SDK Team"
+---
+
+# Apex CLI Guide
+
+**The Apex CLI provides powerful tools for managing your System Chain projects, from initial setup to production deployment on Polkadot Asset Hub and Revive.**
+
+## Installation
+
+The CLI is part of the modular Apex SDK suite and can be installed via cargo:
+
+```bash
+cargo install apex-cli
+```
+
+Verify the installation:
+
+```bash
+apex --version
+```
+
+## Project Management
+
+### Initialize a System Chain Project
+
+```bash
+# Create a new project focused on Polkadot System Chains
+apex new my-system-dapp --template system-chain
+
+# Specifically for Asset Hub or Revive
+apex new my-asset-project --template asset-hub
+apex new my-revive-project --template revive
+```
+
+Available templates:
+- **system-chain**: General purpose Polkadot system chain setup.
+- **asset-hub**: Optimized for Asset Hub (Assets, NFTs).
+- **revive**: Optimized for Revive protocol and asset recovery.
+- **minimal**: Basic Rust blockchain project setup.
+
+### Development Workflow
+
+```bash
+# Build the project (optimized for PolkaVM and Substrate)
+apex build
+
+# Run unit and integration tests
+apex test
+
+# Start a local development node (requires Docker)
+apex dev-node start
+```
+
+## Account and Key Management
+
+### Manage Accounts
+
+```bash
+# List all managed accounts
+apex account list
+
+# Generate a new BIP-39 mnemonic and account
+apex account generate --name dev-wallet
+
+# Import an existing account
+apex account import --seed "mnemonic words..."
+```
+
+## Network and Deployment
+
+### Chain Connectivity
+
+```bash
+# Connect to a system chain RPC
+apex chain connect asset-hub
+apex chain connect revive
+
+# Check chain status and metadata
+apex chain status
+```
+
+### Contract Deployment (PolkaVM/Solidity)
+
+```bash
+# Deploy a Solidity contract to the current system chain
+apex deploy --contract ./contracts/MyContract.sol
+
+# Deploy with constructor arguments
+apex deploy --contract ./MyToken.sol --args "1000,ApexToken"
+```
+
+## Advanced Tools
+
+### Metadata Generation
+
+Apex SDK relies on type-safe metadata. You can generate Rust bindings directly from a live chain:
+
+```bash
+apex generate bindings --network asset-hub
+```
+
+### Event Monitoring
+
+```bash
+# Monitor all System Chain events in real-time
+apex monitor events
+
+# Filter for specific pallets (Asset Hub)
+apex monitor events --pallet assets
+```
+
+## Configuration
+
+Project settings are managed in `apex.toml`:
+
+```toml
+[project]
+name = "my-system-dapp"
+template = "system-chain"
+
+[networks.asset-hub]
+rpc = "wss://asset-hub.polkadot.io"
+
+[networks.revive]
+rpc = "wss://revive-rpc.polkadot.io"
+```
+
+## Troubleshooting
+
+- **WS Connection Errors**: Ensure your system supports WebSockets and the RPC endpoint is reachable.
+- **Build Failures**: Verify you have the `wasm32-unknown-unknown` target installed for PolkaVM builds.
+
+## Next Steps
+
+- [Quick Start](/docs/quickstart)
+- [API Reference](/docs/api)
+- [Architecture Overview](/docs/architecture)

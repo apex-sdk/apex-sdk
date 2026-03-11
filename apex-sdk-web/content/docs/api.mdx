@@ -1,0 +1,159 @@
+---
+title: "API Reference: System Chain Standard"
+description: "API documentation for Apex SDK as the System Chain Standard Library for Polkadot Asset Hub, Revive, and PolkaVM/Solidity."
+section: "api"
+order: 1
+lastUpdated: "2026-02-02"
+tags: ["api", "system-chain", "asset-hub", "revive", "polkavm", "solidity"]
+author: "Apex SDK Team"
+---
+
+
+# API Reference: System Chain Standard
+
+**Apex SDK is the canonical System Chain Standard Library for Polkadot Asset Hub, Revive, and PolkaVM/Solidity.**
+
+This reference covers:
+- High-level Asset Hub APIs (assets, NFTs, balances)
+- Revive protocol (asset recovery, migration)
+- PolkaVM/Solidity contract management
+- Unified account, transaction, and chain operations
+
+> **Note:** This documentation covers Apex SDK version 0.2.x and later. For legacy APIs, see the [version archive](https://docs.apex-sdk.org/archive).
+
+
+## Core Modules
+
+### `apex_sdk::prelude`
+
+Entry point for all system chain operations:
+
+```rust
+use apex_sdk::prelude::*;
+```
+
+**Exports:**
+- `AssetManager` — Asset Hub API (assets, NFTs, balances)
+- `ReviveAdapter` — Revive protocol integration
+- `ContractManager` — PolkaVM/Solidity contract deployment/calls
+- `Account` — Unified account abstraction
+- `SystemChainError` — Unified error type
+
+
+## Asset Hub API (`AssetManager`)
+
+High-level interface for Polkadot Asset Hub:
+
+```rust
+use apex_sdk::substrate::AssetManager;
+
+let asset_mgr = AssetManager::connect_env().await?;
+let assets = asset_mgr.list_assets().await?;
+let nfts = asset_mgr.list_nfts().await?;
+let balance = asset_mgr.get_balance(account_id, asset_id).await?;
+```
+
+
+## Revive Protocol (`ReviveAdapter`)
+
+Native asset recovery and migration:
+
+```rust
+use apex_sdk::revive::ReviveAdapter;
+
+let revive = ReviveAdapter::connect_env().await?;
+let recoverable = revive.list_recoverable_assets().await?;
+let result = revive.recover_asset(account_id, asset_id).await?;
+```
+
+
+## PolkaVM/Solidity Contracts (`ContractManager`)
+
+Deploy and interact with Solidity contracts on Asset Hub:
+
+```rust
+use apex_sdk::polkavm::{ContractManager, ContractConfig};
+
+let contract = ContractManager::deploy(
+    &bytecode,
+    ContractConfig::default(),
+    &deployer_account
+).await?;
+
+let result = contract.call_method("transfer", &[recipient, amount]).await?;
+```
+
+
+## Account Management
+
+Unified account abstraction for all system chain operations:
+
+```rust
+let account = Account::from_private_key("0x...");
+let address = account.address();
+```
+
+
+## Error Handling
+
+All system chain APIs return `Result<T, SystemChainError>`.
+
+```rust
+match asset_mgr.get_balance(account_id, asset_id).await {
+    Ok(balance) => println!("Balance: {balance}"),
+    Err(e) => eprintln!("Error: {e}"),
+}
+```
+
+
+## Chain Operations
+
+Query chain info, block height, and runtime metadata:
+
+```rust
+let info = asset_mgr.get_chain_info().await?;
+println!("Asset Hub block: {}", info.latest_block);
+```
+
+
+## Testing Support
+
+Test utilities for system chain modules:
+
+```rust
+use apex_sdk::testing::*;
+
+#[tokio::test]
+async fn test_asset_listing() {
+    let asset_mgr = AssetManager::connect_test().await.unwrap();
+    let assets = asset_mgr.list_assets().await.unwrap();
+    assert!(!assets.is_empty());
+}
+```
+
+
+## Example: Asset Recovery and Contract Call
+
+```rust
+// Recover asset using Revive
+let result = revive.recover_asset(account_id, asset_id).await?;
+println!("Recovered: {result:?}");
+
+// Call Solidity contract on Asset Hub
+let call_result = contract.call_method("transfer", &[recipient, amount]).await?;
+println!("Contract call: {call_result:?}");
+```
+
+
+## Security Warning
+
+Store private keys securely. Never log or transmit private keys in plain text.
+
+
+##### Core APIs
+
+- **`AssetManager`** — High-level interface for Polkadot Asset Hub (assets, NFTs, balances).
+- **`ReviveAdapter`** — Native Revive protocol integration for asset recovery and migration.
+- **`ContractManager`** — PolkaVM/Solidity contract deployment and calls on Asset Hub.
+
+> **Tip:** This API reference is regularly updated. For the latest method signatures and examples, check our [GitHub repository](https://github.com/apex-protocol/apex-sdk) or use `cargo doc --open` to generate local documentation.

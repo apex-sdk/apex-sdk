@@ -1,0 +1,71 @@
+---
+title: "Ecosystem Overview"
+description: "Explore the Apex SDK ecosystem including supported system chains, developer tools, and community resources."
+section: "ecosystem"
+order: 1
+tags: ["ecosystem", "networks", "tools", "polkadot", "system-chain"]
+lastUpdated: "2026-02-08"
+---
+
+# Ecosystem Overview
+
+**Explore the Apex SDK ecosystem, focused on Providing the standard library for Polkadot System Chains.**
+
+## Supported System Chains
+
+Apex SDK provides first-class support for Polkadot and Kusama system chains:
+
+| Network | Chain | Type | Status | Resources |
+|---------|-------|------|--------|-----------|
+| **Polkadot** | Asset Hub | System Chain | Production | [Guide](/docs/substrate) |
+| **Polkadot** | Revive | System Chain | Beta | [Revive Guide](/docs/revive) |
+| **Kusama** | Asset Hub | System Chain | Production | [Substrate Guide](/docs/substrate) |
+| **Westend** | Asset Hub | Testnet | Development | [Testnet Guide](/docs/testnets) |
+
+## Developer Tools
+
+### CLI Tools
+
+**Apex CLI**
+- Project scaffolding for system chain dApps
+- Network configuration and testing utilities
+- Deployment automation for PolkaVM/Solidity contracts
+
+```bash
+# Install Apex CLI
+cargo install apex-cli
+
+# Create a new system chain project
+apex new my-dapp --template system-chain
+```
+
+### Testing Framework
+
+**Built-in Testing Suite**
+- Unit testing with mocked chain adapters
+- Integration testing for Asset Hub and Revive operations
+- Local PolkaVM simulation for contract testing
+
+## Community Resources
+
+- **GitHub Repository**: [apex-protocol/apex-sdk](https://github.com/apex-protocol/apex-sdk)
+- **Discord Community**: [Join the Apex SDK Discord](https://discord.gg/apex-sdk)
+- **Developer Forums**: [Polkadot Forum](https://forum.polkadot.network/)
+
+## Roadmap
+
+### Q1 2026
+- Complete Revive protocol integration
+- Stable Release of `apex-sdk-revive`
+- Enhanced PolkaVM/Solidity debugging tools
+
+### Q2 2026
+- Advanced atomic orchestration patterns
+- Multi-asset bridge automation
+- Cross-consensus messaging (XCM) abstractions
+
+## Getting Involved
+
+1. **Start Building**: Follow the [Quick Start Guide](/docs/quickstart).
+2. **Contribute**: Check out the [Contributing Guidelines](/docs/contributing).
+3. **Connect**: Join our Discord for real-time support and updates.

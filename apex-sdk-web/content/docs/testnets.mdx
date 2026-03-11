@@ -1,0 +1,75 @@
+---
+title: "Test Networks Guide"
+description: "Complete guide to using Apex SDK with Polkadot System Chain testnets, including Westend Asset Hub and Revive."
+section: "testnets"
+order: 1
+tags: ["testnets", "testing", "development", "networks", "system-chain", "westend"]
+lastUpdated: "2026-02-08"
+author: "Apex SDK Team"
+---
+
+# Test Networks Guide
+
+**Developing on Polkadot System Chains requires a robust testnet environment. Apex SDK primarily supports the Westend and Paseo testnets for Asset Hub and Revive development.**
+
+## Recommended Testnets
+
+### Westend (Polkadot Testnet)
+
+Westend is the primary testnet for Polkadot features, including all System Chain parathreads.
+
+- **Purpose**: Testing core Polkadot features and System Chain logic.
+- **SS58 Format**: 42
+- **Asset Hub Endpoint**: `wss://westend-asset-hub-rpc.polkadot.io`
+- **Revive Endpoint**: `wss://westend-revive-rpc.polkadot.io`
+
+### Paseo (Community Testnet)
+
+Paseo is a community-driven testnet that mirrors Polkadot's production environment.
+
+- **Purpose**: Stable community testing and dApp development.
+- **SS58 Format**: 0
+- **Endpoint**: `wss://paseo.dotters.network`
+
+## Configuration
+
+### Connecting to a Testnet
+
+```rust
+use apex_sdk::prelude::*;
+use apex_sdk::substrate::AssetManager;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Connect specifically to Westend Asset Hub
+    let asset_mgr = AssetManager::connect("wss://westend-asset-hub-rpc.polkadot.io").await?;
+    println!("Connected to Westend Asset Hub");
+
+    Ok(())
+}
+```
+
+## Faucets and Test Tokens
+
+- **Westend WND**: Request WND from the [Polkadot Faucet](https://faucet.polkadot.io/) or the Matrix `#westend_faucet` channel.
+- **Paseo PAS**: Request PAS tokens from the community [Paseo Faucet](https://faucet.paseo.network/).
+
+## Local Development (Dev Nodes)
+
+For the fastest iteration cycle, we recommend running a local dev node of the system chains.
+
+```bash
+# Start a local Asset Hub dev node
+apex dev-node start --chain asset-hub
+```
+
+## Troubleshooting
+
+- **Connection Drops**: Testnet RPCs can be less stable than mainnet. Always implement retry logic in your client.
+- **Drip Limits**: Faucets have daily limits. Coordinate with your team to manage shared test accounts.
+
+## Next Steps
+
+- [Testing Guide](/docs/testing)
+- [Quick Start](/docs/quickstart)
+- [API Reference](/docs/api)

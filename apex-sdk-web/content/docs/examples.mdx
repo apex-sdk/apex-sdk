@@ -1,0 +1,100 @@
+---
+title: "Examples & Tutorials"
+description: "Working code samples and step-by-step tutorials demonstrating common patterns for Polkadot Asset Hub and Revive with Apex SDK."
+section: "examples"
+order: 1
+tags: ["examples", "tutorials", "code-samples", "guides", "asset-hub", "revive"]
+lastUpdated: "2026-02-08"
+author: "Apex SDK Team"
+---
+
+# Examples & Tutorials
+
+**Learn how to build production-ready applications for Polkadot System Chains with practical examples and step-by-step guides.**
+
+## System Chain Patterns
+
+### Native Asset Monitoring (Asset Hub)
+
+Subscribe to balance changes on Asset Hub for a specific account:
+
+```rust
+use apex_sdk::prelude::*;
+use apex_sdk::substrate::AssetManager;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let asset_mgr = AssetManager::connect_env().await?;
+    let account = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY".parse()?;
+
+    // Monitor DOT balance (Asset ID 0)
+    let mut stream = asset_mgr.watch_balance(account, 0).await?;
+    
+    while let Some(balance) = stream.next().await {
+        println!("New balance: {balance}");
+    }
+
+    Ok(())
+}
+```
+
+### Smart Contract Interaction (PolkaVM/Revive)
+
+Call a Solidity contract method on the Revive protocol:
+
+```rust
+use apex_sdk::prelude::*;
+use apex_sdk::polkavm::ContractManager;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let contract_mgr = ContractManager::connect_env().await?;
+    let contract_addr = "0x...".parse()?;
+    
+    // Attach to an existing contract
+    let contract = contract_mgr.attach(contract_addr);
+    
+    // Call a read-only method
+    let total_supply: U256 = contract.call("totalSupply", ()).await?;
+    println!("Total Supply: {total_supply}");
+
+    Ok(())
+}
+```
+
+## Step-by-Step Tutorials
+
+### Tutorial: Building an Asset Hub Portfolio Bot
+
+**Difficulty**: Beginner | **Duration**: 20 mins
+
+A CLI tool that aggregates all your assets on Asset Hub and monitors for incoming transfers.
+
+1. **Setup**: Initialize a new project with `apex new portfolio-bot --template asset-hub`.
+2. **Implementation**: Use the `AssetManager` to list all registered assets and their balances.
+3. **Monitoring**: Implement a background loop to watch for `Transfer` events.
+
+### Tutorial: Asset Recovery with Revive
+
+**Difficulty**: Intermediate | **Duration**: 45 mins
+
+Learn how to use the Revive protocol adapter to implement secure asset recovery patterns.
+
+1. **Concept**: Understand the Revive recovery mechanism.
+2. **Integration**: Set up a recovery contract on the Revive testnet.
+3. **Execution**: Use `ReviveAdapter` to trigger a recovery process and verify the outcome.
+
+## Code Repository
+
+All examples and advanced tutorials are available in our [GitHub Examples Repository](https://github.com/apex-sdk/apex-sdk/tree/main/examples):
+
+- **asset-transfer**: Simple DOT and custom asset transfers.
+- **nft-gallery**: Minting and displaying NFTs from Asset Hub.
+- **revive-recovery**: Implementing the Revive protocol recovery flow.
+- **system-chain-oracle**: Building a lightweight oracle on a system chain.
+
+## Next Steps
+
+- [Quick Start Guide](/docs/quickstart)
+- [API Reference](/docs/api)
+- [Architecture Overview](/docs/architecture)

@@ -1,0 +1,72 @@
+---
+title: "Security Best Practices"
+description: "Essential security guidelines for building on Polkadot System Chains, leveraging shared security and secure XCM patterns."
+section: "security"
+order: 1
+tags: ["security", "best-practices", "safety", "guidelines", "system-chain", "xcm"]
+lastUpdated: "2026-02-08"
+author: "Apex SDK Team"
+---
+
+# Security Best Practices
+
+**Building on Polkadot System Chains allows you to leverage Polkadot's shared security model, but correctly implementing application-level security is still your responsibility.**
+
+## Core Security Principles
+
+### Leveraging Shared Security
+
+Polkadot System Chains like Asset Hub and Revive share the security of the Polkadot Relay Chain. This means your application is protected by the full validator set of the network. However, you must still ensure:
+
+- **Correct Origin Validation**: Always verify that XCM messages come from expected and trusted chains.
+- **Transact Safety**: When using `Transact` in XCM, ensure the encoded call is exactly what you intend to execute on the destination chain.
+
+### Private Key Safety
+
+Never hardcode private keys or mnemonics in your Rust code.
+
+```rust
+// SECURE: Loading from environment or secure keystore
+let account = Account::from_env("APEX_KEY")?;
+```
+
+## System Chain Specifics
+
+### Asset Hub Security
+
+- **Asset Logic**: When managing custom assets, ensure that only authorized accounts can mint or burn tokens.
+- **Metadata Integrity**: Verify asset metadata on-chain before displaying it to users to prevent phishing.
+
+### PolkaVM & Solidity Security
+
+Solidity contracts on Revive/PolkaVM require the same level of auditing as EVM contracts:
+
+- **Re-entrancy**: Always use re-entrancy guards for methods that interact with external contracts.
+- **Arithmetic Safety**: Use checked arithmetic for all balance and token calculations.
+- **Access Control**: Use `Ownable` or similar patterns to restrict administrative functions.
+
+## Transaction Security
+
+### Tips and Mortality
+
+- **Tips**: On congested networks, use appropriate tips to ensure timely execution without overpaying.
+- **Mortality**: Use mortal extrinsics so that a transaction cannot be replayed far in the future if the chain state reverts.
+
+```rust
+// Example: Setting mortality for a transaction
+let params = TxParams::new().mortality(64); // Valid for 64 blocks
+```
+
+## Security Checklist
+
+- [ ] All XCM origins are strictly validated.
+- [ ] Private keys are stored in secure environment variables or HSMs.
+- [ ] All PolkaVM contracts have been audited for common Solidity vulnerabilities.
+- [ ] Transaction mortality is used for all sensitive operations.
+- [ ] Fuzz testing has been performed on any custom data parsing logic.
+
+## Next Steps
+
+- [Testing Guide](/docs/testing)
+- [Architecture Overview](/docs/architecture)
+- [API Reference](/docs/api)

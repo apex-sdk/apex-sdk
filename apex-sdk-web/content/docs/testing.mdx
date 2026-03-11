@@ -1,0 +1,103 @@
+---
+title: "Testing Guide"
+description: "Comprehensive testing strategies for System Chain applications, including mocking Asset Hub state and testing PolkaVM contracts."
+section: "testing"
+order: 1
+tags: ["testing", "quality", "unit-tests", "integration", "system-chain", "polkavm"]
+lastUpdated: "2026-02-08"
+author: "Apex SDK Team"
+---
+
+# Testing Guide
+
+**Building reliable applications on Polkadot System Chains requires a robust testing strategy that covers everything from simple asset logic to complex PolkaVM contract interactions.**
+
+## Testing Philosophy
+
+Apex SDK provides specialized tools for testing system chain integrations:
+
+- **State Mocking**: Simulate Asset Hub storage and balances without a live node.
+- **Contract Testing**: Specialized environment for testing PolkaVM/Solidity contracts.
+- **XCM Simulation**: Test cross-chain messaging scenarios in isolation.
+- **Integration Tests**: End-to-end validation against local development nodes.
+
+## Unit Testing with Mocks
+
+### Mocking Asset Hub State
+
+Use the `MockAssetManager` to test your application logic without network dependencies:
+
+```rust
+#[cfg(test)]
+mod tests {
+    use apex_sdk::testing::MockAssetManager;
+    
+    #[tokio::test]
+    async fn test_balance_logic() {
+        let mut mock = MockAssetManager::new();
+        
+        // Arrange: Set a mock balance for an account
+        mock.set_balance(alice(), asset_id, 1000);
+        
+        // Act: Run your logic
+        let balance = mock.get_balance(alice(), asset_id).await.unwrap();
+        
+        // Assert
+        assert_eq!(balance, 1000);
+    }
+}
+```
+
+## PolkaVM Contract Testing
+
+### Local Contract Simulation
+
+Test your Solidity contracts using the built-in PolkaVM simulator:
+
+```rust
+#[tokio::test]
+async fn test_contract_execution() {
+    let simulator = PolkaVM::simulator();
+    let contract = simulator.deploy(bytecode).await?;
+    
+    let result: U256 = contract.call("getValue", ()).await?;
+    assert_eq!(result, expected_value);
+}
+```
+
+## Integration Testing
+
+### Using Dev Nodes
+
+We recommend using the `apex dev-node` CLI command to spin up local Asset Hub and Revive instances for integration testing.
+
+```bash
+# Start a local system chain stack
+apex dev-node start --chains asset-hub,revive
+```
+
+In your Rust tests:
+
+```rust
+#[tokio::test]
+async fn test_live_asset_hub_transfer() {
+    let client = AssetManager::connect("ws://127.0.0.1:9944").await?;
+    
+    let tx_hash = client.transfer(asset_id, alice(), bob(), 500).await?;
+    let status = client.wait_for_confirmation(tx_hash).await?;
+    
+    assert!(status.is_success());
+}
+```
+
+## Best Practices for System Chains
+
+1. **Verify XCM Origins**: When testing cross-chain logic, always verify that the XCM origin is correctly handled by your destination logic.
+2. **Handle Re-entrancy**: Testing PolkaVM contracts requires careful attention to re-entrancy patterns, just like in standard EVM development.
+3. **Continuous Integration**: Add `apex test` to your CI pipeline to ensure all system chain integrations are validated on every push.
+
+## Next Steps
+
+- [API Reference](/docs/api)
+- [Architecture Overview](/docs/architecture)
+- [Security Best Practices](/docs/security)

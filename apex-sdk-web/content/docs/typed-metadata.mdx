@@ -1,0 +1,86 @@
+---
+title: "Typed Metadata System"
+description: "Comprehensive guide to Apex SDK's typed metadata system for Polkadot System Chains, providing compile-time type safety for Asset Hub and Revive."
+section: "substrate"
+order: 2
+tags: ["substrate", "metadata", "types", "polkadot", "system-chain"]
+lastUpdated: "2026-02-08"
+author: "Apex SDK Team"
+---
+
+# Typed Metadata System
+
+**Apex SDK's typed metadata system provides compile-time type safety for System Chain interactions while maintaining compatibility with runtime upgrades.**
+
+## Overview
+
+The typed metadata system automatically generates Rust types from Polkadot System Chain metadata (Asset Hub and Revive), ensuring type-safe interactions with assets, NFTs, and smart contracts. This eliminates runtime errors while providing excellent developer experience.
+
+## Key Features
+
+- **Type Safety**: Catch errors at compile time, not runtime.
+- **IntelliSense**: Complete IDE support with autocomplete for pallet calls and storage items.
+- **Runtime Adaptability**: Automatically refresh types when a system chain undergoes a runtime upgrade.
+- **Optimized Codegen**: Lightweight Rust bindings tailored for high-performance dApps.
+
+## Basic Usage
+
+### Fetching Metadata
+
+Metadata is automatically handled by the `AssetManager` and `ReviveAdapter`:
+
+```rust
+use apex_sdk::prelude::*;
+use apex_sdk::substrate::AssetManager;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let asset_mgr = AssetManager::connect_env().await?;
+    
+    // Fetch live metadata from Asset Hub
+    let metadata = asset_mgr.metadata().await?;
+    println!("System chain spec: {}", metadata.spec_name);
+    
+    Ok(())
+}
+```
+
+### Accessing Typed Storage
+
+```rust
+// Type-safe access to Asset Hub storage
+let account_info = asset_mgr
+    .storage()
+    .system()
+    .account(&account_id)
+    .await?;
+
+println!("Nonce: {}", account_info.nonce);
+```
+
+## Advanced Patterns
+
+### Generating Bindings for Custom Features
+
+If you are using experimental pallets on a system chain, you can generate custom bindings:
+
+```bash
+# Generate Rust bindings for a local dev node
+apex generate bindings --network asset-hub --output ./src/bindings.rs
+```
+
+### Handling Upgrades
+
+Apex SDK monitors the `System.Code` storage block to detect runtime upgrades. When an upgrade occurs, the SDK can optionally refresh its internal metadata cache to ensure continued compatibility.
+
+## Best Practices
+
+1. **Use Pre-generated Bindings**: For production, use `apex generate` to include static bindings for better performance.
+2. **Handle Spec Versions**: Always check the `spec_version` if your application relies on specific pallet logic that might change.
+3. **Minimize Metadata Refreshes**: Metadata can be large (~500KB+). Cache it locally when possible to avoid heavy RPC calls on startup.
+
+## Next Steps
+
+- [API Reference](/docs/api)
+- [Architecture Overview](/docs/architecture)
+- [Testing Guide](/docs/testing)

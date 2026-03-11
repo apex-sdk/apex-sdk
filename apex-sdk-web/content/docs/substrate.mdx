@@ -1,0 +1,112 @@
+---
+title: "Polkadot Asset Hub Integration"
+description: "Apex SDK integration with Polkadot Asset Hub: manage assets, NFTs, balances, and typed metadata with high-level APIs."
+section: "substrate"
+order: 2
+tags: ["asset-hub", "substrate", "polkadot", "nft", "metadata", "system-chain"]
+lastUpdated: "2026-02-02"
+author: "Apex SDK Team"
+---
+
+
+# Polkadot Asset Hub Integration
+
+**Apex SDK provides high-level APIs for Polkadot Asset Hub, enabling seamless interaction with native assets, NFTs, balances, and typed metadata.**
+
+By abstracting the complexity of Substrate extrinsics and runtime metadata, Apex SDK allows you to build sophisticated system chain applications with just a few lines of code.
+
+## Key Features
+
+- **AssetManager**: High-level interface for assets, balances, and transfers on Asset Hub.
+- **NftManager**: Native NFT management including minting, discovery, and metadata.
+- **Typed Metadata**: Type-safe handling of Asset Hub's unique metadata systems.
+- **System Chain Performance**: Optimized for the high-throughput requirements of Polkadot system chains.
+
+## Quick Start
+
+### Connecting to Asset Hub
+
+```rust
+use apex_sdk::prelude::*;
+use apex_sdk::substrate::AssetManager;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Connect to Asset Hub using environment variables
+    let asset_mgr = AssetManager::connect_env().await?;
+    println!("Connected to Polkadot Asset Hub");
+
+    Ok(())
+}
+```
+
+### Managing Assets
+
+```rust
+// Get native token balance
+let balance = asset_mgr.get_balance(account_id, 0).await?;
+println!("Balance: {balance}");
+
+// Transfer assets
+let tx_hash = asset_mgr.transfer(asset_id, from_account, to_account, amount).await?;
+```
+
+### NFT Operations
+
+```rust
+use apex_sdk::substrate::NftManager;
+
+let nft_mgr = NftManager::connect_env().await?;
+
+// Mint a new NFT
+let nft_id = nft_mgr.mint(collection_id, account_id, metadata).await?;
+
+// List NFTs in a collection
+let nfts = nft_mgr.list_collection(collection_id).await?;
+```
+
+## Advanced Features
+
+### Typed Metadata
+
+Access strongly-typed metadata for assets and NFTs:
+
+```rust
+let asset_meta = asset_mgr.get_metadata(asset_id).await?;
+println!("Asset Name: {}", asset_meta.name);
+```
+
+### Storage Queries
+
+Query the underlying Substrate storage with typed interfaces:
+
+```rust
+let block_hash = asset_mgr.get_latest_block_hash().await?;
+let historical_data = asset_mgr.storage().at(block_hash).await?;
+```
+
+### Batching Transactions
+
+Execute multiple Asset Hub operations in a single signed transaction:
+
+```rust
+let calls = vec![
+    asset_mgr.transfer_call(asset1, to1, amount1)?,
+    asset_mgr.transfer_call(asset2, to2, amount2)?,
+];
+
+let result = asset_mgr.batch_execute(calls, &signer_account).await?;
+```
+
+## Security Recommendations
+
+- **Tip Management**: Adjust transaction tips according to network congestion on Asset Hub.
+- **Mortality**: Use mortal extrinsics for better security and chain health.
+- **Key Handling**: Never hardcode private keys; use secure storage or hardware wallets.
+
+## Next Steps
+
+- [Quick Start](/docs/quickstart)
+- [API Reference](/docs/api)
+- [Revive & PolkaVM Guide](/docs/revive)
+- [Installation Guide](/docs/installation)

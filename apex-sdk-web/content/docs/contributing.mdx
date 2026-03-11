@@ -1,0 +1,53 @@
+---
+title: "Contributing"
+description: "Learn how to contribute to the Apex SDK System Chain Standard Library: from code to documentation."
+section: "contributing"
+order: 1
+tags: ["contributing", "development", "community", "open-source", "system-chain"]
+lastUpdated: "2026-02-08"
+author: "Apex SDK Team"
+---
+
+# Contributing to Apex SDK
+
+**We welcome contributions that help us build the definitive System Chain Standard Library for Polkadot.**
+
+## How to Contribute
+
+1. **Bug Reports**: Open an issue for any bugs you find in the SDK or documentation.
+2. **Feature Requests**: Propose new adapters for system chain features (e.g., new Asset Hub pallets).
+3. **Draft PRs**: We encourage starting with a Draft Pull Request to discuss implementation patterns early.
+
+## Development Setup
+
+The SDK is written in Rust. You'll need the latest stable toolchain:
+
+```bash
+# Clone the repository
+git clone https://github.com/apex-sdk/apex-sdk
+cd apex-sdk
+
+# Run the test suite
+cargo test --all-features
+```
+
+## Contribution Guidelines
+
+- **Standard Library Quality**: Since we aim to be a "standard library", we prioritize clarity, safety, and thorough documentation over complex abstractions.
+- **Testing**: Every new feature must include unit tests and, where applicable, integration tests against a mock or live system chain.
+- **Documentation**: Update the relevant MDX documentation file in `apex-sdk-web` whenever you change public APIs.
+
+## Community
+
+- **Discord**: Join our developer channels to discuss system chain patterns.
+- **GitHub Discussions**: Use discussions for long-form design proposals.
+
+## Recognition
+
+Significant contributors are added to the `CONTRIBUTORS.md` file and recognized in our seasonal ecosystem updates.
+
+## Next Steps
+
+- [API Reference](/docs/api)
+- [Architecture Overview](/docs/architecture)
+- [Testing Guide](/docs/testing)

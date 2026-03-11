@@ -1,0 +1,22 @@
+{
+    "name": "apex-sdk-og",
+    "version": "0.0.1",
+    "private": true,
+    "scripts": {
+        "deploy": "wrangler deploy",
+        "dev": "wrangler dev",
+        "start": "wrangler dev"
+    },
+    "devDependencies": {
+        "@cloudflare/workers-types": "^4.20240129.0",
+        "@types/react": "^19.2.10",
+        "typescript": "^5.3.3",
+        "wrangler": "^3.26.0"
+    },
+    "dependencies": {
+        "@resvg/resvg-wasm": "^2.6.2",
+        "hono": "^3.12.12",
+        "react": "^19.2.4",
+        "satori": "^0.10.14"
+    }
+}

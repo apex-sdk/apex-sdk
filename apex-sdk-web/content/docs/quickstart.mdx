@@ -1,0 +1,101 @@
+---
+title: "Quick Start: System Chain Standard Library"
+description: "Get started with the Apex SDK as the System Chain Standard Library for Polkadot Asset Hub and Revive (PolkaVM/Solidity)."
+section: "getting-started"
+order: 1
+lastUpdated: "2026-02-02"
+tags: ["quickstart", "system-chain", "asset-hub", "revive", "polkavm", "solidity"]
+author: "Apex SDK Team"
+---
+
+
+# Quick Start: System Chain Standard Library
+
+> **Apex SDK is now the canonical System Chain Standard Library for Polkadot Asset Hub and Revive (PolkaVM/Solidity).**
+
+## What You'll Build
+
+By the end of this guide, you'll have:
+- A working system chain application
+- Understanding of core Apex SDK components (`AssetManager`, `ReviveAdapter`, `ContractManager`)
+- Ready-to-deploy code examples for Asset Hub and Revive
+
+## Prerequisites
+
+- **Rust** 1.85+ ([install with rustup](https://rustup.rs/))
+- **Polkadot Asset Hub** endpoint access (local or via provider)
+
+## Installation
+
+Add Apex SDK to your project with the new modular features:
+
+```bash
+cargo add apex-sdk-substrate
+cargo add apex-sdk-revive
+cargo add apex-sdk-core
+```
+
+## Your First System Chain App
+
+Create `src/main.rs`:
+
+```rust
+use apex_sdk::prelude::*;
+use apex_sdk::substrate::AssetManager;
+use apex_sdk::revive::ReviveAdapter;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Initialize Asset Hub manager
+    let asset_mgr = AssetManager::connect_env().await?;
+    println!("Connected to Asset Hub");
+
+    // List all assets
+    let assets = asset_mgr.list_assets().await?;
+    println!("Assets: {assets:?}");
+
+    // Use Revive protocol for asset recovery
+    let revive = ReviveAdapter::connect_env().await?;
+    let recoveries = revive.list_recoverable_assets().await?;
+    println!("Recoverable: {recoveries:?}");
+
+    Ok(())
+}
+```
+
+## Example: Deploy a Solidity Contract (PolkaVM)
+
+```rust
+use apex_sdk::polkavm::{ContractManager, ContractConfig};
+
+let contract = ContractManager::deploy(
+    &bytecode,
+    ContractConfig::default(),
+    &deployer_account
+).await?;
+
+let result = contract.call_method("transfer", &[recipient, amount]).await?;
+println!("Call result: {:?}", result);
+```
+
+## Testing
+
+```rust
+use apex_sdk::testing::*;
+
+#[tokio::test]
+async fn test_asset_listing() {
+    let asset_mgr = AssetManager::connect_test().await.unwrap();
+    let assets = asset_mgr.list_assets().await.unwrap();
+    assert!(!assets.is_empty());
+}
+```
+
+## Next Steps
+
+- [API Reference](/docs/api)
+- [Architecture Overview](/docs/architecture)
+- [Installation Guide](/docs/installation)
+- [Revive & PolkaVM Guide](/docs/revive)
+
+**Ready to build the future of system chain applications?**

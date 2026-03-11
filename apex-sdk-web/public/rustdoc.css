@@ -1,0 +1,108 @@
+/* 
+  Apex SDK Rustdoc Theme 
+  Palette: Obsidian (#0B0C10), Hyper Blue (#2176FF), Vivid Orange (#FF5A1F)
+*/
+
+:root {
+    --obsidian: #0B0C10;
+    --obsidian-light: #1F2833;
+    --obsidian-lighter: #2C3440;
+    --hyper-blue: #2176FF;
+    --hyper-blue-dim: rgba(33, 118, 255, 0.1);
+    --vivid-orange: #FF5A1F;
+    --text-main: #e2e8f0;
+    --text-dim: #94a3b8;
+}
+
+/* Base Layout - "The Map" and "The Narrative" */
+body {
+    background-color: var(--obsidian);
+    color: var(--text-main);
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+.sidebar {
+    background-color: var(--obsidian-light);
+    border-right: 1px solid var(--obsidian-lighter);
+}
+
+.sidebar .current {
+    background-color: var(--hyper-blue-dim);
+    border-left: 3px solid var(--hyper-blue);
+    color: var(--hyper-blue);
+    font-weight: 600;
+}
+
+/* Headings - "Deep Navy" to "Hyper Blue" gradient effect simulation */
+h1.fqn, h2, h3, h4 {
+    border-bottom-color: var(--obsidian-lighter);
+    color: #fff; /* Fallback */
+    background: linear-gradient(90deg, #fff, var(--hyper-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+}
+
+/* Links */
+a {
+    color: var(--hyper-blue);
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: var(--vivid-orange); /* Actionability hint */
+    text-decoration: none;
+}
+
+/* Code Blocks & "Smart Annotations" */
+pre {
+    background-color: var(--obsidian-light) !important;
+    border: 1px solid var(--obsidian-lighter);
+    border-radius: 8px;
+}
+
+.rust.docblock {
+    color: var(--text-dim);
+    line-height: 1.6;
+}
+
+/* Copy to Clipboard - "Race" Effect specific styling would need JS, 
+   but we can style the button */
+.copy-button {
+    color: var(--slate-gray);
+    transition: all 0.2s ease;
+}
+.copy-button:hover {
+    color: var(--vivid-orange);
+}
+
+/* "In This Crate" Metadata Block Styling (Custom Class) */
+.apex-metadata {
+    background: var(--obsidian-light);
+    border: 1px solid var(--obsidian-lighter);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem; 
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--hyper-blue);
+}
+
+/* Search Bar - "Breadcrumbs 2.0" */
+#search-input {
+    background-color: var(--obsidian-lighter);
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: #fff;
+    transition: all 0.2s ease;
+}
+
+#search-input:focus {
+    border-color: var(--hyper-blue);
+    box-shadow: 0 0 0 3px var(--hyper-blue-dim);
+}
+
+/* Mobile Sidebar Toggle */
+#sidebar-toggle {
+    background-color: var(--obsidian-lighter);
+}
