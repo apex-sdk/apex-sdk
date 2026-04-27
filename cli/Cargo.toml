@@ -40,7 +40,7 @@ zeroize = { workspace = true }
 bip39 = "2.0"
 chrono = { workspace = true }
 indicatif = "0.18"
-subxt-signer = "0.44"
+subxt-signer = "0.50"
 hex = { workspace = true }
 rpassword = "7.3"
 dirs = "6.0"
